@@ -1,10 +1,27 @@
 import os
 import uvicorn
+import starlette
 from fastapi import FastAPI, Request, status
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 from starlette.middleware.base import BaseHTTPMiddleware
+
+# Gracefully adapt legacy Starlette (< 0.28) in local test environments so modern signature works seamlessly
+if starlette.__version__ < "0.28.0":
+    import starlette.templating
+    _orig_tr = starlette.templating.Jinja2Templates.TemplateResponse
+    def _compat_tr(self, *args, **kwargs):
+        if "request" in kwargs and "name" in kwargs:
+            req = kwargs.pop("request")
+            name = kwargs.pop("name")
+            ctx = kwargs.pop("context", {}) or {}
+            ctx["request"] = req
+            return _orig_tr(self, name, ctx, **kwargs)
+        return _orig_tr(self, *args, **kwargs)
+    starlette.templating.Jinja2Templates.TemplateResponse = _compat_tr
+
+from app.templating import templates
+
 
 from app.config import APP_DIR, PORT, ENVIRONMENT, APP_URL
 from app.database import init_db
@@ -35,12 +52,12 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(SecurityHeadersMiddleware)
 app.mount("/static", StaticFiles(directory=str(APP_DIR / "static")), name="static")
-templates = Jinja2Templates(directory=str(APP_DIR / "templates"))
+# templates imported from app.templating
 
 @app.exception_handler(404)
 async def custom_404_handler(request: Request, exc):
     settings = settings_service.get_all_settings()
-    return templates.TemplateResponse("errors/404.html", {
+    return templates.TemplateResponse(request=request, name="errors/404.html", context={
         "request": request,
         "app_url": APP_URL,
         "settings": settings,
@@ -51,7 +68,7 @@ async def custom_404_handler(request: Request, exc):
 @app.exception_handler(500)
 async def custom_500_handler(request: Request, exc):
     settings = settings_service.get_all_settings()
-    return templates.TemplateResponse("errors/500.html", {
+    return templates.TemplateResponse(request=request, name="errors/500.html", context={
         "request": request,
         "app_url": APP_URL,
         "settings": settings,
