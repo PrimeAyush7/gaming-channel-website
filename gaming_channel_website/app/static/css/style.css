@@ -271,29 +271,7 @@ body {
   box-shadow: 0 0 12px rgba(168, 85, 247, 0.4);
 }
 
-.yt-sub-btn {
-  background: linear-gradient(135deg, #e11d48, #be123c);
-  color: #fff;
-  font-size: 0.825rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 0.55rem 1rem;
-  border-radius: var(--radius-sm);
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  box-shadow: 0 0 15px rgba(225, 29, 72, 0.35);
-  transition: all var(--transition-fast);
-}
-
-.yt-sub-btn:hover {
-  background: linear-gradient(135deg, #f43f5e, #e11d48);
-  box-shadow: 0 0 20px rgba(244, 63, 94, 0.6);
-  transform: translateY(-2px);
-}
-
+/* Social Media Buttons */
 .social-links {
   display: flex;
   align-items: center;
@@ -303,14 +281,15 @@ body {
 .social-btn {
   width: 38px;
   height: 38px;
+  padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 9px;
   color: #fff;
-  background: rgba(20, 12, 40, 0.8);
-  border: 1px solid rgba(96, 165, 250, 0.25);
-  transition: .2s ease;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
 }
 
 .social-btn svg {
@@ -319,23 +298,85 @@ body {
   fill: currentColor;
 }
 
-.social-btn:hover {
-  transform: translateY(-2px);
-  color: #60a5fa;
-  border-color: #3b82f6;
-  box-shadow: 0 0 16px rgba(59, 130, 246, .45);
+/* YouTube */
+.social-btn.youtube {
+  background: #ff0000;
+  border-color: #ff0000;
+  box-shadow: 0 0 12px rgba(255, 0, 0, 0.25);
 }
 
+/* Instagram */
+.social-btn.instagram {
+  background: linear-gradient(135deg, #833ab4, #e1306c, #f77737);
+  border-color: #e1306c;
+  box-shadow: 0 0 12px rgba(225, 48, 108, 0.25);
+}
+
+/* WhatsApp */
+.social-btn.whatsapp {
+  background: #25d366;
+  border-color: #25d366;
+  box-shadow: 0 0 12px rgba(37, 211, 102, 0.25);
+}
+
+/* Telegram */
+.social-btn.telegram {
+  background: #229ed9;
+  border-color: #229ed9;
+  box-shadow: 0 0 12px rgba(34, 158, 217, 0.25);
+}
+
+/* Discord */
+.social-btn.discord {
+  background: #5865f2;
+  border-color: #5865f2;
+  box-shadow: 0 0 12px rgba(88, 101, 242, 0.25);
+}
+
+/* Facebook */
+.social-btn.facebook {
+  background: #1877f2;
+  border-color: #1877f2;
+  box-shadow: 0 0 12px rgba(24, 119, 242, 0.25);
+}
+
+/* Hover */
+.social-btn:not(.disabled):hover {
+  transform: translateY(-2px) scale(1.05);
+  filter: brightness(1.12);
+}
+
+/* Coming Soon buttons */
 .social-btn.disabled {
-  opacity: .35;
+  opacity: 0.35;
   cursor: not-allowed;
+  filter: grayscale(0.4);
 }
 
-.social-btn.disabled:hover {
-  transform: none;
+/* Remove old large YouTube styling */
+.yt-sub-btn {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  border-radius: 9px;
+  background: #ff0000;
   color: #fff;
-  border-color: rgba(96, 165, 250, 0.25);
-  box-shadow: none;
+  border: 1px solid #ff0000;
+  box-shadow: 0 0 12px rgba(255, 0, 0, 0.25);
+}
+
+.yt-sub-btn span {
+  display: none;
+}
+
+.yt-sub-btn:hover {
+  background: #ff0000;
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.55);
+  transform: translateY(-2px) scale(1.05);
 }
 
 /* Mobile Toggle */
