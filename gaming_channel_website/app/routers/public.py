@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request, Response, HTTPException, status
 from fastapi.responses import HTMLResponse, PlainTextResponse
-from fastapi.templating import Jinja2Templates
+from app.templating import templates
 from app.config import APP_DIR, APP_URL
 from app.services import (
     posts as post_service,
@@ -14,7 +14,7 @@ from app.services import (
 )
 
 router = APIRouter()
-templates = Jinja2Templates(directory=str(APP_DIR / "templates"))
+# templates imported from app.templating
 
 def get_common_context(request: Request):
     return {
@@ -45,7 +45,7 @@ async def home_view(request: Request):
         "featured_video": featured_video,
         "featured_post": featured_post,
     })
-    return templates.TemplateResponse("public/home.html", ctx)
+    return templates.TemplateResponse(request=request, name="public/home.html", context=ctx)
 
 @router.get("/post/{slug}", response_class=HTMLResponse)
 async def post_detail_view(request: Request, slug: str):
@@ -71,7 +71,7 @@ async def post_detail_view(request: Request, slug: str):
         "related_posts": related,
         "popular_posts": popular
     })
-    return templates.TemplateResponse("public/post.html", ctx)
+    return templates.TemplateResponse(request=request, name="public/post.html", context=ctx)
 
 @router.get("/section/{slug}", response_class=HTMLResponse)
 async def section_archive_view(request: Request, slug: str, page: int = 1):
@@ -93,7 +93,7 @@ async def section_archive_view(request: Request, slug: str, page: int = 1):
         "has_next": posts_data["has_next"],
         "has_prev": posts_data["has_prev"]
     })
-    return templates.TemplateResponse("public/section.html", ctx)
+    return templates.TemplateResponse(request=request, name="public/section.html", context=ctx)
 
 @router.get("/tag/{slug}", response_class=HTMLResponse)
 async def tag_archive_view(request: Request, slug: str, page: int = 1):
@@ -114,7 +114,7 @@ async def tag_archive_view(request: Request, slug: str, page: int = 1):
         "has_next": posts_data["has_next"],
         "has_prev": posts_data["has_prev"]
     })
-    return templates.TemplateResponse("public/tag.html", ctx)
+    return templates.TemplateResponse(request=request, name="public/tag.html", context=ctx)
 
 @router.get("/search", response_class=HTMLResponse)
 async def search_view(request: Request, q: str = "", page: int = 1):
@@ -132,7 +132,7 @@ async def search_view(request: Request, q: str = "", page: int = 1):
         "has_next": posts_data["has_next"],
         "has_prev": posts_data["has_prev"]
     })
-    return templates.TemplateResponse("public/search.html", ctx)
+    return templates.TemplateResponse(request=request, name="public/search.html", context=ctx)
 
 @router.post("/api/track/download/{post_id}")
 async def track_download_api(post_id: int):
