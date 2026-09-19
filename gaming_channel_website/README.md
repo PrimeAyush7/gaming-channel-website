@@ -1,4 +1,4 @@
-# NEXUS GAMING — Official Content & Downloads Portal
+# GOD4XE GAMING — Official Content & Downloads Portal
 
 A high-performance, full-stack gaming website designed specifically for gaming YouTube channels. Built from the ground up with an immersive Dark Purple + Void Black + Neon Purple cyberpunk aesthetic, dynamic navigation and section management, full post publishing with external verified download links, real-time database search, YouTube embeds, first-class Google AdSense architecture, first-party privacy-friendly analytics, and a non-technical Admin Panel.
 
