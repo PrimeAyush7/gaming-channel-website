@@ -125,6 +125,12 @@ def init_db():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         """)
+              "youtube_channel_url": "https://www.youtube.com/@channel",
+      "instagram_url": "",
+      "whatsapp_url": "",
+      "telegram_url": "",
+      "discord_url": "",
+      "facebook_url": "",
 
         # 8. Media Library
         cursor.execute("""
