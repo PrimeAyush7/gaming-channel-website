@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request, Response, Form, UploadFile, File, HTTPException, status
 from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
+from app.templating import templates
 from app.config import APP_DIR, ENVIRONMENT
 from app.services import (
     auth as auth_service,
@@ -15,7 +15,7 @@ from app.services import (
 )
 
 router = APIRouter(prefix="/admin")
-templates = Jinja2Templates(directory=str(APP_DIR / "templates"))
+# templates imported from app.templating
 
 def get_client_ip(request: Request) -> str:
     forwarded = request.headers.get("X-Forwarded-For")
@@ -41,7 +41,7 @@ async def login_page(request: Request, error: str = None):
     admin = auth_service.get_current_admin(request)
     if admin:
         return RedirectResponse(url="/admin", status_code=status.HTTP_302_FOUND)
-    return templates.TemplateResponse("admin/login.html", {"request": request, "error": error})
+    return templates.TemplateResponse(request=request, name="admin/login.html", context={"request": request, "error": error})
 
 @router.post("/login")
 async def login_submit(request: Request, username: str = Form(...), password: str = Form(...)):
@@ -49,7 +49,7 @@ async def login_submit(request: Request, username: str = Form(...), password: st
     admin_record, error_msg = auth_service.authenticate_admin(username, password, ip_address=ip)
     
     if error_msg or not admin_record:
-        return templates.TemplateResponse("admin/login.html", {
+        return templates.TemplateResponse(request=request, name="admin/login.html", context={
             "request": request,
             "error": error_msg or "Authentication failed."
         }, status_code=401)
@@ -87,7 +87,7 @@ async def dashboard(request: Request):
         return RedirectResponse(url="/admin/login", status_code=status.HTTP_302_FOUND)
 
     stats = analytics_service.get_dashboard_stats()
-    return templates.TemplateResponse("admin/dashboard.html", {
+    return templates.TemplateResponse(request=request, name="admin/dashboard.html", context={
         "request": request,
         "admin": admin,
         "stats": stats,
@@ -104,7 +104,7 @@ async def list_posts(request: Request, msg: str = None, error: str = None):
         return RedirectResponse(url="/admin/login", status_code=status.HTTP_302_FOUND)
 
     posts_data = post_service.get_posts(page=1, per_page=100, only_published=False)
-    return templates.TemplateResponse("admin/posts.html", {
+    return templates.TemplateResponse(request=request, name="admin/posts.html", context={
         "request": request,
         "admin": admin,
         "posts": posts_data["posts"],
@@ -121,7 +121,7 @@ async def new_post_page(request: Request):
         return RedirectResponse(url="/admin/login", status_code=status.HTTP_302_FOUND)
 
     sections = section_service.get_all_sections()
-    return templates.TemplateResponse("admin/post_form.html", {
+    return templates.TemplateResponse(request=request, name="admin/post_form.html", context={
         "request": request,
         "admin": admin,
         "post": None,
@@ -172,7 +172,7 @@ async def create_post_submit(
     post_id, error = post_service.create_post(data)
     if error:
         sections = section_service.get_all_sections()
-        return templates.TemplateResponse("admin/post_form.html", {
+        return templates.TemplateResponse(request=request, name="admin/post_form.html", context={
             "request": request,
             "admin": admin,
             "post": data,
@@ -194,7 +194,7 @@ async def edit_post_page(request: Request, post_id: int):
         return RedirectResponse(url="/admin/posts?error=Post+not+found", status_code=status.HTTP_302_FOUND)
 
     sections = section_service.get_all_sections()
-    return templates.TemplateResponse("admin/post_form.html", {
+    return templates.TemplateResponse(request=request, name="admin/post_form.html", context={
         "request": request,
         "admin": admin,
         "post": post,
@@ -247,7 +247,7 @@ async def update_post_submit(
     if error:
         sections = section_service.get_all_sections()
         data["id"] = post_id
-        return templates.TemplateResponse("admin/post_form.html", {
+        return templates.TemplateResponse(request=request, name="admin/post_form.html", context={
             "request": request,
             "admin": admin,
             "post": data,
@@ -278,7 +278,7 @@ async def sections_page(request: Request, msg: str = None, error: str = None):
         return RedirectResponse(url="/admin/login", status_code=status.HTTP_302_FOUND)
 
     sections = section_service.get_all_sections()
-    return templates.TemplateResponse("admin/sections.html", {
+    return templates.TemplateResponse(request=request, name="admin/sections.html", context={
         "request": request,
         "admin": admin,
         "sections": sections,
@@ -333,7 +333,7 @@ async def tags_page(request: Request, msg: str = None):
         return RedirectResponse(url="/admin/login", status_code=status.HTTP_302_FOUND)
 
     tags = tag_service.get_all_tags()
-    return templates.TemplateResponse("admin/tags.html", {
+    return templates.TemplateResponse(request=request, name="admin/tags.html", context={
         "request": request,
         "admin": admin,
         "tags": tags,
@@ -371,7 +371,7 @@ async def media_page(request: Request, msg: str = None, error: str = None):
         return RedirectResponse(url="/admin/login", status_code=status.HTTP_302_FOUND)
 
     media_files = media_service.get_all_media()
-    return templates.TemplateResponse("admin/media.html", {
+    return templates.TemplateResponse(request=request, name="admin/media.html", context={
         "request": request,
         "admin": admin,
         "media_files": media_files,
@@ -391,7 +391,7 @@ async def upload_media_submit(request: Request, csrf_token: str = Form(...), fil
     record, error = media_service.save_media_file(file.filename, content, file.content_type)
     if error:
         media_files = media_service.get_all_media()
-        return templates.TemplateResponse("admin/media.html", {
+        return templates.TemplateResponse(request=request, name="admin/media.html", context={
             "request": request,
             "admin": admin,
             "media_files": media_files,
@@ -421,7 +421,7 @@ async def youtube_page(request: Request, msg: str = None, error: str = None):
         return RedirectResponse(url="/admin/login", status_code=status.HTTP_302_FOUND)
 
     videos = youtube_service.get_all_videos()
-    return templates.TemplateResponse("admin/youtube.html", {
+    return templates.TemplateResponse(request=request, name="admin/youtube.html", context={
         "request": request,
         "admin": admin,
         "videos": videos,
@@ -452,7 +452,7 @@ async def add_youtube_submit(
     )
     if error:
         videos = youtube_service.get_all_videos()
-        return templates.TemplateResponse("admin/youtube.html", {
+        return templates.TemplateResponse(request=request, name="admin/youtube.html", context={
             "request": request,
             "admin": admin,
             "videos": videos,
@@ -482,7 +482,7 @@ async def ads_page(request: Request, msg: str = None):
         return RedirectResponse(url="/admin/login", status_code=status.HTTP_302_FOUND)
 
     ads = ad_service.get_ad_settings()
-    return templates.TemplateResponse("admin/ads.html", {
+    return templates.TemplateResponse(request=request, name="admin/ads.html", context={
         "request": request,
         "admin": admin,
         "ads": ads,
@@ -530,7 +530,7 @@ async def settings_page(request: Request, msg: str = None):
         return RedirectResponse(url="/admin/login", status_code=status.HTTP_302_FOUND)
 
     settings = settings_service.get_all_settings()
-    return templates.TemplateResponse("admin/settings.html", {
+    return templates.TemplateResponse(request=request, name="admin/settings.html", context={
         "request": request,
         "admin": admin,
         "settings": settings,
