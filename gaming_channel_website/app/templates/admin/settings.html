@@ -1,0 +1,67 @@
+{% extends "admin/base.html" %}
+
+{% block header_title %}Website Settings & SEO{% endblock %}
+
+{% block content %}
+<div class="admin-card" style="max-width: 900px;">
+  <form action="/admin/settings" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ admin.csrf_token }}">
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="site_name">Website Name *</label>
+        <input type="text" id="site_name" name="site_name" value="{{ settings.site_name }}" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="site_tagline">Site Tagline</label>
+        <input type="text" id="site_tagline" name="site_tagline" value="{{ settings.site_tagline }}" class="form-control">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="site_description">Site Description (Meta SEO & Footer)</label>
+      <textarea id="site_description" name="site_description" class="form-control" style="min-height: 80px;">{{ settings.site_description }}</textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="logo_url">Custom Logo URL</label>
+        <input type="text" id="logo_url" name="logo_url" value="{{ settings.logo_url }}" class="form-control" placeholder="/static/images/default-logo.svg">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="favicon_url">Favicon URL</label>
+        <input type="text" id="favicon_url" name="favicon_url" value="{{ settings.favicon_url }}" class="form-control" placeholder="/static/images/favicon.svg">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="youtube_channel_url">Official YouTube Channel URL</label>
+      <input type="url" id="youtube_channel_url" name="youtube_channel_url" value="{{ settings.youtube_channel_url }}" class="form-control" placeholder="https://www.youtube.com/@YourChannel">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="seo_keywords">Default SEO Keywords (Comma-separated)</label>
+      <input type="text" id="seo_keywords" name="seo_keywords" value="{{ settings.seo_keywords }}" class="form-control">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="footer_text">Custom Footer Copyright & Text</label>
+      <input type="text" id="footer_text" name="footer_text" value="{{ settings.footer_text }}" class="form-control">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="robots_txt">Custom Robots.txt Content</label>
+      <textarea id="robots_txt" name="robots_txt" class="form-control" style="font-family: monospace; min-height: 100px;">{{ settings.robots_txt }}</textarea>
+      <div style="font-size: 0.75rem; color: var(--admin-dim); margin-top: 0.35rem;">
+        Served live at <a href="/robots.txt" target="_blank" style="color: var(--neon-purple);">/robots.txt</a>.
+      </div>
+    </div>
+
+    <button type="submit" class="btn-admin-primary" style="margin-top: 1rem;">
+      💾 Save Website Configuration
+    </button>
+  </form>
+</div>
+{% endblock %}

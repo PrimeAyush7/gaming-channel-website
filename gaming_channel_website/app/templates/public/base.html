@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ settings.site_name }} - {{ settings.site_tagline }}{% endblock %}</title>
+  
+  <meta name="description" content="{% block meta_description %}{{ settings.site_description }}{% endblock %}">
+  <meta name="keywords" content="{{ settings.seo_keywords }}">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="{% block canonical_url %}{{ request.url }}{% endblock %}">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+  <meta property="og:title" content="{% block og_title %}{{ settings.site_name }}{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}{{ settings.site_description }}{% endblock %}">
+  <meta property="og:url" content="{{ request.url }}">
+  <meta property="og:image" content="{% block og_image %}{{ settings.logo_url }}{% endblock %}">
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{% block twitter_title %}{{ settings.site_name }}{% endblock %}">
+  <meta name="twitter:description" content="{% block twitter_description %}{{ settings.site_description }}{% endblock %}">
+  <meta name="twitter:image" content="{% block twitter_image %}{{ settings.logo_url }}{% endblock %}">
+
+  <link rel="icon" type="image/svg+xml" href="{{ settings.favicon_url or '/static/images/favicon.svg' }}">
+  <link rel="stylesheet" href="/static/css/style.css">
+
+  {% if ads and ads.is_enabled and ads.client_id %}
+  <!-- Google AdSense Official Loader (Active when client_id is set) -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ ads.client_id }}" crossorigin="anonymous"></script>
+  {% endif %}
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <!-- Desktop Cursor Lighting Element -->
+  <div id="cursor-glow" aria-hidden="true"></div>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <!-- Site Logo & Brand -->
+      <a href="/" class="site-brand">
+        {% if settings.logo_url %}
+          <img src="{{ settings.logo_url }}" alt="{{ settings.site_name }} Logo">
+        {% else %}
+          <div class="site-brand-text">{{ settings.site_name }} <span>HUB</span></div>
+        {% endif %}
+      </a>
+
+      <!-- Dynamic Sections Desktop Navigation -->
+      <nav class="desktop-nav" aria-label="Main Navigation">
+        <a href="/" class="nav-link {% if request.url.path == '/' %}active{% endif %}">HOME</a>
+        {% for sec in nav_sections %}
+          <a href="/section/{{ sec.slug }}" class="nav-link {% if current_section and current_section.slug == sec.slug %}active{% endif %}">
+            <span>{{ sec.icon }}</span> {{ sec.name }}
+          </a>
+        {% endfor %}
+      </nav>
+
+      <!-- Action Buttons -->
+      <div class="header-actions">
+        <!-- Search Trigger Form -->
+        <form action="/search" method="GET" class="header-search-form" style="display: flex;">
+          <input type="text" name="q" placeholder="Search..." required class="form-control" style="padding: 0.4rem 0.75rem; font-size: 0.85rem; width: 140px; border-radius: 6px; background: rgba(168,85,247,0.1); border: 1px solid var(--border-subtle); color: #fff;">
+        </form>
+
+        <!-- YouTube Channel Button -->
+        {% if settings.youtube_channel_url %}
+        <a href="{{ settings.youtube_channel_url }}" target="_blank" rel="noopener noreferrer" class="yt-sub-btn" data-track-youtube="1">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+          <span>YouTube</span>
+        </a>
+        {% endif %}
+
+        <!-- Mobile Drawer Toggle -->
+        <button id="mobile-nav-toggle" class="mobile-toggle-btn" aria-label="Open Navigation Menu" aria-expanded="false">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Navigation Drawer -->
+  <aside id="mobile-drawer" class="mobile-drawer">
+    <form action="/search" method="GET" style="display: flex; gap: 0.5rem;">
+      <input type="text" name="q" placeholder="Search guides, configs..." class="form-control" style="flex: 1;">
+      <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.25rem;">Search</button>
+    </form>
+    <div class="mobile-nav-links">
+      <a href="/" class="nav-link">🏠 HOME</a>
+      {% for sec in nav_sections %}
+        <a href="/section/{{ sec.slug }}" class="nav-link">
+          <span>{{ sec.icon }}</span> {{ sec.name }}
+        </a>
+      {% endfor %}
+    </div>
+  </aside>
+
+  <!-- Main Content Body -->
+  <main class="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="site-brand-text">{{ settings.site_name }} <span>HUB</span></div>
+          <p>{{ settings.site_description }}</p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Navigation</h4>
+          <ul class="footer-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/search">Search All</a></li>
+            {% if settings.youtube_channel_url %}
+            <li><a href="{{ settings.youtube_channel_url }}" target="_blank" rel="noopener noreferrer">YouTube Channel</a></li>
+            {% endif %}
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Top Sections</h4>
+          <ul class="footer-links">
+            {% for sec in nav_sections[:4] %}
+            <li><a href="/section/{{ sec.slug }}">{{ sec.name }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>System</h4>
+          <ul class="footer-links">
+            <li><a href="/sitemap.xml">Sitemap</a></li>
+            <li><a href="/robots.txt">Robots.txt</a></li>
+            <li><a href="/ads.txt">ads.txt</a></li>
+            <li><a href="/admin/login">Admin Portal</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom-bar">
+        <div>{{ settings.footer_text }}</div>
+        <div>Designed for Elite Gaming Channels. 100% Original Architecture.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/static/js/main.js"></script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>
