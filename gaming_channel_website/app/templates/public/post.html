@@ -1,0 +1,240 @@
+{% extends "public/base.html" %}
+
+{% block title %}{{ post.seo_title or post.title }} - {{ settings.site_name }}{% endblock %}
+{% block meta_description %}{{ post.seo_description or post.summary or (post.content[:150] ~ '...') }}{% endblock %}
+{% block canonical_url %}{{ app_url }}/post/{{ post.slug }}{% endblock %}
+
+{% block og_title %}{{ post.seo_title or post.title }}{% endblock %}
+{% block og_description %}{{ post.seo_description or post.summary }}{% endblock %}
+{% block og_image %}{{ post.thumbnail_url or settings.logo_url }}{% endblock %}
+
+{% block content %}
+<div class="container">
+  
+  <div class="post-detail-layout">
+    
+    <!-- Main Article Column -->
+    <article class="post-article-container">
+      
+      <!-- Breadcrumbs -->
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a>
+        <span>/</span>
+        {% if post.section_slug %}
+        <a href="/section/{{ post.section_slug }}">{{ post.section_name }}</a>
+        <span>/</span>
+        {% endif %}
+        <span style="color: var(--neon-violet);">{{ post.title }}</span>
+      </nav>
+
+      <h1 class="article-headline">{{ post.title }}</h1>
+
+      <!-- Meta Bar -->
+      <div class="article-meta-bar">
+        <div class="meta-item">
+          <span>📅 Published:</span>
+          <strong>{{ post.published_at[:10] }}</strong>
+        </div>
+        {% if post.section_name %}
+        <div class="meta-item">
+          <span>📁 Section:</span>
+          <a href="/section/{{ post.section_slug }}" class="badge badge-purple">{{ post.section_name }}</a>
+        </div>
+        {% endif %}
+        <div class="meta-item">
+          <span>👁️ Views:</span>
+          <strong>{{ post.view_count }}</strong>
+        </div>
+        {% if post.download_url %}
+        <div class="meta-item">
+          <span>📥 Downloads:</span>
+          <strong>{{ post.download_count }}</strong>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Featured Image -->
+      {% if post.thumbnail_url %}
+      <div class="article-hero-media">
+        <img src="{{ post.thumbnail_url }}" alt="{{ post.title }}">
+      </div>
+      {% endif %}
+
+      <!-- Safe Top Article Ad Slot -->
+      {% if ads and ads.is_enabled and ads.client_id and ads.slot_post_top %}
+      <div class="ad-slot-wrapper">
+        <span class="ad-label">Sponsored Advertisement</span>
+        <div class="ad-container-responsive">
+          <ins class="adsbygoogle"
+               style="display:block"
+               data-ad-client="{{ ads.client_id }}"
+               data-ad-slot="{{ ads.slot_post_top }}"
+               data-ad-format="auto"
+               data-full-width-responsive="true"></ins>
+          <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Post Formatted Content -->
+      <div class="article-body-content">
+        {{ formatted_content | safe }}
+      </div>
+
+      <!-- YouTube Embed Section (if available) -->
+      {% if post.youtube_video_id %}
+      <div style="margin: 3rem 0;">
+        <h3 style="font-size: 1.35rem; color: #fff; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+          <svg width="24" height="24" fill="#e11d48" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+          Video Showcase & Tutorial
+        </h3>
+        <div class="featured-video-card cyber-card" data-track-youtube="1" data-post-id="{{ post.id }}">
+          <div class="video-responsive-wrapper">
+            <iframe 
+              src="https://www.youtube-nocookie.com/embed/{{ post.youtube_video_id }}" 
+              title="{{ post.title }}" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+              allowfullscreen>
+            </iframe>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- PROMINENT VERIFIED EXTERNAL DOWNLOAD SECTION -->
+      {% if post.download_url %}
+      <div class="download-card-container">
+        <div class="download-badge">✓ Verified Direct Download</div>
+        <h3 class="download-title">{{ post.download_label or 'DOWNLOAD OFFICIAL CONFIG / ASSET' }}</h3>
+        <p class="download-desc">Click below to open the external download mirror in a secure tab. No malicious popups or redirects.</p>
+        
+        <a href="{{ post.download_url }}" 
+           target="_blank" 
+           rel="noopener noreferrer" 
+           class="btn-download-cyber"
+           data-track-download="1" 
+           data-post-id="{{ post.id }}">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          <span>{{ post.download_label or 'DOWNLOAD FILE' }}</span>
+        </a>
+
+        <div class="download-disclaimer">
+          🔒 Safe Link Protection Active. Opens in a separate secure browser tab.
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Safe Bottom Article Ad Slot -->
+      {% if ads and ads.is_enabled and ads.client_id and ads.slot_post_bottom %}
+      <div class="ad-slot-wrapper">
+        <span class="ad-label">Sponsored Advertisement</span>
+        <div class="ad-container-responsive">
+          <ins class="adsbygoogle"
+               style="display:block"
+               data-ad-client="{{ ads.client_id }}"
+               data-ad-slot="{{ ads.slot_post_bottom }}"
+               data-ad-format="auto"
+               data-full-width-responsive="true"></ins>
+          <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Tags Row -->
+      {% if post.tags %}
+      <div class="post-tags-row">
+        <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Tags:</span>
+        {% for tag in post.tags %}
+        <a href="/tag/{{ tag.slug }}" class="tag-badge">#{{ tag.name }}</a>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Related Posts -->
+      {% if related_posts %}
+      <div style="margin-top: 3.5rem;">
+        <h3 style="font-size: 1.4rem; color: #fff; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+          <span class="title-bar"></span> Related Content
+        </h3>
+        <div class="posts-grid" style="grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));">
+          {% for rel in related_posts %}
+          <div class="post-card cyber-card">
+            <a href="/post/{{ rel.slug }}" class="post-thumb-link">
+              {% if rel.thumbnail_url %}
+              <img src="{{ rel.thumbnail_url }}" alt="{{ rel.title }}" class="post-thumb-img" loading="lazy">
+              {% else %}
+              <div style="width: 100%; height: 100%; background: #120924; display: flex; align-items: center; justify-content: center; font-size: 2rem;">🎮</div>
+              {% endif %}
+            </a>
+            <div class="post-content-box" style="padding: 1rem;">
+              <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">
+                <a href="/post/{{ rel.slug }}" style="color: #fff; text-decoration: none;">{{ rel.title }}</a>
+              </h4>
+              <a href="/post/{{ rel.slug }}" class="read-more-link" style="font-size: 0.8rem;">Read More &rarr;</a>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+    </article>
+
+    <!-- Sidebar Column -->
+    <aside class="post-sidebar">
+      
+      <!-- Popular Posts Widget -->
+      {% if popular_posts %}
+      <div class="sidebar-widget">
+        <h3 class="widget-title">🔥 Popular Guides</h3>
+        <div class="popular-posts-list">
+          {% for pop in popular_posts %}
+          <a href="/post/{{ pop.slug }}" class="popular-item">
+            <div class="popular-rank">0{{ loop.index }}</div>
+            <div class="popular-info">
+              <h4>{{ pop.title }}</h4>
+              <div class="popular-meta">👁️ {{ pop.view_count }} views</div>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Sections Widget -->
+      <div class="sidebar-widget">
+        <h3 class="widget-title">🎮 Browse Sections</h3>
+        <ul class="footer-links">
+          {% for sec in nav_sections %}
+          <li>
+            <a href="/section/{{ sec.slug }}" style="display: flex; align-items: center; justify-content: space-between; padding: 0.4rem 0;">
+              <span>{{ sec.icon }} {{ sec.name }}</span>
+              <span style="color: var(--neon-purple);">&rarr;</span>
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <!-- Safe Sidebar Ad Slot -->
+      {% if ads and ads.is_enabled and ads.client_id and ads.slot_sidebar %}
+      <div class="sidebar-widget" style="padding: 1rem; text-align: center;">
+        <span class="ad-label">Sponsored</span>
+        <div class="ad-container-responsive">
+          <ins class="adsbygoogle"
+               style="display:block"
+               data-ad-client="{{ ads.client_id }}"
+               data-ad-slot="{{ ads.slot_sidebar }}"
+               data-ad-format="auto"
+               data-full-width-responsive="true"></ins>
+          <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+      </div>
+      {% endif %}
+
+    </aside>
+
+  </div>
+
+</div>
+{% endblock %}
