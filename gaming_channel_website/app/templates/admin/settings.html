@@ -42,6 +42,61 @@
     </div>
 
     <div class="form-group">
+    <label class="form-label" for="instagram_url">Instagram URL</label>
+    <input
+        type="url"
+        id="instagram_url"
+        name="instagram_url"
+        value="{{ settings.instagram_url or '' }}"
+        class="form-control"
+        placeholder="https://www.instagram.com/yourpage/">
+</div>
+
+<div class="form-group">
+    <label class="form-label" for="whatsapp_url">WhatsApp Channel URL</label>
+    <input
+        type="url"
+        id="whatsapp_url"
+        name="whatsapp_url"
+        value="{{ settings.whatsapp_url or '' }}"
+        class="form-control"
+        placeholder="https://whatsapp.com/channel/...">
+</div>
+
+<div class="form-group">
+    <label class="form-label" for="telegram_url">Telegram Channel URL</label>
+    <input
+        type="url"
+        id="telegram_url"
+        name="telegram_url"
+        value="{{ settings.telegram_url or '' }}"
+        class="form-control"
+        placeholder="https://t.me/yourchannel">
+</div>
+
+<div class="form-group">
+    <label class="form-label" for="discord_url">Discord Server URL</label>
+    <input
+        type="url"
+        id="discord_url"
+        name="discord_url"
+        value="{{ settings.discord_url or '' }}"
+        class="form-control"
+        placeholder="https://discord.gg/yourserver">
+</div>
+
+<div class="form-group">
+    <label class="form-label" for="facebook_url">Facebook URL</label>
+    <input
+        type="url"
+        id="facebook_url"
+        name="facebook_url"
+        value="{{ settings.facebook_url or '' }}"
+        class="form-control"
+        placeholder="https://www.facebook.com/yourpage">
+</div>
+
+    <div class="form-group">
       <label class="form-label" for="seo_keywords">Default SEO Keywords (Comma-separated)</label>
       <input type="text" id="seo_keywords" name="seo_keywords" value="{{ settings.seo_keywords }}" class="form-control">
     </div>
