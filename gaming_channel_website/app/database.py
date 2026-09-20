@@ -2,19 +2,28 @@ import sqlite3
 from contextlib import contextmanager
 from app.config import DATABASE_PATH
 
+
 def get_db_connection():
-    conn = sqlite3.connect(DATABASE_PATH, timeout=20.0, check_same_thread=False)
+    conn = sqlite3.connect(
+        DATABASE_PATH,
+        timeout=20.0,
+        check_same_thread=False
+    )
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON;")
+
     try:
         conn.execute("PRAGMA journal_mode = DELETE;")
     except Exception:
         pass
+
     return conn
+
 
 @contextmanager
 def get_db():
     conn = get_db_connection()
+
     try:
         yield conn
         conn.commit()
@@ -24,11 +33,13 @@ def get_db():
     finally:
         conn.close()
 
+
 def init_db():
     """Initialize database tables with indexes and initial settings."""
+
     with get_db() as conn:
         cursor = conn.cursor()
-        
+
         # 1. Admins
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS admins (
@@ -41,7 +52,7 @@ def init_db():
             );
         """)
 
-        # 2. Sessions (Secure Session Management)
+        # 2. Sessions
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS sessions (
                 session_id TEXT PRIMARY KEY,
@@ -99,7 +110,9 @@ def init_db():
                 seo_description TEXT,
                 view_count INTEGER DEFAULT 0,
                 download_count INTEGER DEFAULT 0,
-                FOREIGN KEY (section_id) REFERENCES sections(id) ON DELETE SET NULL
+                FOREIGN KEY (section_id)
+                    REFERENCES sections(id)
+                    ON DELETE SET NULL
             );
         """)
 
@@ -109,8 +122,12 @@ def init_db():
                 post_id INTEGER NOT NULL,
                 tag_id INTEGER NOT NULL,
                 PRIMARY KEY (post_id, tag_id),
-                FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
-                FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+                FOREIGN KEY (post_id)
+                    REFERENCES posts(id)
+                    ON DELETE CASCADE,
+                FOREIGN KEY (tag_id)
+                    REFERENCES tags(id)
+                    ON DELETE CASCADE
             );
         """)
 
@@ -125,12 +142,6 @@ def init_db():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         """)
-              "youtube_channel_url": "https://www.youtube.com/@channel",
-      "instagram_url": "",
-      "whatsapp_url": "",
-      "telegram_url": "",
-      "discord_url": "",
-      "facebook_url": "",
 
         # 8. Media Library
         cursor.execute("""
@@ -145,7 +156,7 @@ def init_db():
             );
         """)
 
-        # 9. Site Settings (Key/Value configuration)
+        # 9. Site Settings
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS site_settings (
                 key TEXT PRIMARY KEY,
@@ -179,7 +190,7 @@ def init_db():
             );
         """)
 
-        # 12. Rate limiting tracking for login attempts
+        # 12. Rate limiting tracking
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS login_attempts (
                 ip_address TEXT PRIMARY KEY,
@@ -188,55 +199,178 @@ def init_db():
             );
         """)
 
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_posts_slug ON posts(slug);")
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_posts_published ON posts(is_published, published_at);")
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_sections_slug ON sections(slug);")
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_sections_nav ON sections(is_nav_visible, sort_order);")
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_tags_slug ON tags(slug);")
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_analytics_type ON analytics_events(event_type, created_at);")
+        # Indexes
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_posts_slug ON posts(slug);"
+        )
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_posts_published "
+            "ON posts(is_published, published_at);"
+        )
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_sections_slug "
+            "ON sections(slug);"
+        )
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_sections_nav "
+            "ON sections(is_nav_visible, sort_order);"
+        )
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_tags_slug ON tags(slug);"
+        )
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_analytics_type "
+            "ON analytics_events(event_type, created_at);"
+        )
 
-       default_settings = {
-    "site_name": "GOD4XE",
-    "site_tagline": "Pro Gaming Guides, Configs & Updates",
-    "site_description": "The ultimate hub for game updates, sensitivity configs, pro guides, and exclusive gaming content.",
-    "logo_url": "/static/images/default-logo.svg",
-    "favicon_url": "/static/images/favicon.svg",
-    "youtube_channel_url": "https://www.youtube.com/@channel",
-    "instagram_url": "",
-    "whatsapp_url": "",
-    "telegram_url": "",
-    "discord_url": "",
-    "facebook_url": "",
-    "seo_keywords": "gaming, configs, game updates, sensitivity, guides, gaming channel",
-    "footer_text": "© 2026 GOD4XE. All rights reserved.",
-    "robots_txt": "User-agent: *\nAllow: /",
-}
-        for k, v in default_settings.items():
-            cursor.execute("INSERT OR IGNORE INTO site_settings (key, value) VALUES (?, ?);", (k, v))
+        # Default Site Settings
+        default_settings = {
+            "site_name": "GOD4XE",
+            "site_tagline": "Pro Gaming Guides, Configs & Updates",
+            "site_description": (
+                "The ultimate hub for game updates, sensitivity configs, "
+                "pro guides, and exclusive gaming content."
+            ),
+            "logo_url": "/static/images/default-logo.svg",
+            "favicon_url": "/static/images/favicon.svg",
 
+            # Social Media
+            "youtube_channel_url": "",
+            "instagram_url": "",
+            "whatsapp_url": "",
+            "telegram_url": "",
+            "discord_url": "",
+            "facebook_url": "",
+
+            # SEO / Footer
+            "footer_text": (
+                "© 2026 GOD4XE. All rights reserved."
+            ),
+            "seo_keywords": (
+                "gaming, configs, game updates, sensitivity, "
+                "guides, gaming channel"
+            ),
+            "robots_txt": (
+                "User-agent: *\n"
+                "Allow: /\n"
+                "Disallow: /admin\n"
+                "Disallow: /api/\n"
+                "Sitemap: /sitemap.xml"
+            ),
+        }
+
+        for key, value in default_settings.items():
+            cursor.execute(
+                """
+                INSERT OR IGNORE INTO site_settings (key, value)
+                VALUES (?, ?);
+                """,
+                (key, value)
+            )
+
+        # Default Ad Settings
         cursor.execute("""
-            INSERT OR IGNORE INTO ad_settings (id, is_enabled, client_id, custom_ads_txt)
-            VALUES (1, 0, '', '# Google AdSense ads.txt configuration\n# google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0');
+            INSERT OR IGNORE INTO ad_settings (
+                id,
+                is_enabled,
+                client_id,
+                custom_ads_txt
+            )
+            VALUES (
+                1,
+                0,
+                '',
+                '# Google AdSense ads.txt configuration
+# google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0'
+            );
         """)
-        
+
+        # Default Sections
         cursor.execute("SELECT COUNT(*) FROM sections;")
+
         if cursor.fetchone()[0] == 0:
             default_sections = [
-                ("FREE STYLE COMBO", "free-style-combo", "Pro freestyle combinations, keybinds, and mechanical setups.", "⚡", 1, 1),
-                ("OB50 UPDATE", "ob50-update", "OB50 patch notes, weapon balances, and tactical meta shifts.", "🔥", 1, 2),
-                ("OB51 UPDATE", "ob51-update", "OB51 full changelog, new character skills, and ranked meta.", "🚀", 1, 3),
-                ("OB52 UPDATE", "ob52-update", "OB52 next-gen mechanics and competitive tournaments.", "👑", 1, 4),
-                ("CONFIG FILES", "config-files", "Optimized graphics configs, high FPS unlockers, and smoothness settings.", "⚙️", 1, 5),
-                ("SENSITIVITY", "sensitivity", "Best DPI, HUD layouts, and one-tap headshot sensitivity guides.", "🎯", 1, 6),
-                ("GUIDES", "guides", "In-depth tactical guides, ranked tips, and weapon mastery.", "📚", 1, 7),
-                ("EVENTS", "events", "Upcoming esports tournaments, redeem events, and rewards.", "🏆", 1, 8),
+                (
+                    "FREE STYLE COMBO",
+                    "free-style-combo",
+                    "Pro freestyle combinations, keybinds, and mechanical setups.",
+                    "⚡",
+                    1,
+                    1
+                ),
+                (
+                    "OB50 UPDATE",
+                    "ob50-update",
+                    "OB50 patch notes, weapon balances, and tactical meta shifts.",
+                    "🔥",
+                    1,
+                    2
+                ),
+                (
+                    "OB51 UPDATE",
+                    "ob51-update",
+                    "OB51 full changelog, new character skills, and ranked meta.",
+                    "🚀",
+                    1,
+                    3
+                ),
+                (
+                    "OB52 UPDATE",
+                    "ob52-update",
+                    "OB52 next-gen mechanics and competitive tournaments.",
+                    "👑",
+                    1,
+                    4
+                ),
+                (
+                    "CONFIG FILES",
+                    "config-files",
+                    "Optimized graphics configs, high FPS unlockers, and smoothness settings.",
+                    "⚙️",
+                    1,
+                    5
+                ),
+                (
+                    "SENSITIVITY",
+                    "sensitivity",
+                    "Best DPI, HUD layouts, and one-tap headshot sensitivity guides.",
+                    "🎯",
+                    1,
+                    6
+                ),
+                (
+                    "GUIDES",
+                    "guides",
+                    "In-depth tactical guides, ranked tips, and weapon mastery.",
+                    "📚",
+                    1,
+                    7
+                ),
+                (
+                    "EVENTS",
+                    "events",
+                    "Upcoming esports tournaments, redeem events, and rewards.",
+                    "🏆",
+                    1,
+                    8
+                ),
             ]
+
             cursor.executemany("""
-                INSERT INTO sections (name, slug, description, icon, is_nav_visible, sort_order)
+                INSERT INTO sections (
+                    name,
+                    slug,
+                    description,
+                    icon,
+                    is_nav_visible,
+                    sort_order
+                )
                 VALUES (?, ?, ?, ?, ?, ?);
             """, default_sections)
 
+        # Default Tags
         cursor.execute("SELECT COUNT(*) FROM tags;")
+
         if cursor.fetchone()[0] == 0:
             default_tags = [
                 ("OB52", "ob52"),
@@ -248,4 +382,8 @@ def init_db():
                 ("FPS BOOST", "fps-boost"),
                 ("HEADSHOT", "headshot"),
             ]
-            cursor.executemany("INSERT INTO tags (name, slug) VALUES (?, ?);", default_tags)
+
+            cursor.executemany(
+                "INSERT INTO tags (name, slug) VALUES (?, ?);",
+                default_tags
+            )
