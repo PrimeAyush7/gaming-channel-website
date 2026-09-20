@@ -195,17 +195,22 @@ def init_db():
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_tags_slug ON tags(slug);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_analytics_type ON analytics_events(event_type, created_at);")
 
-        default_settings = {
-            "site_name": "NEXUS GAMING",
-            "site_tagline": "Pro Gaming Guides, Configs & Updates",
-            "site_description": "The ultimate hub for game updates, sensitivity configs, pro guides, and exclusive gaming content.",
-            "logo_url": "/static/images/default-logo.svg",
-            "favicon_url": "/static/images/favicon.svg",
-            "youtube_channel_url": "https://www.youtube.com/@channel",
-            "footer_text": "© 2026 Nexus Gaming. All rights reserved. Powered by Nexus Engine.",
-            "seo_keywords": "gaming, configs, game updates, sensitivity, guides, gaming channel",
-            "robots_txt": "User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\nSitemap: /sitemap.xml",
-        }
+       default_settings = {
+    "site_name": "GOD4XE",
+    "site_tagline": "Pro Gaming Guides, Configs & Updates",
+    "site_description": "The ultimate hub for game updates, sensitivity configs, pro guides, and exclusive gaming content.",
+    "logo_url": "/static/images/default-logo.svg",
+    "favicon_url": "/static/images/favicon.svg",
+    "youtube_channel_url": "https://www.youtube.com/@channel",
+    "instagram_url": "",
+    "whatsapp_url": "",
+    "telegram_url": "",
+    "discord_url": "",
+    "facebook_url": "",
+    "seo_keywords": "gaming, configs, game updates, sensitivity, guides, gaming channel",
+    "footer_text": "© 2026 GOD4XE. All rights reserved.",
+    "robots_txt": "User-agent: *\nAllow: /",
+}
         for k, v in default_settings.items():
             cursor.execute("INSERT OR IGNORE INTO site_settings (key, value) VALUES (?, ?);", (k, v))
 
