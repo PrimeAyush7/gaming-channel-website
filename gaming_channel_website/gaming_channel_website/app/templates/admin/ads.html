@@ -1,0 +1,83 @@
+{% extends "admin/base.html" %}
+
+{% block header_title %}Google AdSense & Monetization Architecture{% endblock %}
+
+{% block content %}
+<div class="admin-card" style="max-width: 900px;">
+  <div class="admin-card-header">
+    <div class="admin-card-title">Google AdSense First-Class Settings</div>
+  </div>
+
+  <p style="color: var(--admin-muted); font-size: 0.875rem; line-height: 1.6; margin-bottom: 1.5rem;">
+    Configure Google AdSense for your gaming portal. Leave disabled until your site receives Google AdSense approval. Once approved, input your official Client ID and Slot IDs below.
+  </p>
+
+  <form action="/admin/ads" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ admin.csrf_token }}">
+
+    <!-- Master Switch -->
+    <div style="background: rgba(168, 85, 247, 0.1); padding: 1.25rem; border-radius: 8px; border: 1px solid var(--admin-border); margin-bottom: 1.75rem;">
+      <label class="toggle-label" style="font-size: 1.05rem;">
+        <input type="checkbox" name="is_enabled" value="1" {% if ads.is_enabled %}checked{% endif %}>
+        <span><strong>Enable Google AdSense Globally</strong></span>
+      </label>
+      <div style="font-size: 0.8rem; color: var(--admin-muted); margin-top: 0.5rem; margin-left: 28px;">
+        When enabled, real Google AdSense ad scripts load in safe containers without interfering with download buttons or navigation.
+      </div>
+    </div>
+
+    <!-- Client ID -->
+    <div class="form-group">
+      <label class="form-label" for="client_id">AdSense Publisher / Client ID (e.g. ca-pub-XXXXXXXXXXXXXXXX)</label>
+      <input type="text" id="client_id" name="client_id" value="{{ ads.client_id or '' }}" class="form-control" placeholder="ca-pub-1234567890123456">
+      <div style="font-size: 0.75rem; color: var(--admin-dim); margin-top: 0.35rem;">
+        Do not use fake credentials. Enter your real ID from your AdSense account once approved.
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="slot_home_top">Homepage Top Ad Slot ID</label>
+        <input type="text" id="slot_home_top" name="slot_home_top" value="{{ ads.slot_home_top or '' }}" class="form-control" placeholder="e.g. 1234567890">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="slot_home_bottom">Homepage Bottom Ad Slot ID</label>
+        <input type="text" id="slot_home_bottom" name="slot_home_bottom" value="{{ ads.slot_home_bottom or '' }}" class="form-control" placeholder="e.g. 1234567890">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="slot_post_top">Post Top Ad Slot ID</label>
+        <input type="text" id="slot_post_top" name="slot_post_top" value="{{ ads.slot_post_top or '' }}" class="form-control" placeholder="e.g. 1234567890">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="slot_post_bottom">Post Bottom Ad Slot ID</label>
+        <input type="text" id="slot_post_bottom" name="slot_post_bottom" value="{{ ads.slot_post_bottom or '' }}" class="form-control" placeholder="e.g. 1234567890">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="slot_sidebar">Sidebar Ad Slot ID</label>
+      <input type="text" id="slot_sidebar" name="slot_sidebar" value="{{ ads.slot_sidebar or '' }}" class="form-control" placeholder="e.g. 1234567890">
+    </div>
+
+    <!-- ads.txt Editor -->
+    <div class="form-group" style="margin-top: 2rem;">
+      <label class="form-label" for="custom_ads_txt">
+        Public <code>/ads.txt</code> Content
+      </label>
+      <div style="font-size: 0.8rem; color: var(--admin-muted); margin-bottom: 0.5rem;">
+        This is served live at <a href="/ads.txt" target="_blank" style="color: var(--neon-purple);">/ads.txt</a> for Google crawlers.
+      </div>
+      <textarea id="custom_ads_txt" name="custom_ads_txt" class="form-control" style="font-family: monospace; min-height: 120px;">{{ ads.custom_ads_txt or '' }}</textarea>
+    </div>
+
+    <button type="submit" class="btn-admin-primary" style="margin-top: 1rem;">
+      💾 Save Monetization Settings
+    </button>
+  </form>
+</div>
+{% endblock %}
