@@ -1236,4 +1236,76 @@ body {
     padding: 0.85rem 1rem;
     font-size: 1rem;
   }
+   /* =========================
+   Mobile Header Fix
+   ========================= */
+@media (max-width: 768px) {
+
+  .site-header,
+  .main-header,
+  header {
+    padding-left: 14px;
+    padding-right: 10px;
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 8px;
+  }
+
+  /* Logo */
+  .site-logo {
+    flex: 0 0 auto;
+    max-width: 155px;
+    width: auto;
+  }
+
+  .site-logo img {
+    max-width: 155px;
+    height: auto;
+  }
+
+  /* Search */
+  .header-search {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: auto;
+    margin: 0;
+  }
+
+  .header-search input {
+    width: 100%;
+    min-width: 0;
+    height: 42px;
+    padding: 0 12px;
+  }
+
+  /* Hamburger */
+  .mobile-menu-toggle {
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+ @media (max-width: 600px) {
+  .site-logo,
+  .site-logo img {
+    max-width: 135px;
+  }
+
+  .header-search input {
+    font-size: 14px;
+  }
+
+  .mobile-menu-toggle {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+  }
 }
