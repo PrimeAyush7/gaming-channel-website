@@ -1,0 +1,18 @@
+{% extends "public/base.html" %}
+
+{% block title %}500 - Server Malfunction - {{ settings.site_name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 5rem 1.5rem; text-align: center;">
+  <div class="cyber-card" style="max-width: 600px; margin: 0 auto; padding: 3rem 2rem; border-color: #ef4444;">
+    <div style="font-size: 4rem; font-weight: 900; color: #ef4444; text-shadow: 0 0 20px #ef4444; margin-bottom: 1rem;">
+      500
+    </div>
+    <h1 style="font-size: 1.75rem; font-weight: 800; color: #fff; margin-bottom: 1rem;">INTERNAL SYSTEM GLITCH</h1>
+    <p style="color: var(--text-muted); line-height: 1.6; margin-bottom: 2rem;">
+      An unexpected internal exception occurred while processing this request. The issue has been logged.
+    </p>
+    <a href="/" class="btn btn-primary">Return to Safety (Home)</a>
+  </div>
+</div>
+{% endblock %}

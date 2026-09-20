@@ -1,0 +1,50 @@
+{% extends "public/base.html" %}
+
+{% block title %}Tag: #{{ tag.name }} - {{ settings.site_name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
+  
+  <div class="cyber-card" style="padding: 2rem; margin-bottom: 3rem; border-color: var(--neon-purple); display: flex; align-items: center; gap: 1.5rem;">
+    <div style="font-size: 2.5rem; color: var(--neon-violet);">#</div>
+    <div>
+      <h1 style="font-size: 1.85rem; font-weight: 800; color: #fff;">Tagged with "{{ tag.name }}"</h1>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">Showing articles and configs matching this tag.</p>
+    </div>
+  </div>
+
+  {% if posts %}
+  <div class="posts-grid">
+    {% for post in posts %}
+    <article class="post-card cyber-card">
+      <a href="/post/{{ post.slug }}" class="post-thumb-link">
+        {% if post.thumbnail_url %}
+        <img src="{{ post.thumbnail_url }}" alt="{{ post.title }}" class="post-thumb-img" loading="lazy">
+        {% else %}
+        <div style="width: 100%; height: 100%; background: #120924; display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">🎮</div>
+        {% endif %}
+      </a>
+      <div class="post-content-box">
+        <div class="post-meta-row">
+          <span>📅 {{ post.published_at[:10] }}</span>
+          <span>👁️ {{ post.view_count }} views</span>
+        </div>
+        <h3 class="post-card-title">
+          <a href="/post/{{ post.slug }}">{{ post.title }}</a>
+        </h3>
+        <p class="post-excerpt">{{ post.summary or (post.content[:130] ~ '...') }}</p>
+        <div class="post-card-footer">
+          <a href="/post/{{ post.slug }}" class="read-more-link">Read Guide &rarr;</a>
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="cyber-card" style="padding: 3rem; text-align: center; color: var(--text-muted);">
+    <p>No posts found for this tag.</p>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
