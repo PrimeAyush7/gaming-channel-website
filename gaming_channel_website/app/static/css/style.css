@@ -1308,4 +1308,120 @@ body {
     height: 40px;
     flex-basis: 40px;
   }
+    /* =========================================================
+   MOBILE HEADER - FINAL FIX
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden !important;
+  }
+
+  .site-header {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .header-inner {
+    width: 100%;
+    max-width: 100%;
+    height: 64px;
+    padding-left: 10px;
+    padding-right: 8px;
+    gap: 7px;
+    min-width: 0;
+  }
+
+  /* Logo */
+  .site-brand {
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 145px;
+    gap: 0;
+  }
+
+  .site-brand img {
+    height: 38px;
+    width: auto;
+    max-width: 145px;
+    object-fit: contain;
+  }
+
+  /* Header right side */
+  .header-actions {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: auto;
+    gap: 6px;
+    justify-content: flex-end;
+  }
+
+  /* Search */
+  .header-search-form {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+
+  .header-search-form input {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: 40px;
+    padding: 0 10px !important;
+    font-size: 14px !important;
+  }
+
+  /* Hamburger */
+  .mobile-toggle-btn {
+    display: flex;
+    flex: 0 0 40px;
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    margin: 0;
+    padding: 0;
+  }
 }
+
+
+/* Smaller phones */
+@media (max-width: 480px) {
+
+  .header-inner {
+    height: 60px;
+    padding-left: 8px;
+    padding-right: 6px;
+    gap: 5px;
+  }
+
+  .site-brand {
+    max-width: 125px;
+  }
+
+  .site-brand img {
+    max-width: 125px;
+    height: 36px;
+  }
+
+  .header-actions {
+    gap: 5px;
+  }
+
+  .header-search-form input {
+    height: 38px;
+    font-size: 13px !important;
+  }
+
+  .mobile-toggle-btn {
+    width: 38px;
+    min-width: 38px;
+    height: 38px;
+  }
+}
+
