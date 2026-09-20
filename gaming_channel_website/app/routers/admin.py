@@ -548,6 +548,11 @@ async def update_settings_submit(
     logo_url: str = Form(""),
     favicon_url: str = Form(""),
     youtube_channel_url: str = Form(""),
+    instagram_url: str = Form(""),
+    whatsapp_url: str = Form(""),
+    telegram_url: str = Form(""),
+    discord_url: str = Form(""),
+    facebook_url: str = Form(""),
     seo_keywords: str = Form(""),
     footer_text: str = Form(""),
     robots_txt: str = Form("")
@@ -564,6 +569,11 @@ async def update_settings_submit(
         "logo_url": logo_url,
         "favicon_url": favicon_url,
         "youtube_channel_url": youtube_channel_url,
+        "instagram_url": instagram_url,
+        "whatsapp_url": whatsapp_url,
+        "telegram_url": telegram_url,
+        "discord_url": discord_url,
+        "facebook_url": facebook_url,
         "seo_keywords": seo_keywords,
         "footer_text": footer_text,
         "robots_txt": robots_txt
