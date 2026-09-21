@@ -1,0 +1,18 @@
+{% extends "public/base.html" %}
+
+{% block title %}404 - Level Not Found - {{ settings.site_name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 5rem 1.5rem; text-align: center;">
+  <div class="cyber-card" style="max-width: 600px; margin: 0 auto; padding: 3rem 2rem; border-color: var(--neon-purple);">
+    <div style="font-size: 4rem; font-weight: 900; color: var(--neon-purple); text-shadow: 0 0 20px var(--neon-purple); margin-bottom: 1rem;">
+      404
+    </div>
+    <h1 style="font-size: 1.75rem; font-weight: 800; color: #fff; margin-bottom: 1rem;">AREA OUT OF BOUNDS</h1>
+    <p style="color: var(--text-muted); line-height: 1.6; margin-bottom: 2rem;">
+      The requested URL or resource does not exist or has been moved to a new coordinate.
+    </p>
+    <a href="/" class="btn btn-primary">Return to Base (Home)</a>
+  </div>
+</div>
+{% endblock %}
