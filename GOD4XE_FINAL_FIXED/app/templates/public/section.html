@@ -1,0 +1,74 @@
+{% extends "public/base.html" %}
+
+{% block title %}{{ section.name }} - {{ settings.site_name }}{% endblock %}
+{% block meta_description %}{{ section.description or ('Browse ' ~ section.name ~ ' guides and updates.') }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
+  
+  <div class="cyber-card" style="padding: 2.5rem 2rem; margin-bottom: 3rem; text-align: center; border-color: var(--neon-purple);">
+    <div style="font-size: 3.5rem; margin-bottom: 0.75rem;">{{ section.icon }}</div>
+    <h1 style="font-size: 2.25rem; font-weight: 900; color: #fff; margin-bottom: 0.75rem;">{{ section.name }}</h1>
+    <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto; line-height: 1.6;">
+      {{ section.description or 'All official guides, configs, and updates for this category.' }}
+    </p>
+  </div>
+
+  <div class="section-header">
+    <h2 class="section-title"><span class="title-bar"></span> Section Archives ({{ total }})</h2>
+  </div>
+
+  {% if posts %}
+  <div class="posts-grid">
+    {% for post in posts %}
+    <article class="post-card cyber-card">
+      <a href="/post/{{ post.slug }}" class="post-thumb-link">
+        {% if post.thumbnail_url %}
+        <img src="{{ post.thumbnail_url }}" alt="{{ post.title }}" class="post-thumb-img" loading="lazy">
+        {% else %}
+        <div style="width: 100%; height: 100%; background: #120924; display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">{{ section.icon }}</div>
+        {% endif %}
+      </a>
+      <div class="post-content-box">
+        <div class="post-meta-row">
+          <span>📅 {{ post.published_at[:10] }}</span>
+          <span>👁️ {{ post.view_count }} views</span>
+        </div>
+        <h3 class="post-card-title">
+          <a href="/post/{{ post.slug }}">{{ post.title }}</a>
+        </h3>
+        <p class="post-excerpt">{{ post.summary or (post.content[:130] ~ '...') }}</p>
+        <div class="post-card-footer">
+          <a href="/post/{{ post.slug }}" class="read-more-link">Read Guide &rarr;</a>
+          {% if post.download_url %}
+          <span class="badge badge-success" style="font-size: 0.7rem;">Download</span>
+          {% endif %}
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+  {% if total_pages > 1 %}
+  <div style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 2rem;">
+    {% if has_prev %}
+    <a href="/section/{{ section.slug }}?page={{ page - 1 }}" class="btn btn-secondary btn-sm">&larr; Previous</a>
+    {% endif %}
+    <span style="display: flex; align-items: center; padding: 0 1rem; color: var(--text-dim); font-size: 0.9rem;">
+      Page {{ page }} of {{ total_pages }}
+    </span>
+    {% if has_next %}
+    <a href="/section/{{ section.slug }}?page={{ page + 1 }}" class="btn btn-secondary btn-sm">Next &rarr;</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="cyber-card" style="padding: 3rem; text-align: center; color: var(--text-muted);">
+    <p>No guides published in this section yet. Check back soon!</p>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

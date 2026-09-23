@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Admin Panel{% endblock %} - GOD4XE GAMING</title>
+  <link rel="icon" type="image/svg+xml" href="/static/images/favicon.svg">
+  <link rel="stylesheet" href="/static/css/admin.css">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<!-- Backdrop Overlay for Mobile Navigation Drawer -->
+<div id="admin-backdrop" class="admin-backdrop" aria-hidden="true"></div>
+
+<!-- Compact Mobile Topbar (Visible on mobile <= 768px only) -->
+<header class="admin-mobile-topbar">
+  <div class="admin-mobile-brand">GOD4XE <span>ADMIN</span></div>
+  <button id="admin-menu-toggle" class="admin-hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+</header>
+
+<div class="admin-layout">
+  
+  <!-- Sidebar / Slide-in Drawer on Mobile -->
+  <aside id="admin-sidebar" class="admin-sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo-text">GOD4XE <span>ADMIN</span></div>
+      <button id="admin-drawer-close" class="admin-drawer-close-btn" aria-label="Close navigation menu">&times;</button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="/admin" class="sidebar-link {% if active_nav == 'dashboard' %}active{% endif %}">
+        <span class="icon">📊</span> Dashboard
+      </a>
+      
+      <a href="/admin/tournaments" class="sidebar-link {% if active_nav == 'tournaments' %}active{% endif %}">
+        <span class="icon">🏆</span> Tournaments & Matches
+      </a>
+      {% if admin and (admin.role == 'SUPER_ADMIN' or admin.role == 'FINANCE_ADMIN') %}
+      <a href="/admin/deposits" class="sidebar-link {% if active_nav == 'deposits' %}active{% endif %}">
+        <span class="icon">💳</span> Deposit Requests
+      </a>
+      {% endif %}
+      <a href="/admin/redeem" class="sidebar-link {% if active_nav == 'redeem' %}active{% endif %}">
+        <span class="icon">🎁</span> Redeem Codes
+      </a>
+      {% if admin and admin.role == 'SUPER_ADMIN' %}
+      <a href="/admin/admins" class="sidebar-link {% if active_nav == 'admins' %}active{% endif %}">
+        <span class="icon">👥</span> Admin Accounts & RBAC
+      </a>
+      <a href="/admin/audit-logs" class="sidebar-link {% if active_nav == 'audit_logs' %}active{% endif %}">
+        <span class="icon">📜</span> Audit Logs
+      </a>
+      {% endif %}
+
+      <a href="/admin/posts" class="sidebar-link {% if active_nav == 'posts' %}active{% endif %}">
+        <span class="icon">📝</span> Posts / Articles
+      </a>
+      <a href="/admin/sections" class="sidebar-link {% if active_nav == 'sections' %}active{% endif %}">
+        <span class="icon">📁</span> Dynamic Sections
+      </a>
+      <a href="/admin/tags" class="sidebar-link {% if active_nav == 'tags' %}active{% endif %}">
+        <span class="icon">🏷️</span> Tags
+      </a>
+      <a href="/admin/media" class="sidebar-link {% if active_nav == 'media' %}active{% endif %}">
+        <span class="icon">🖼️</span> Media Library
+      </a>
+      <a href="/admin/youtube" class="sidebar-link {% if active_nav == 'youtube' %}active{% endif %}">
+        <span class="icon">▶️</span> YouTube Videos
+      </a>
+      <a href="/admin/ads" class="sidebar-link {% if active_nav == 'ads' %}active{% endif %}">
+        <span class="icon">💰</span> AdSense & Ads
+      </a>
+      <a href="/admin/settings" class="sidebar-link {% if active_nav == 'settings' %}active{% endif %}">
+        <span class="icon">⚙️</span> Site Settings & SEO
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="/" target="_blank" class="btn-sm btn-edit" style="width: 100%; justify-content: center; margin-bottom: 0.5rem;">
+        👁️ View Live Website
+      </a>
+      <form action="/admin/logout" method="POST" style="margin: 0;">
+        <input type="hidden" name="csrf_token" value="{{ admin.csrf_token if admin else '' }}">
+        <button type="submit" class="btn-sm btn-delete" style="width: 100%; justify-content: center;">
+          🚪 Log Out
+        </button>
+      </form>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="admin-main">
+    
+    <header class="admin-topbar">
+      <div class="admin-topbar-title">
+        {% block header_title %}Control Center{% endblock %}
+      </div>
+      <div class="admin-topbar-user">
+        <span>Logged in as: <strong style="color: var(--neon-purple);">{{ admin.username if admin else 'Admin' }}</strong></span>
+      </div>
+    </header>
+
+    <main class="admin-container">
+      {% if msg %}
+      <div class="alert alert-success">
+        <span>✓ {{ msg }}</span>
+      </div>
+      {% endif %}
+
+      {% if error %}
+      <div class="alert alert-error">
+        <span>⚠️ {{ error }}</span>
+      </div>
+      {% endif %}
+
+      {% block content %}{% endblock %}
+    </main>
+
+  </div>
+
+</div>
+
+<script src="/static/js/admin.js"></script>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

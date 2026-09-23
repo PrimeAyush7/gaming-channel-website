@@ -1,0 +1,22 @@
+# Core Framework & ASGI Server
+fastapi==0.115.0
+starlette==0.38.6
+uvicorn==0.30.6
+
+# Templating & Forms
+jinja2==3.1.6
+python-multipart==0.0.12
+
+# Media & Data Validation
+pillow==11.1.0
+pydantic>=1.10.14,<3.0.0
+
+# Database Driver
+psycopg2-binary==2.9.9
+
+# Cryptography & Security (RSA-SHA256 Token Verification)
+cryptography>=42.0.0,<44.0.0
+
+# Test Client & HTML Utilities
+httpx>=0.27.0
+beautifulsoup4==4.12.3
