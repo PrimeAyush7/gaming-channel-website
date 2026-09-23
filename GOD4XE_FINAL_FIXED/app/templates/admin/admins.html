@@ -1,0 +1,70 @@
+{% extends "admin/base.html" %}
+
+{% block header_title %}Admin Accounts & Role-Based Access Control{% endblock %}
+
+{% block content %}
+<div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+  <div class="card" style="background: rgba(18, 8, 35, 0.8); border: 1px solid rgba(168,85,247,0.3); border-radius: 12px; padding: 1.5rem; height: fit-content;">
+    <h3 style="color: #fff; font-size: 1.2rem; margin-bottom: 1rem;">Create Admin Account</h3>
+    <form action="/admin/admins/new" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ admin.csrf_token }}">
+
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label style="color: #fff; font-size: 0.85rem; display: block; margin-bottom: 0.3rem;">Username *</label>
+        <input type="text" name="username" required style="width: 100%; padding: 0.6rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 6px;">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label style="color: #fff; font-size: 0.85rem; display: block; margin-bottom: 0.3rem;">Temporary Password *</label>
+        <input type="password" name="password" required style="width: 100%; padding: 0.6rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 6px;">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label style="color: #fff; font-size: 0.85rem; display: block; margin-bottom: 0.3rem;">Admin Role *</label>
+        <select name="role" style="width: 100%; padding: 0.6rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 6px;">
+          <option value="TOURNAMENT_ADMIN">Tournament Admin (Matches & Results)</option>
+          <option value="FINANCE_ADMIN">Finance Admin (Deposits & Ledgers)</option>
+          <option value="SUPPORT_ADMIN">Support Admin (Tickets & Moderation)</option>
+          <option value="SUPER_ADMIN">Super Admin (Full System Control)</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.65rem; border-radius: 6px; font-weight: 600;">Create Admin User</button>
+    </form>
+  </div>
+
+  <div class="card" style="background: rgba(18, 8, 35, 0.6); border: 1px solid rgba(168,85,247,0.2); border-radius: 12px; overflow-x: auto;">
+    <h3 style="color: #fff; font-size: 1.2rem; padding: 1rem 1rem 0;">Active Administrators</h3>
+    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
+      <thead>
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--text-muted);">
+          <th style="padding: 1rem;">ID</th>
+          <th style="padding: 1rem;">Username</th>
+          <th style="padding: 1rem;">Role</th>
+          <th style="padding: 1rem;">Status</th>
+          <th style="padding: 1rem;">Last Login</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in admins_list %}
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #fff;">
+          <td style="padding: 1rem;">#{{ a.id }}</td>
+          <td style="padding: 1rem; font-weight: 600;">{{ a.username }}</td>
+          <td style="padding: 1rem;">
+            <span class="badge" style="background: rgba(168,85,247,0.2); color: #c084fc; border: 1px solid #a855f7;">
+              {{ a.role }}
+            </span>
+          </td>
+          <td style="padding: 1rem;">
+            <span style="color: {% if a.is_active == 1 %}#10b981{% else %}#ef4444{% endif %}; font-weight: 600;">
+              {% if a.is_active == 1 %}Active{% else %}Disabled{% endif %}
+            </span>
+          </td>
+          <td style="padding: 1rem; color: var(--text-muted);">{{ a.last_login or 'Never' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

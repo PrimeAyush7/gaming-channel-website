@@ -1,0 +1,91 @@
+{% extends "admin/base.html" %}
+
+{% block header_title %}Create Free Fire Tournament{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 800px; background: rgba(18, 8, 35, 0.8); border: 1px solid rgba(168,85,247,0.3); border-radius: 12px; padding: 2rem;">
+  <form action="/admin/tournaments/new" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ admin.csrf_token }}">
+
+    <div class="form-group" style="margin-bottom: 1.25rem;">
+      <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Tournament Title *</label>
+      <input type="text" name="title" required placeholder="e.g. Free Fire Bermuda Clash - Solo" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">
+    </div>
+
+    <div class="form-group" style="margin-bottom: 1.25rem;">
+      <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Banner Image URL</label>
+      <input type="text" name="banner_url" placeholder="/static/images/banners/banner1.jpg or external URL" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+      <div>
+        <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Mode</label>
+        <select name="mode" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">
+          <option value="SOLO">Solo</option>
+          <option value="DUO">Duo</option>
+          <option value="SQUAD">Squad</option>
+        </select>
+      </div>
+
+      <div>
+        <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Map</label>
+        <select name="map_name" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">
+          <option value="BERMUDA">Bermuda</option>
+          <option value="PURGATORY">Purgatory</option>
+          <option value="KALAHARI">Kalahari</option>
+          <option value="ALPINE">Alpine</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+      <div>
+        <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Entry Type *</label>
+        <select name="entry_type" id="entry_type_select" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">
+          <option value="FREE">FREE</option>
+          <option value="DIAMONDS">DIAMONDS</option>
+        </select>
+      </div>
+
+      <div>
+        <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Entry Fee (Diamonds)</label>
+        <input type="number" name="entry_fee_diamonds" id="entry_fee_input" value="0" min="0" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+      <div>
+        <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Prize Amount (Diamonds) *</label>
+        <input type="number" name="prize_amount_diamonds" value="1000" min="0" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">
+      </div>
+
+      <div>
+        <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Max Player Slots</label>
+        <input type="number" name="max_slots" value="48" min="2" max="100" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 1.25rem;">
+      <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Scheduled Start Time *</label>
+      <input type="datetime-local" name="start_time" required style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">
+    </div>
+
+    <div class="form-group" style="margin-bottom: 1.25rem;">
+      <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Tournament Description</label>
+      <textarea name="description" rows="3" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;"></textarea>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 1.5rem;">
+      <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Rules & Instructions</label>
+      <textarea name="rules" rows="4" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">1. Emulators strictly forbidden. Mobile players only.
+2. Teaming with opponents results in immediate disqualification.
+3. Room details will be revealed 10 minutes before start.</textarea>
+    </div>
+
+    <div style="display: flex; gap: 1rem;">
+      <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.8rem; border-radius: 8px; font-weight: 700;">Save & Publish Tournament</button>
+      <a href="/admin/tournaments" class="btn btn-outline" style="padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none;">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "admin/base.html" %}
+
+{% block header_title %}System Audit Logs{% endblock %}
+
+{% block content %}
+<div class="card" style="background: rgba(18, 8, 35, 0.6); border: 1px solid rgba(168,85,247,0.2); border-radius: 12px; overflow-x: auto;">
+  <div style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
+    <h3 style="color: #fff; font-size: 1.2rem; margin: 0;">Immutable Administrative Audit Trails</h3>
+    <span style="color: var(--text-muted); font-size: 0.85rem;">Showing latest 150 administrative actions</span>
+  </div>
+
+  <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
+    <thead>
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--text-muted);">
+        <th style="padding: 0.85rem;">Timestamp</th>
+        <th style="padding: 0.85rem;">Admin User</th>
+        <th style="padding: 0.85rem;">Role</th>
+        <th style="padding: 0.85rem;">Action</th>
+        <th style="padding: 0.85rem;">Resource</th>
+        <th style="padding: 0.85rem;">Target ID</th>
+        <th style="padding: 0.85rem;">IP Address</th>
+        <th style="padding: 0.85rem;">Details</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for log in logs %}
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #fff;">
+        <td style="padding: 0.85rem; color: var(--text-muted); font-size: 0.8rem;">{{ log.created_at }}</td>
+        <td style="padding: 0.85rem; font-weight: 600;">{{ log.admin_username }}</td>
+        <td style="padding: 0.85rem;">
+          <span class="badge" style="font-size: 0.75rem;">{{ log.role }}</span>
+        </td>
+        <td style="padding: 0.85rem; font-weight: 700; color: #c084fc;">{{ log.action }}</td>
+        <td style="padding: 0.85rem; color: var(--text-muted);">{{ log.resource }}</td>
+        <td style="padding: 0.85rem; font-family: monospace;">#{{ log.resource_id or '-' }}</td>
+        <td style="padding: 0.85rem; color: var(--text-muted); font-size: 0.8rem;">{{ log.ip_address }}</td>
+        <td style="padding: 0.85rem; font-size: 0.8rem; color: var(--text-muted); max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+          {{ log.after_state or log.before_state or '-' }}
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="8" style="padding: 2rem; text-align: center; color: var(--text-muted);">No audit logs recorded yet.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
