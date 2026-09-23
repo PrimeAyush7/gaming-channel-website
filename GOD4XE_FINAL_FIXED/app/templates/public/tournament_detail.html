@@ -1,0 +1,94 @@
+{% extends "public/base.html" %}
+
+{% block title %}{{ tournament.title }} - Free Fire Tournament{% endblock %}
+{% block meta_description %}{{ tournament.description[:150] if tournament.description else 'Join Free Fire tournament on GOD4XE ESPORTS.' }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2rem; padding-bottom: 4rem; max-width: 900px;">
+
+  <div style="margin-bottom: 1.5rem;">
+    <a href="/tournaments" style="color: var(--neon-purple); text-decoration: none; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 0.3rem;">
+      ← Back to All Tournaments
+    </a>
+  </div>
+
+  <div class="card" style="background: rgba(18, 8, 35, 0.85); border: 1px solid rgba(168,85,247,0.3); border-radius: 16px; overflow: hidden; padding: 0;">
+    {% if tournament.banner_url %}
+    <img src="{{ tournament.banner_url }}" alt="{{ tournament.title }}" style="width: 100%; max-height: 320px; object-fit: cover;">
+    {% endif %}
+
+    <div style="padding: 2rem;">
+      <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
+        <span class="badge" style="{% if tournament.status == 'LIVE' %}background: #ef4444;{% elif tournament.status == 'UPCOMING' %}background: #10b981;{% else %}background: #6b7280;{% endif %} color: #fff;">
+          {{ tournament.status }}
+        </span>
+        <span class="badge" style="background: rgba(168,85,247,0.2); color: #c084fc;">
+          {{ tournament.game }} • {{ tournament.mode }} • {{ tournament.map_name }}
+        </span>
+      </div>
+
+      <h1 style="font-size: 2rem; font-weight: 800; color: #fff; margin-bottom: 1rem;">{{ tournament.title }}</h1>
+      
+      <p style="color: var(--text-muted); font-size: 1.05rem; line-height: 1.7; margin-bottom: 2rem;">
+        {{ tournament.description or 'Official competitive Free Fire custom match hosted on GOD4XE ESPORTS platform.' }}
+      </p>
+
+      <!-- Key Details Cards -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <div style="background: rgba(0,0,0,0.4); padding: 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.06);">
+          <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Entry Fee</div>
+          <div style="font-size: 1.2rem; font-weight: 700; color: {% if tournament.entry_type == 'FREE' %}#10b981{% else %}#c084fc{% endif %}; margin-top: 0.25rem;">
+            {% if tournament.entry_type == 'FREE' %}FREE ENTRY{% else %}💎 {{ tournament.entry_fee_diamonds }} Diamonds{% endif %}
+          </div>
+        </div>
+
+        <div style="background: rgba(0,0,0,0.4); padding: 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.06);">
+          <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Total Prize Pool</div>
+          <div style="font-size: 1.2rem; font-weight: 700; color: #fbbf24; margin-top: 0.25rem;">
+            💎 {{ tournament.prize_amount_diamonds }} Diamonds
+          </div>
+        </div>
+
+        <div style="background: rgba(0,0,0,0.4); padding: 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.06);">
+          <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Registered Players</div>
+          <div style="font-size: 1.2rem; font-weight: 700; color: #fff; margin-top: 0.25rem;">
+            {{ tournament.joined_players }} / {{ tournament.max_slots }} Slots
+          </div>
+        </div>
+
+        <div style="background: rgba(0,0,0,0.4); padding: 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.06);">
+          <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Match Schedule</div>
+          <div style="font-size: 1rem; font-weight: 600; color: #fff; margin-top: 0.25rem;">
+            {{ tournament.start_time[:16].replace('T', ' ') if tournament.start_time else 'TBA' }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Rules & Instructions -->
+      {% if tournament.rules %}
+      <div style="background: rgba(0,0,0,0.3); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
+        <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 0.75rem;">📜 Tournament Rules</h3>
+        <div style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.7; white-space: pre-line;">
+          {{ tournament.rules }}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Android App Entry Callout -->
+      <div style="background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(30,10,50,0.4)); border: 1px solid #a855f7; border-radius: 12px; padding: 1.75rem; text-align: center;">
+        <h3 style="color: #fff; font-size: 1.3rem; margin-bottom: 0.5rem;">Join This Match from the App</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.25rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+          To secure your slot, enter your Free Fire UID & IGN, and receive your custom Room ID & Password, install the official GOD4XE ESPORTS Android app.
+        </p>
+        <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+          <a href="/static/downloads/god4xe_esports.apk" class="btn btn-primary" style="background: linear-gradient(135deg, #a855f7, #7c3aed); color: #fff; padding: 0.8rem 1.8rem; border-radius: 8px; font-weight: 700; text-decoration: none;">
+            Download Android APK (v1.0.0)
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

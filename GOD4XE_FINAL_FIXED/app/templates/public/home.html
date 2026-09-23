@@ -1,0 +1,213 @@
+{% extends "public/base.html" %}
+
+{% block content %}
+<div class="container">
+  
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-grid">
+      <div class="hero-text-col">
+        <div class="hero-badge">
+          <span class="pulse-dot"></span> LIVE CONTENT UPDATE
+        </div>
+        <h1 class="hero-title">
+          DOMINATE THE LOBBY WITH <span class="gradient-text">PRO CONFIGS</span> & GUIDES
+        </h1>
+        <p class="hero-desc">
+          Official gaming hub featuring battle-tested sensitivity configs, patch updates, mechanical guides, and tournament-ready downloads.
+        </p>
+
+        <!-- Search Form -->
+        <form action="/search" method="GET" class="hero-search-box">
+          <input type="text" name="q" placeholder="Search sensitivity, OB updates, configs..." required>
+          <button type="submit" class="btn btn-primary">Find Guide</button>
+        </form>
+      </div>
+
+      <!-- Featured YouTube Video or Post Highlight -->
+      <div class="hero-media-col">
+        {% if featured_video %}
+        <div class="featured-video-card cyber-card">
+          <div class="video-responsive-wrapper">
+            <iframe 
+              src="https://www.youtube-nocookie.com/embed/{{ featured_video.youtube_id }}" 
+              title="{{ featured_video.title }}" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+              allowfullscreen>
+            </iframe>
+          </div>
+          <div class="video-card-footer">
+            <div class="video-card-title">{{ featured_video.title }}</div>
+            {% if settings.youtube_channel_url %}
+            <a href="{{ settings.youtube_channel_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" data-track-youtube="1">Watch More</a>
+            {% endif %}
+          </div>
+        </div>
+        {% elif featured_post and featured_post.thumbnail_url %}
+        <div class="featured-video-card cyber-card">
+          <a href="/post/{{ featured_post.slug }}" class="video-responsive-wrapper" style="display: block;">
+            <img src="{{ featured_post.thumbnail_url }}" alt="{{ featured_post.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+          </a>
+          <div class="video-card-footer">
+            <div class="video-card-title">{{ featured_post.title }}</div>
+            <a href="/post/{{ featured_post.slug }}" class="btn btn-primary btn-sm">Read Now</a>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <!-- Dynamic Sections Rail -->
+  <section class="sections-rail-wrapper">
+    <div class="section-rail">
+      {% for sec in nav_sections %}
+      <a href="/section/{{ sec.slug }}" class="section-chip cyber-card">
+        <div class="chip-icon">{{ sec.icon }}</div>
+        <div class="chip-name">{{ sec.name }}</div>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Safe Homepage Top Ad Placement -->
+  {% if ads and ads.is_enabled and ads.client_id and ads.slot_home_top %}
+  <div class="ad-slot-wrapper">
+    <span class="ad-label">Sponsored Advertisement</span>
+    <div class="ad-container-responsive">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="{{ ads.client_id }}"
+           data-ad-slot="{{ ads.slot_home_top }}"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Latest Posts Section -->
+  <section style="margin-bottom: 3.5rem;">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span class="title-bar"></span> LATEST ARTICLES & CONFIGS
+      </h2>
+      <a href="/search" class="btn btn-secondary btn-sm">View All Guides &rarr;</a>
+    </div>
+
+    {% if posts %}
+    <div class="posts-grid">
+      {% for post in posts %}
+      <article class="post-card cyber-card">
+        <a href="/post/{{ post.slug }}" class="post-thumb-link">
+          {% if post.thumbnail_url %}
+          <img src="{{ post.thumbnail_url }}" alt="{{ post.title }}" class="post-thumb-img" loading="lazy">
+          {% else %}
+          <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #1f113d, #0d0722); display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">🎮</div>
+          {% endif %}
+          {% if post.section_name %}
+          <span class="post-badge">{{ post.section_name }}</span>
+          {% endif %}
+        </a>
+
+        <div class="post-content-box">
+          <div class="post-meta-row">
+            <span>📅 {{ post.published_at[:10] }}</span>
+            <span>👁️ {{ post.view_count }} views</span>
+          </div>
+
+          <h3 class="post-card-title">
+            <a href="/post/{{ post.slug }}">{{ post.title }}</a>
+          </h3>
+
+          <p class="post-excerpt">
+            {{ post.summary or (post.content[:130] ~ '...') }}
+          </p>
+
+          <div class="post-card-footer">
+            <a href="/post/{{ post.slug }}" class="read-more-link">
+              Read Guide
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </a>
+            {% if post.download_url %}
+            <span class="badge badge-success" style="font-size: 0.7rem;">Download Available</span>
+            {% endif %}
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="cyber-card" style="padding: 3rem; text-align: center; color: var(--text-muted);">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">🎮</div>
+      <h3>No Posts Published Yet</h3>
+      <p>Content will appear here as soon as published via the admin panel.</p>
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- Popular Posts Section -->
+  {% if popular_posts %}
+  <section style="margin-bottom: 3.5rem;">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span class="title-bar"></span> COMMUNITY FAVORITES
+      </h2>
+    </div>
+
+    <div class="posts-grid">
+      {% for post in popular_posts %}
+      <article class="post-card cyber-card">
+        <a href="/post/{{ post.slug }}" class="post-thumb-link">
+          {% if post.thumbnail_url %}
+          <img src="{{ post.thumbnail_url }}" alt="{{ post.title }}" class="post-thumb-img" loading="lazy">
+          {% else %}
+          <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #1f113d, #0d0722); display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">🔥</div>
+          {% endif %}
+          {% if post.section_name %}
+          <span class="post-badge">{{ post.section_name }}</span>
+          {% endif %}
+        </a>
+
+        <div class="post-content-box">
+          <div class="post-meta-row">
+            <span>🔥 Popular</span>
+            <span>👁️ {{ post.view_count }} views</span>
+          </div>
+
+          <h3 class="post-card-title">
+            <a href="/post/{{ post.slug }}">{{ post.title }}</a>
+          </h3>
+
+          <p class="post-excerpt">
+            {{ post.summary or (post.content[:120] ~ '...') }}
+          </p>
+
+          <div class="post-card-footer">
+            <a href="/post/{{ post.slug }}" class="read-more-link">Get Details &rarr;</a>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Safe Homepage Bottom Ad Placement -->
+  {% if ads and ads.is_enabled and ads.client_id and ads.slot_home_bottom %}
+  <div class="ad-slot-wrapper">
+    <span class="ad-label">Sponsored Advertisement</span>
+    <div class="ad-container-responsive">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="{{ ads.client_id }}"
+           data-ad-slot="{{ ads.slot_home_bottom }}"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

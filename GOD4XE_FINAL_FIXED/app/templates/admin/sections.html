@@ -1,0 +1,109 @@
+{% extends "admin/base.html" %}
+
+{% block header_title %}Dynamic Sections & Categories{% endblock %}
+
+{% block content %}
+<div class="admin-two-col-grid">
+  
+  <!-- Add New Section Form -->
+  <div class="admin-card">
+    <div class="admin-card-header">
+      <div class="admin-card-title">➕ Add New Section</div>
+    </div>
+    
+    <p style="font-size: 0.825rem; color: var(--admin-muted); margin-bottom: 1.25rem;">
+      When a new update or category arrives (e.g. OB53 UPDATE), add it here. The website navigation updates automatically without code changes!
+    </p>
+
+    <form action="/admin/sections/new" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ admin.csrf_token }}">
+
+      <div class="form-group">
+        <label class="form-label" for="name">Section Name *</label>
+        <input type="text" id="name" name="name" class="form-control" placeholder="e.g. OB53 UPDATE" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="slug">Slug (Auto if empty)</label>
+        <input type="text" id="slug" name="slug" class="form-control" placeholder="ob53-update">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="icon">Icon / Emoji</label>
+        <input type="text" id="icon" name="icon" value="🎮" class="form-control" placeholder="⚡, 🔥, 🚀, 👑, 🎯">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="sort_order">Sort Order (Lower appears first)</label>
+        <input type="number" id="sort_order" name="sort_order" value="0" class="form-control">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="description">Short Description</label>
+        <textarea id="description" name="description" class="form-control" style="min-height: 80px;" placeholder="Brief description of this game category..."></textarea>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1.5rem;">
+        <label class="toggle-label">
+          <input type="checkbox" name="is_nav_visible" value="1" checked>
+          <span>Show in Header Navigation</span>
+        </label>
+      </div>
+
+      <button type="submit" class="btn-admin-primary" style="width: 100%; justify-content: center;">
+        Create Section
+      </button>
+    </form>
+  </div>
+
+  <!-- Existing Sections List -->
+  <div class="admin-card">
+    <div class="admin-card-header">
+      <div class="admin-card-title">Configured Sections ({{ sections | length }})</div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Icon</th>
+            <th>Name & Slug</th>
+            <th>Nav Visible</th>
+            <th>Order</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for sec in sections %}
+          <tr>
+            <td style="font-size: 1.5rem;">{{ sec.icon }}</td>
+            <td>
+              <div style="font-weight: 700; color: #fff;">{{ sec.name }}</div>
+              <div style="font-size: 0.75rem; color: var(--admin-dim);">/section/{{ sec.slug }}</div>
+            </td>
+            <td>
+              {% if sec.is_nav_visible %}
+              <span class="badge badge-success">Visible</span>
+              {% else %}
+              <span class="badge badge-warning">Hidden</span>
+              {% endif %}
+            </td>
+            <td>{{ sec.sort_order }}</td>
+            <td>
+              <div style="display: flex; gap: 0.4rem;">
+                <a href="/section/{{ sec.slug }}" target="_blank" class="btn-sm btn-edit" title="Preview Live">👁️</a>
+                <form action="/admin/sections/delete/{{ sec.id }}" method="POST" style="display: inline;">
+                  <input type="hidden" name="csrf_token" value="{{ admin.csrf_token }}">
+                  <button type="submit" class="btn-sm btn-delete" data-confirm="Are you sure you want to delete this section?">Delete</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
