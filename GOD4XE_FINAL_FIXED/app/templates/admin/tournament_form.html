@@ -1,0 +1,93 @@
+{% extends "admin/base.html" %}
+
+{% block header_title %}Create Free Fire Tournament{% endblock %}
+
+{% block content %}
+<div class="admin-card" style="max-width: 800px;">
+  <form action="/admin/tournaments/new" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ admin.csrf_token }}">
+
+    <div class="form-group">
+      <label class="form-label" for="title">Tournament Title *</label>
+      <input type="text" id="title" name="title" required placeholder="e.g. Free Fire Bermuda Clash - Solo" class="form-control">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="banner_url">Banner Image URL</label>
+      <input type="text" id="banner_url" name="banner_url" placeholder="/static/images/banners/banner1.jpg or external URL" class="form-control">
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="mode">Mode</label>
+        <select id="mode" name="mode" class="form-control">
+          <option value="SOLO">Solo</option>
+          <option value="DUO">Duo</option>
+          <option value="SQUAD">Squad</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="map_name">Map</label>
+        <select id="map_name" name="map_name" class="form-control">
+          <option value="BERMUDA">Bermuda</option>
+          <option value="PURGATORY">Purgatory</option>
+          <option value="KALAHARI">Kalahari</option>
+          <option value="ALPINE">Alpine</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="entry_type_select">Entry Type *</label>
+        <select name="entry_type" id="entry_type_select" class="form-control">
+          <option value="FREE">FREE</option>
+          <option value="DIAMONDS">DIAMONDS</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="entry_fee_input">Entry Fee (Diamonds)</label>
+        <input type="number" name="entry_fee_diamonds" id="entry_fee_input" value="0" min="0" class="form-control">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="prize_amount_diamonds">Prize Amount (Diamonds) *</label>
+        <input type="number" id="prize_amount_diamonds" name="prize_amount_diamonds" value="1000" min="0" class="form-control">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="max_slots">Max Player Slots</label>
+        <input type="number" id="max_slots" name="max_slots" value="48" min="2" max="100" class="form-control">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="start_time">Scheduled Start Time *</label>
+      <input type="datetime-local" id="start_time" name="start_time" required class="form-control">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="description">Tournament Description</label>
+      <textarea id="description" name="description" rows="3" class="form-control"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="rules">Rules & Instructions</label>
+      <textarea id="rules" name="rules" rows="4" class="form-control">1. Emulators strictly forbidden. Mobile players only.
+2. Teaming with opponents results in immediate disqualification.
+3. Room details will be revealed 10 minutes before start.</textarea>
+    </div>
+
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem;">
+      <button type="submit" class="btn-admin-primary">
+        💾 Save &amp; Publish Tournament
+      </button>
+      <a href="/admin/tournaments" class="btn-sm btn-edit" style="padding: 0.75rem 1.25rem; text-decoration: none;">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

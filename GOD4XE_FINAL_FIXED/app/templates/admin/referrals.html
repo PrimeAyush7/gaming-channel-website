@@ -1,0 +1,245 @@
+{% extends "admin/base.html" %}
+
+{% block header_title %}Referral System & Dynamic Ranking Console{% endblock %}
+
+{% block content %}
+<!-- Top Metrics Cards -->
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+  <div class="stat-card">
+    <div class="stat-icon-wrapper" style="color: #c084fc; background: rgba(168, 85, 247, 0.15);">👥</div>
+    <div>
+      <div class="stat-value">{{ total_refs }}</div>
+      <div class="stat-label">Total Referrals Recorded</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon-wrapper" style="color: #10b981; background: rgba(16, 185, 129, 0.15);">✓</div>
+    <div>
+      <div class="stat-value">{{ successful_refs }}</div>
+      <div class="stat-label">Valid Successful Referrals</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon-wrapper" style="color: #ef4444; background: rgba(239, 68, 68, 0.15);">✕</div>
+    <div>
+      <div class="stat-value">{{ invalid_refs }}</div>
+      <div class="stat-label">Invalidated / Reversed</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon-wrapper" style="color: #fbbf24; background: rgba(251, 191, 36, 0.15);">👑</div>
+    <div>
+      <div class="stat-value">{{ ranks | length }}</div>
+      <div class="stat-label">Active Rank Tiers</div>
+    </div>
+  </div>
+</div>
+
+<!-- Two-Column Section: Rank Threshold Configuration & Info -->
+<div class="admin-two-col-grid" style="margin-bottom: 2rem;">
+  <!-- Configure Rank Thresholds Form -->
+  <div class="admin-card">
+    <div class="admin-card-header">
+      <div class="admin-card-title">⚙️ Configure Referral Rank Thresholds</div>
+    </div>
+    <p style="color: var(--admin-muted); font-size: 0.85rem; line-height: 1.5; margin-bottom: 1.25rem;">
+      Adjust minimum and maximum referral counts required for each tier. Ranks update dynamically across Website and Android app immediately.
+    </p>
+
+    <form action="/admin/referrals/ranks" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ admin.csrf_token }}">
+
+      <div class="form-group">
+        <label class="form-label">ROOKIE Rank Max Referrals (Tier 1)</label>
+        <input type="number" name="rank_rookie_max" value="9" min="1" max="99" class="form-control" required>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">PRO Min</label>
+          <input type="number" name="rank_pro_min" value="10" min="2" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">PRO Max</label>
+          <input type="number" name="rank_pro_max" value="24" min="3" class="form-control" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">ELITE Min</label>
+          <input type="number" name="rank_elite_min" value="25" min="4" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">ELITE Max</label>
+          <input type="number" name="rank_elite_max" value="49" min="5" class="form-control" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">MASTER Min</label>
+          <input type="number" name="rank_master_min" value="50" min="6" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">MASTER Max</label>
+          <input type="number" name="rank_master_max" value="99" min="7" class="form-control" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">LEGEND Min (Tier 5 - No Upper Limit)</label>
+        <input type="number" name="rank_legend_min" value="100" min="8" class="form-control" required>
+      </div>
+
+      <button type="submit" class="btn-admin-primary" style="width: 100%; justify-content: center; margin-top: 1rem;">
+        💾 Save Rank Thresholds
+      </button>
+    </form>
+  </div>
+
+  <!-- Active Rank Tiers Table -->
+  <div class="admin-card">
+    <div class="admin-card-header">
+      <div class="admin-card-title">Active Referral Rank Tiers</div>
+    </div>
+    <div class="table-responsive">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Required Referrals</th>
+            <th>Badge</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in ranks %}
+          <tr>
+            <td><strong style="color: #fff;">{{ r.name }}</strong></td>
+            <td>
+              {% if r.max_referrals %}
+                {{ r.min_referrals }} – {{ r.max_referrals }} referrals
+              {% else %}
+                {{ r.min_referrals }}+ referrals
+              {% endif %}
+            </td>
+            <td>
+              <span class="badge" style="background: rgba(255,255,255,0.08); color: {{ r.badge_color }}; border: 1px solid {{ r.badge_color }};">
+                {{ r.name }}
+              </span>
+            </td>
+            <td>
+              <span style="color: #10b981; font-weight: 600;">Active</span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Search & Filtering Header -->
+<div class="admin-card">
+  <div class="admin-card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <div class="admin-card-title">Referral Records &amp; Attribution Logs</div>
+      <p style="color: var(--admin-muted); font-size: 0.85rem; margin-top: 0.25rem;">
+        View referrers, referees, dynamic rankings, and manage invalidation actions.
+      </p>
+    </div>
+
+    <!-- Filter Form -->
+    <form action="/admin/referrals" method="GET" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+      <input type="text" name="search" value="{{ search_query }}" placeholder="Search username / code..." class="form-control" style="width: 200px; padding: 0.4rem 0.75rem; font-size: 0.85rem;">
+      <select name="status" class="form-control" style="width: 140px; padding: 0.4rem 0.75rem; font-size: 0.85rem;">
+        <option value="">All Statuses</option>
+        <option value="SUCCESSFUL" {% if status_filter == 'SUCCESSFUL' %}selected{% endif %}>SUCCESSFUL</option>
+        <option value="INVALID" {% if status_filter == 'INVALID' %}selected{% endif %}>INVALID</option>
+      </select>
+      <button type="submit" class="btn-sm btn-edit" style="padding: 0.4rem 0.85rem;">Filter</button>
+      {% if search_query or status_filter %}
+      <a href="/admin/referrals" class="btn-sm btn-delete" style="padding: 0.4rem 0.85rem; text-decoration: none;">Clear</a>
+      {% endif %}
+    </form>
+  </div>
+
+  <div class="table-responsive">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Referrer Player</th>
+          <th>Referrer Live Stats</th>
+          <th>Referred Player</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ref in referrals %}
+        <tr>
+          <td>#{{ ref.id }}</td>
+          <td>
+            <strong style="color: #fff;">{{ ref.referrer_username }}</strong><br>
+            <span style="color: var(--neon-violet); font-family: monospace; font-size: 0.8rem;">Code: {{ ref.referrer_code }}</span><br>
+            <span style="color: var(--admin-muted); font-size: 0.75rem;">{{ ref.referrer_email or ref.referrer_phone or '' }}</span>
+          </td>
+          <td>
+            <div>Count: <strong style="color: #fbbf24;">{{ ref.referrer_successful_count }}</strong></div>
+            <div style="margin-top: 0.2rem;">
+              <span class="badge" style="background: rgba(255,255,255,0.08); color: {{ ref.referrer_badge_color }}; border: 1px solid {{ ref.referrer_badge_color }}; font-size: 0.75rem;">
+                {{ ref.referrer_current_rank }}
+              </span>
+            </div>
+          </td>
+          <td>
+            <strong style="color: #fff;">{{ ref.referee_username }}</strong><br>
+            <span style="color: var(--admin-muted); font-size: 0.75rem;">Registered: {{ ref.referee_registered_at[:10] if ref.referee_registered_at else '-' }}</span>
+          </td>
+          <td style="color: var(--admin-muted); font-size: 0.85rem; white-space: nowrap;">
+            {{ ref.created_at[:16] if ref.created_at else '-' }}
+          </td>
+          <td>
+            {% if ref.status == 'SUCCESSFUL' %}
+            <span class="badge" style="background: #10b981; color: #fff;">✓ SUCCESSFUL</span>
+            {% else %}
+            <span class="badge" style="background: #ef4444; color: #fff;">✕ INVALID</span>
+            {% if ref.invalidation_reason %}
+            <div style="color: var(--admin-dim); font-size: 0.7rem; margin-top: 0.25rem; max-width: 140px; word-break: break-all;">
+              {{ ref.invalidation_reason }}
+            </div>
+            {% endif %}
+            {% endif %}
+          </td>
+          <td>
+            {% if ref.status == 'SUCCESSFUL' %}
+            <form action="/admin/referrals/{{ ref.id }}/invalidate" method="POST" style="margin: 0; display: inline-block;">
+              <input type="hidden" name="csrf_token" value="{{ admin.csrf_token }}">
+              <input type="hidden" name="reason" value="Administratively invalidated (suspicious referral)">
+              <button type="submit" class="btn-sm btn-delete" data-confirm="Invalidate this referral? This will immediately reduce the referrer's count and rank if below threshold.">
+                Invalidate
+              </button>
+            </form>
+            {% else %}
+            <span style="color: var(--admin-dim); font-size: 0.8rem;">Reversed</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="7" style="padding: 2.5rem; text-align: center; color: var(--admin-muted);">
+            No referral records found matching query.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

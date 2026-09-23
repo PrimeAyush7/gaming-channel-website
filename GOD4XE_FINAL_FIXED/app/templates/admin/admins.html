@@ -1,0 +1,80 @@
+{% extends "admin/base.html" %}
+
+{% block header_title %}Admin Accounts & Role-Based Access Control{% endblock %}
+
+{% block content %}
+<div class="admin-two-col-grid">
+  <!-- Create Admin Account Form -->
+  <div class="admin-card">
+    <div class="admin-card-header">
+      <div class="admin-card-title">➕ Create Admin Account</div>
+    </div>
+    <form action="/admin/admins/new" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ admin.csrf_token }}">
+
+      <div class="form-group">
+        <label class="form-label" for="admin_username">Username *</label>
+        <input type="text" id="admin_username" name="username" required class="form-control" placeholder="e.g. tournament_lead">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="admin_password">Temporary Password *</label>
+        <input type="password" id="admin_password" name="password" required class="form-control" placeholder="Min 6 characters">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="admin_role">Admin Role *</label>
+        <select id="admin_role" name="role" class="form-control">
+          <option value="TOURNAMENT_ADMIN">Tournament Admin (Matches & Results)</option>
+          <option value="FINANCE_ADMIN">Finance Admin (Deposits & Ledgers)</option>
+          <option value="SUPPORT_ADMIN">Support Admin (Tickets & Moderation)</option>
+          <option value="SUPER_ADMIN">Super Admin (Full System Control)</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn-admin-primary" style="width: 100%; justify-content: center; margin-top: 1rem;">
+        Create Admin User
+      </button>
+    </form>
+  </div>
+
+  <!-- Active Administrators List -->
+  <div class="admin-card">
+    <div class="admin-card-header">
+      <div class="admin-card-title">Active Administrators ({{ admins_list | length }})</div>
+    </div>
+    <div class="table-responsive">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Last Login</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in admins_list %}
+          <tr>
+            <td>#{{ a.id }}</td>
+            <td style="font-weight: 600; color: #fff;">{{ a.username }}</td>
+            <td>
+              <span class="badge badge-purple">
+                {{ a.role }}
+              </span>
+            </td>
+            <td>
+              <span style="color: {% if a.is_active == 1 %}#10b981{% else %}#ef4444{% endif %}; font-weight: 600;">
+                {% if a.is_active == 1 %}Active{% else %}Disabled{% endif %}
+              </span>
+            </td>
+            <td style="color: var(--admin-muted);">{{ a.last_login or 'Never' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
