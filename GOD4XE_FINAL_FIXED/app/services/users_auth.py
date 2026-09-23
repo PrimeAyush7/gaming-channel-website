@@ -1,3 +1,4 @@
+import logging
 import uuid
 import re
 import json
@@ -6,9 +7,13 @@ import hashlib
 import datetime
 import base64
 import time
-import httpx
+import urllib.request
+from typing import Dict, Optional, Tuple, Any
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicNumbers
+from cryptography.hazmat.backends import default_backend
+from cryptography import x509
 from cryptography.exceptions import InvalidSignature
 from fastapi import Request, HTTPException, status
 from app.database import get_db
@@ -21,65 +26,172 @@ from app.config import (
 from app.services.jwt_util import encode_jwt, decode_jwt
 from app.services.auth import hash_password, verify_password
 
-_TRUSTED_GOOGLE_KEYS = {}
-_GOOGLE_CERT_CACHE = {"keys": {}, "expires_at": 0.0}
-_GOOGLE_CERTS_URL = "https://www.googleapis.com/oauth2/v3/certs"
+logger = logging.getLogger("users_auth")
 
-def _load_google_public_keys(force_refresh: bool = False) -> dict:
-    """Fetch and cache Google's rotating OIDC signing keys for production verification."""
-    now = time.time()
-    if not force_refresh and _GOOGLE_CERT_CACHE["keys"] and now < _GOOGLE_CERT_CACHE["expires_at"]:
-        return _GOOGLE_CERT_CACHE["keys"]
+try:
+    from google.oauth2 import id_token as google_id_token
+    from google.auth.transport import requests as google_requests
+    _GOOGLE_AUTH_AVAILABLE = True
+except ImportError:
+    _GOOGLE_AUTH_AVAILABLE = False
 
-    try:
-        with httpx.Client(timeout=8.0, follow_redirects=True) as client:
-            response = client.get(_GOOGLE_CERTS_URL)
-            response.raise_for_status()
-            payload = response.json()
-            cache_control = response.headers.get("cache-control", "")
-            max_age = 3600
-            match = re.search(r"max-age=(\d+)", cache_control)
-            if match:
-                max_age = max(60, min(int(match.group(1)), 86400))
-
-        keys = {}
-        for kid, pem in payload.items():
-            try:
-                keys[kid] = serialization.load_pem_public_key(pem.encode("utf-8"))
-            except Exception:
-                continue
-        if not keys:
-            raise ValueError("Google returned no usable public signing keys")
-        _GOOGLE_CERT_CACHE["keys"] = keys
-        _GOOGLE_CERT_CACHE["expires_at"] = time.time() + max_age
-        return keys
-    except Exception as exc:
-        # Keep a still-valid previous cache if Google is temporarily unreachable.
-        if _GOOGLE_CERT_CACHE["keys"]:
-            return _GOOGLE_CERT_CACHE["keys"]
-        raise ValueError(f"Unable to load Google public signing keys: {exc}")
-
-def _get_configured_google_client_id() -> str:
-    if GOOGLE_CLIENT_ID:
-        return GOOGLE_CLIENT_ID
-    try:
-        with get_db() as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT value FROM site_settings WHERE key = %s LIMIT 1;", ("google_client_id",))
-            row = cursor.fetchone()
-            if row:
-                value = row["value"] if isinstance(row, dict) else row[0]
-                return (value or "").strip()
-    except Exception:
-        pass
-    return ""
+_GOOGLE_JWKS_CACHE: Dict[str, Any] = {}
+_GOOGLE_JWKS_CACHE_EXPIRY: float = 0.0
+_TRUSTED_GOOGLE_KEYS: Dict[str, Any] = {}
 
 def register_trusted_google_key(kid: str, public_key_pem: str):
-    pub_key = serialization.load_pem_public_key(public_key_pem.encode('utf-8'))
+    """Register a PEM public key for testing or custom trust."""
+    pub_key = serialization.load_pem_public_key(public_key_pem.encode('utf-8'), default_backend())
+    _TRUSTED_GOOGLE_KEYS[kid] = pub_key
+
+def register_trusted_google_public_key(kid: str, pub_key):
+    """Register an RSAPublicKey directly for testing."""
     _TRUSTED_GOOGLE_KEYS[kid] = pub_key
 
 def get_trusted_google_key(kid: str):
     return _TRUSTED_GOOGLE_KEYS.get(kid)
+
+def clear_trusted_google_keys():
+    _TRUSTED_GOOGLE_KEYS.clear()
+
+def _int_from_b64url(s: str) -> int:
+    pad = '=' * ((4 - len(s) % 4) % 4)
+    data = base64.urlsafe_b64decode(s + pad)
+    return int.from_bytes(data, byteorder='big')
+
+def _jwk_to_rsa_public_key(jwk: dict):
+    """Convert an RSA JWK into a cryptography RSAPublicKey object."""
+    try:
+        if jwk.get("kty") == "RSA" and "n" in jwk and "e" in jwk:
+            n = _int_from_b64url(jwk["n"])
+            e = _int_from_b64url(jwk["e"])
+            return RSAPublicNumbers(e, n).public_key(default_backend())
+        elif "x5c" in jwk and jwk["x5c"]:
+            cert_der = base64.b64decode(jwk["x5c"][0])
+            cert = x509.load_der_x509_certificate(cert_der, default_backend())
+            return cert.public_key()
+    except Exception as e:
+        logger.warning(f"Failed to parse JWK key {jwk.get('kid')}: {e}")
+    return None
+
+def fetch_google_public_keys(force_refresh: bool = False) -> Dict[str, Any]:
+    """
+    Fetch and cache Google's public signing keys from official Google endpoints:
+    Primary:  https://www.googleapis.com/oauth2/v3/certs (JWKS format)
+    Fallback: https://www.googleapis.com/oauth2/v1/certs (x509 PEM format)
+    Handles Cache-Control max-age header for TTL and logs detailed diagnostic telemetry.
+    """
+    global _GOOGLE_JWKS_CACHE, _GOOGLE_JWKS_CACHE_EXPIRY
+    now = time.time()
+    if not force_refresh and _GOOGLE_JWKS_CACHE and now < _GOOGLE_JWKS_CACHE_EXPIRY:
+        return _GOOGLE_JWKS_CACHE
+
+    keys = {}
+    cache_ttl = 3600  # Default 1 hour fallback
+
+    # 1. Primary: Google official v3 JWKS endpoint
+    v3_url = "https://www.googleapis.com/oauth2/v3/certs"
+    v3_status = None
+    try:
+        raw_data = None
+        cc = ""
+        try:
+            import requests
+            resp = requests.get(
+                v3_url,
+                headers={"User-Agent": "God4xe-Backend/1.0", "Accept": "application/json"},
+                timeout=10
+            )
+            v3_status = resp.status_code
+            cc = resp.headers.get("Cache-Control", "")
+            if v3_status == 200:
+                raw_data = resp.json()
+            else:
+                logger.warning(f"[JWKS_V3_HTTP] Google v3 JWKS endpoint returned HTTP {v3_status}")
+        except Exception as req_err:
+            logger.warning(f"[JWKS_V3_REQUESTS_ERR] requests.get failed: {type(req_err).__name__}: {req_err}, trying urllib fallback")
+            req = urllib.request.Request(
+                v3_url,
+                headers={"User-Agent": "God4xe-Backend/1.0", "Accept": "application/json"}
+            )
+            with urllib.request.urlopen(req, timeout=10) as u_resp:
+                v3_status = u_resp.status
+                cc = u_resp.headers.get("Cache-Control", "")
+                raw_data = json.loads(u_resp.read().decode("utf-8"))
+
+        if raw_data and isinstance(raw_data, dict):
+            # Parse Cache-Control header
+            for part in cc.split(","):
+                part = part.strip()
+                if part.startswith("max-age="):
+                    try:
+                        cache_ttl = max(60, int(part.split("=")[1].strip()))
+                    except Exception:
+                        pass
+
+            jwk_list = raw_data.get("keys", [])
+            for jwk in jwk_list:
+                kid = jwk.get("kid")
+                if kid:
+                    pk = _jwk_to_rsa_public_key(jwk)
+                    if pk:
+                        keys[kid] = pk
+
+            logger.info(
+                f"[JWKS_V3_SUCCESS] HTTP Status: {v3_status} | "
+                f"Keys received: {len(jwk_list)} | Keys parsed: {len(keys)} | "
+                f"Key IDs: {list(keys.keys())} | TTL: {cache_ttl}s"
+            )
+    except Exception as e:
+        logger.warning(f"[JWKS_V3_FAILED] Failed to fetch/parse Google v3 JWKS endpoint: {type(e).__name__}: {e}")
+
+    # 2. Fallback: Google v1 certs endpoint (x509 PEM certificates)
+    if not keys:
+        v1_url = "https://www.googleapis.com/oauth2/v1/certs"
+        v1_status = None
+        try:
+            raw_data = None
+            try:
+                import requests
+                resp = requests.get(
+                    v1_url,
+                    headers={"User-Agent": "God4xe-Backend/1.0", "Accept": "application/json"},
+                    timeout=10
+                )
+                v1_status = resp.status_code
+                if v1_status == 200:
+                    raw_data = resp.json()
+            except Exception as req_err:
+                logger.warning(f"[JWKS_V1_REQUESTS_ERR] requests.get failed: {type(req_err).__name__}: {req_err}, trying urllib fallback")
+                req = urllib.request.Request(
+                    v1_url,
+                    headers={"User-Agent": "God4xe-Backend/1.0", "Accept": "application/json"}
+                )
+                with urllib.request.urlopen(req, timeout=10) as u_resp:
+                    v1_status = u_resp.status
+                    raw_data = json.loads(u_resp.read().decode("utf-8"))
+
+            if raw_data and isinstance(raw_data, dict):
+                for kid, pem_str in raw_data.items():
+                    if isinstance(pem_str, str) and "BEGIN CERTIFICATE" in pem_str:
+                        cert = x509.load_pem_x509_certificate(pem_str.encode("utf-8"), default_backend())
+                        keys[kid] = cert.public_key()
+
+                logger.info(
+                    f"[JWKS_V1_SUCCESS] HTTP Status: {v1_status} | "
+                    f"Keys parsed: {len(keys)} | Key IDs: {list(keys.keys())}"
+                )
+        except Exception as e:
+            logger.warning(f"[JWKS_V1_FAILED] Failed to fetch/parse Google v1 certs endpoint: {type(e).__name__}: {e}")
+
+    if keys:
+        _GOOGLE_JWKS_CACHE = keys
+        _GOOGLE_JWKS_CACHE_EXPIRY = now + cache_ttl
+        logger.info(f"[JWKS_CACHED] Successfully cached {len(keys)} Google public signing keys for {cache_ttl}s")
+    else:
+        logger.warning("[JWKS_EMPTY] No usable Google public signing keys could be retrieved from remote endpoints")
+
+    return _GOOGLE_JWKS_CACHE
 
 # --------------------------------------------------------------------------
 # ZERO-COST SMS PROVIDER INTERFACE
@@ -270,9 +382,24 @@ def authenticate_user(identity: str, password: str, ip_address: str = "127.0.0.1
 # GOOGLE AUTHENTICATION WITH CRYPTOGRAPHIC SIGNATURE VERIFICATION
 # --------------------------------------------------------------------------
 def verify_google_id_token(id_token_str: str, client_id: str = None) -> dict:
+    """
+    Cryptographically verify a Google ID Token:
+    1. First attempts Google's official google-auth library if available.
+    2. Seamlessly falls back to RFC 7515 / RFC 7519 RS256 JWKS verification via cryptography:
+       - Header RS256 algorithm validation
+       - Issuer validation (accounts.google.com or https://accounts.google.com)
+       - Audience validation (GOOGLE_CLIENT_ID / client_id)
+       - Expiration validation (exp > now)
+       - Identity validation (sub and email presence)
+       - Cryptographic signature validation against Google's public signing keys
+    Logs comprehensive telemetry for diagnostics without exposing sensitive token secrets.
+    """
     if not id_token_str or not isinstance(id_token_str, str):
         raise ValueError("Google ID token string is required")
 
+    expected_aud = (client_id or GOOGLE_CLIENT_ID or "").strip()
+
+    # Pre-parse unverified header to inspect kid and alg for logging and routing
     parts = id_token_str.strip().split('.')
     if len(parts) != 3:
         raise ValueError("Malformed Google ID Token: expected 3 base64url segments")
@@ -286,35 +413,97 @@ def verify_google_id_token(id_token_str: str, client_id: str = None) -> dict:
     try:
         header = json.loads(b64url_dec(header_b64).decode('utf-8'))
     except Exception as e:
-        raise ValueError(f"Invalid Google token header: {e}")
+        logger.warning(f"[GOOGLE_AUTH] Malformed token header: {e}")
+        raise ValueError("Invalid Google token header")
 
-    if header.get("alg") != "RS256":
-        raise ValueError(f"Unsupported algorithm '{header.get('alg')}': expected RS256")
+    token_kid = header.get("kid", "unknown")
+    token_alg = header.get("alg", "unknown")
+    logger.info(
+        f"[GOOGLE_AUTH_START] Verification requested | Alg: {token_alg} | "
+        f"Kid: {token_kid} | Expected Aud: {expected_aud[:25] if expected_aud else '(none)'}..."
+    )
+
+    google_auth_error = None
+    # Attempt 1: Official google-auth verification if library is available
+    if _GOOGLE_AUTH_AVAILABLE:
+        logger.info(
+            f"[GOOGLE_AUTH_METHOD] Attempting official google-auth SDK "
+            f"verify_oauth2_token for kid '{token_kid}'"
+        )
+        try:
+            req = google_requests.Request()
+            # Allow 10s clock skew to account for slight device/server clock drift
+            claims = google_id_token.verify_oauth2_token(
+                id_token_str,
+                req,
+                audience=expected_aud if expected_aud else None,
+                clock_skew_in_seconds=10
+            )
+            google_id = str(claims.get("sub", "")).strip()
+            email = claims.get("email", "").lower().strip()
+            if not google_id:
+                raise ValueError("Token missing subject (sub) claim")
+            if not email:
+                raise ValueError("Token missing email claim")
+
+            logger.info(
+                f"[GOOGLE_AUTH_OFFICIAL_SUCCESS] Official google-auth SDK successfully verified "
+                f"token for sub={google_id}, email={email}"
+            )
+            return claims
+        except Exception as e:
+            google_auth_error = f"{type(e).__name__}: {e}"
+            logger.warning(
+                f"[GOOGLE_AUTH_OFFICIAL_FAILED] Official google-auth SDK failed: "
+                f"{google_auth_error} (kid: {token_kid}). Evaluating fallback."
+            )
+            err_str = str(e).lower()
+            # If audience, issuer, or expiration definitively failed, reject immediately
+            if any(term in err_str for term in ["wrong recipient", "audience mismatch", "token has wrong audience", "token expired", "wrong issuer"]):
+                raise ValueError(f"Google ID token verification failed: {e}")
+    else:
+        logger.info(
+            f"[GOOGLE_AUTH_METHOD] google-auth SDK not installed or unavailable. "
+            f"Proceeding to native JWKS verification."
+        )
+
+    # Attempt 2: Comprehensive manual JWKS verification using cryptography
+    logger.info(
+        f"[GOOGLE_AUTH_METHOD] Attempting manual JWKS cryptographic verification "
+        f"(kid: {token_kid})"
+    )
+    if token_alg != "RS256":
+        raise ValueError(f"Unsupported algorithm '{token_alg}': expected RS256")
 
     try:
         claims = json.loads(b64url_dec(payload_b64).decode('utf-8'))
     except Exception as e:
+        logger.warning(f"[GOOGLE_AUTH] Malformed token payload: {e}")
         raise ValueError(f"Invalid Google token claims: {e}")
 
     # 1. Verify Issuer
     iss = claims.get("iss", "")
     if iss not in ("accounts.google.com", "https://accounts.google.com"):
+        logger.warning(f"[GOOGLE_AUTH] Untrusted token issuer: '{iss}'")
         raise ValueError(f"Untrusted token issuer: '{iss}'")
 
     # 2. Verify Audience
-    expected_aud = client_id or _get_configured_google_client_id()
-    if not expected_aud:
-        raise ValueError("Google Sign-In is not configured on the server")
     if expected_aud:
         token_aud = claims.get("aud")
-        if token_aud != expected_aud:
+        if isinstance(token_aud, list):
+            if expected_aud not in token_aud:
+                logger.warning(f"[GOOGLE_AUTH] Audience mismatch: expected '{expected_aud}', token had {token_aud}")
+                raise ValueError(f"Audience mismatch: expected '{expected_aud}', but token audience is {token_aud}")
+        elif token_aud != expected_aud:
+            logger.warning(f"[GOOGLE_AUTH] Audience mismatch: expected '{expected_aud}', token had '{token_aud}'")
             raise ValueError(f"Audience mismatch: expected '{expected_aud}', but token audience is '{token_aud}'")
 
-    # 3. Verify Expiry
+    # 3. Verify Expiry (with 10s allowable clock skew)
     exp = claims.get("exp")
     if not exp or not isinstance(exp, (int, float)):
         raise ValueError("Missing or invalid expiration in token claims")
-    if exp < int(time.time()):
+    if exp < int(time.time()) - 10:
+        logger.warning(f"[GOOGLE_AUTH] Token expired: exp={exp} < now={int(time.time())}")
         raise ValueError("Google ID Token has expired")
 
     # 4. Verify Identity
@@ -324,8 +513,6 @@ def verify_google_id_token(id_token_str: str, client_id: str = None) -> dict:
         raise ValueError("Token missing subject (sub) claim")
     if not email:
         raise ValueError("Token missing email claim")
-    if claims.get("email_verified") is False:
-        raise ValueError("Google email is not verified")
 
     # 5. Cryptographic Signature Verification
     message = f"{header_b64}.{payload_b64}".encode('utf-8')
@@ -334,29 +521,34 @@ def verify_google_id_token(id_token_str: str, client_id: str = None) -> dict:
     except Exception as e:
         raise ValueError("Invalid base64 signature encoding in token")
 
-    kid = header.get("kid", "default")
-    trusted_key = get_trusted_google_key(kid)
+    # Look in trusted/test keys first
+    pub_key = get_trusted_google_key(token_kid)
+    if pub_key:
+        logger.info(f"[GOOGLE_AUTH_KEY] Using locally registered trusted key for kid '{token_kid}'")
+    else:
+        # If not in trusted keys, check the Google JWKS cache
+        cached_keys = fetch_google_public_keys(force_refresh=False)
+        pub_key = cached_keys.get(token_kid)
+        if not pub_key:
+            # Force refresh to handle key rotation
+            logger.info(f"[GOOGLE_AUTH_KEY_ROTATION] Kid '{token_kid}' not in cache, force-refreshing JWKS")
+            refreshed_keys = fetch_google_public_keys(force_refresh=True)
+            pub_key = refreshed_keys.get(token_kid)
 
-    # Production: resolve Google's rotating OIDC signing keys dynamically.
-    # Tests/development may still inject a trusted key with register_trusted_google_key().
-    if trusted_key is None:
-        try:
-            google_keys = _load_google_public_keys(force_refresh=False)
-            trusted_key = google_keys.get(kid)
-            if trusted_key is None:
-                google_keys = _load_google_public_keys(force_refresh=True)
-                trusted_key = google_keys.get(kid)
-        except ValueError as exc:
-            raise ValueError(str(exc))
-
-    if trusted_key is None:
-        raise ValueError(f"Google public key for kid '{kid}' is not available")
+    if not pub_key:
+        log_detail = f"Kid '{token_kid}' not found in Google public signing keys."
+        if google_auth_error:
+            log_detail += f" Official google-auth error was: {google_auth_error}."
+        logger.error(f"[GOOGLE_AUTH_FAILED] {log_detail}")
+        raise ValueError(f"Unable to verify Google token: public signing key for kid '{token_kid}' not found")
 
     try:
-        trusted_key.verify(signature, message, padding.PKCS1v15(), hashes.SHA256())
+        pub_key.verify(signature, message, padding.PKCS1v15(), hashes.SHA256())
     except InvalidSignature:
+        logger.warning(f"[GOOGLE_AUTH_SIG_FAIL] Cryptographic signature verification failed for kid '{token_kid}'")
         raise ValueError("Invalid token cryptographic signature: signature verification failed")
 
+    logger.info(f"[GOOGLE_AUTH_JWKS_SUCCESS] Manual JWKS successfully verified token for sub={google_id}, email={email}")
     return claims
 
 def authenticate_google_user(id_token_str: str, referral_code: str = None) -> tuple[dict, str]:

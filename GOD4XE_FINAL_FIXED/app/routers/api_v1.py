@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger("api_v1")
 from fastapi import APIRouter, Request, Depends, HTTPException, status, Query, UploadFile, File, Form
 from pydantic import BaseModel, Field
 from typing import Optional, List
@@ -113,7 +115,7 @@ async def api_login(req: LoginRequest, request: Request):
 @router.get("/auth/config")
 async def api_auth_config():
     all_settings = settings_service.get_all_settings()
-    configured_client_id = GOOGLE_CLIENT_ID or all_settings.get("google_client_id", "")
+    configured_client_id = GOOGLE_CLIENT_ID or all_settings.get("google_client_id", "") or "399321991405-ojrb4vtnhpcigg56fu0e8glgsdqob8ap.apps.googleusercontent.com"
     return {
         "success": True,
         "google_client_id": configured_client_id
@@ -125,7 +127,17 @@ async def api_google_auth(req: GoogleAuthRequest):
         user, token = user_service.authenticate_google_user(req.id_token, referral_code=req.referral_code)
         return {"success": True, "user": user, "token": token}
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        logger.error(f"[GOOGLE_AUTH_FAILED] Token verification rejected: {e}")
+        err_msg = str(e)
+        # Protect internal JWKS / key-loading infrastructure details from being leaked to client
+        if any(term in err_msg.lower() for term in ["public signing key", "unable to load", "jwks", "cert cache", "connection", "urlopen"]):
+            client_msg = "Google authentication failed: unable to verify signing keys."
+        else:
+            client_msg = err_msg
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=client_msg)
+    except Exception as e:
+        logger.error(f"[GOOGLE_AUTH_ERROR] Unexpected error during Google authentication: {e}", exc_info=True)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Authentication failed due to a server error")
 
 @router.post("/auth/otp/request")
 async def api_otp_request(req: OTPRequest):

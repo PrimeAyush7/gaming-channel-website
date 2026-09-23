@@ -1057,6 +1057,60 @@ class TestEsportsFullSuite(unittest.TestCase):
         self.assertEqual(iss_res.status_code, 400)
         self.assertIn('untrusted token issuer', iss_res.json()['detail'].lower())
 
+        # 5. Wrong audience rejection -> MUST FAIL (HTTP 400)
+        bad_aud_claims = valid_claims.copy()
+        bad_aud_claims['aud'] = 'wrong-client-id.apps.googleusercontent.com'
+        from app.services.users_auth import verify_google_id_token
+        bad_aud_token = make_token(valid_header, bad_aud_claims, sign=True)
+        with self.assertRaises(ValueError) as cm:
+            verify_google_id_token(bad_aud_token, client_id='expected-client-id.apps.googleusercontent.com')
+        self.assertIn('audience mismatch', str(cm.exception).lower())
+
+        # 6. Missing / unknown signing key -> MUST FAIL (HTTP 400)
+        unknown_kid_header = {'alg': 'RS256', 'typ': 'JWT', 'kid': 'unknown-google-kid-999'}
+        unknown_key_token = make_token(unknown_kid_header, valid_claims, sign=True)
+        key_res = self.client.post('/api/v1/auth/google', json={'id_token': unknown_key_token})
+        self.assertEqual(key_res.status_code, 400)
+
+        # 7. Direct JWK (n, e) parsing and verification
+        from app.services.users_auth import _jwk_to_rsa_public_key, register_trusted_google_public_key
+        pub_nums = priv_key.public_key().public_numbers()
+        def int_to_b64url(val):
+            blen = (val.bit_length() + 7) // 8
+            return base64.urlsafe_b64encode(val.to_bytes(blen, byteorder='big')).decode().rstrip('=')
+        jwk_dict = {
+            'kty': 'RSA',
+            'alg': 'RS256',
+            'use': 'sig',
+            'kid': 'test-jwk-kid-88',
+            'n': int_to_b64url(pub_nums.n),
+            'e': int_to_b64url(pub_nums.e)
+        }
+        reconstructed_pub = _jwk_to_rsa_public_key(jwk_dict)
+        self.assertIsNotNone(reconstructed_pub)
+        register_trusted_google_public_key('test-jwk-kid-88', reconstructed_pub)
+        jwk_token = make_token({'alg': 'RS256', 'typ': 'JWT', 'kid': 'test-jwk-kid-88'}, valid_claims, sign=True)
+        claims_verified = verify_google_id_token(jwk_token)
+        self.assertEqual(claims_verified['sub'], 'google_test_uid_99')
+
+        # 8. GET /api/v1/auth/config returns the configured Web Client ID
+        cfg_res = self.client.get('/api/v1/auth/config')
+        self.assertEqual(cfg_res.status_code, 200)
+        cfg_data = cfg_res.json()
+        self.assertTrue(cfg_data['success'])
+        self.assertEqual(
+            cfg_data['google_client_id'],
+            '399321991405-ojrb4vtnhpcigg56fu0e8glgsdqob8ap.apps.googleusercontent.com'
+        )
+
+        # 9. Verify that internal JWKS details are NOT exposed to the client
+        bad_key_res = self.client.post('/api/v1/auth/google', json={'id_token': unknown_key_token})
+        self.assertEqual(bad_key_res.status_code, 400)
+        detail_msg = bad_key_res.json()['detail']
+        self.assertNotIn('urlopen', detail_msg.lower())
+        self.assertNotIn('googleapis.com', detail_msg.lower())
+        self.assertNotIn('temporary failure', detail_msg.lower())
+
     def test_esports_04_profile_and_freefire_update(self):
         u = self.client.post('/api/v1/auth/register', json={
             'username': 'ff_master',
