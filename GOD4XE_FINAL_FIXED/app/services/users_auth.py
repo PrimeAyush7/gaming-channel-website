@@ -6,6 +6,7 @@ import hashlib
 import datetime
 import base64
 import time
+import httpx
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.exceptions import InvalidSignature
@@ -21,6 +22,57 @@ from app.services.jwt_util import encode_jwt, decode_jwt
 from app.services.auth import hash_password, verify_password
 
 _TRUSTED_GOOGLE_KEYS = {}
+_GOOGLE_CERT_CACHE = {"keys": {}, "expires_at": 0.0}
+_GOOGLE_CERTS_URL = "https://www.googleapis.com/oauth2/v3/certs"
+
+def _load_google_public_keys(force_refresh: bool = False) -> dict:
+    """Fetch and cache Google's rotating OIDC signing keys for production verification."""
+    now = time.time()
+    if not force_refresh and _GOOGLE_CERT_CACHE["keys"] and now < _GOOGLE_CERT_CACHE["expires_at"]:
+        return _GOOGLE_CERT_CACHE["keys"]
+
+    try:
+        with httpx.Client(timeout=8.0, follow_redirects=True) as client:
+            response = client.get(_GOOGLE_CERTS_URL)
+            response.raise_for_status()
+            payload = response.json()
+            cache_control = response.headers.get("cache-control", "")
+            max_age = 3600
+            match = re.search(r"max-age=(\d+)", cache_control)
+            if match:
+                max_age = max(60, min(int(match.group(1)), 86400))
+
+        keys = {}
+        for kid, pem in payload.items():
+            try:
+                keys[kid] = serialization.load_pem_public_key(pem.encode("utf-8"))
+            except Exception:
+                continue
+        if not keys:
+            raise ValueError("Google returned no usable public signing keys")
+        _GOOGLE_CERT_CACHE["keys"] = keys
+        _GOOGLE_CERT_CACHE["expires_at"] = time.time() + max_age
+        return keys
+    except Exception as exc:
+        # Keep a still-valid previous cache if Google is temporarily unreachable.
+        if _GOOGLE_CERT_CACHE["keys"]:
+            return _GOOGLE_CERT_CACHE["keys"]
+        raise ValueError(f"Unable to load Google public signing keys: {exc}")
+
+def _get_configured_google_client_id() -> str:
+    if GOOGLE_CLIENT_ID:
+        return GOOGLE_CLIENT_ID
+    try:
+        with get_db() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT value FROM site_settings WHERE key = %s LIMIT 1;", ("google_client_id",))
+            row = cursor.fetchone()
+            if row:
+                value = row["value"] if isinstance(row, dict) else row[0]
+                return (value or "").strip()
+    except Exception:
+        pass
+    return ""
 
 def register_trusted_google_key(kid: str, public_key_pem: str):
     pub_key = serialization.load_pem_public_key(public_key_pem.encode('utf-8'))
@@ -250,7 +302,9 @@ def verify_google_id_token(id_token_str: str, client_id: str = None) -> dict:
         raise ValueError(f"Untrusted token issuer: '{iss}'")
 
     # 2. Verify Audience
-    expected_aud = client_id or GOOGLE_CLIENT_ID
+    expected_aud = client_id or _get_configured_google_client_id()
+    if not expected_aud:
+        raise ValueError("Google Sign-In is not configured on the server")
     if expected_aud:
         token_aud = claims.get("aud")
         if token_aud != expected_aud:
@@ -270,6 +324,8 @@ def verify_google_id_token(id_token_str: str, client_id: str = None) -> dict:
         raise ValueError("Token missing subject (sub) claim")
     if not email:
         raise ValueError("Token missing email claim")
+    if claims.get("email_verified") is False:
+        raise ValueError("Google email is not verified")
 
     # 5. Cryptographic Signature Verification
     message = f"{header_b64}.{payload_b64}".encode('utf-8')
@@ -281,16 +337,25 @@ def verify_google_id_token(id_token_str: str, client_id: str = None) -> dict:
     kid = header.get("kid", "default")
     trusted_key = get_trusted_google_key(kid)
 
-    if trusted_key:
+    # Production: resolve Google's rotating OIDC signing keys dynamically.
+    # Tests/development may still inject a trusted key with register_trusted_google_key().
+    if trusted_key is None:
         try:
-            trusted_key.verify(signature, message, padding.PKCS1v15(), hashes.SHA256())
-        except InvalidSignature:
-            raise ValueError("Invalid token cryptographic signature: signature verification failed")
-    else:
-        if ENVIRONMENT == "production":
-            raise ValueError(f"Google public key for kid '{kid}' not found in trusted cert cache")
-        else:
-            raise ValueError(f"No trusted public key found for kid '{kid}'. Token signature cannot be verified.")
+            google_keys = _load_google_public_keys(force_refresh=False)
+            trusted_key = google_keys.get(kid)
+            if trusted_key is None:
+                google_keys = _load_google_public_keys(force_refresh=True)
+                trusted_key = google_keys.get(kid)
+        except ValueError as exc:
+            raise ValueError(str(exc))
+
+    if trusted_key is None:
+        raise ValueError(f"Google public key for kid '{kid}' is not available")
+
+    try:
+        trusted_key.verify(signature, message, padding.PKCS1v15(), hashes.SHA256())
+    except InvalidSignature:
+        raise ValueError("Invalid token cryptographic signature: signature verification failed")
 
     return claims
 

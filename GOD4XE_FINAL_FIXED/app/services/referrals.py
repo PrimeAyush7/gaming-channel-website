@@ -20,7 +20,7 @@ def get_active_ranks() -> List[Dict[str, Any]]:
             cursor.execute("""
                 SELECT id, name, min_referrals, max_referrals, display_order, badge_color, is_active
                 FROM referral_ranks
-                WHERE is_active = TRUE or is_active = 1
+                WHERE is_active = TRUE
                 ORDER BY display_order ASC, min_referrals ASC;
             """)
             rows = cursor.fetchall()
@@ -156,7 +156,7 @@ def get_user_leaderboard_position(user_id: int, successful_count: Optional[int] 
                     GROUP BY referrer_id
                 )
                 SELECT (SELECT COUNT(DISTINCT referrer_id) FROM referrals WHERE status = 'SUCCESSFUL') +
-                       (SELECT COUNT(*) FROM app_users WHERE id NOT IN (SELECT referrer_id FROM ref_counts) AND id < %s AND (is_active = 1 OR is_active = TRUE)) + 1 AS pos;
+                       (SELECT COUNT(*) FROM app_users WHERE id NOT IN (SELECT referrer_id FROM ref_counts) AND id < %s AND is_active = 1) + 1 AS pos;
             """, (user_id,))
             row = cursor.fetchone()
             return int(row["pos"]) if row and row["pos"] is not None else 1
@@ -257,7 +257,7 @@ def get_referral_leaderboard(limit: int = 50, offset: int = 0) -> Dict[str, Any]
                 rc.successful_referrals
             FROM ref_counts rc
             JOIN app_users u ON rc.referrer_id = u.id
-            WHERE u.is_active = 1 OR u.is_active = TRUE
+            WHERE u.is_active = 1
             ORDER BY rc.successful_referrals DESC, rc.referrer_id ASC
             LIMIT %s OFFSET %s;
         """, (limit, offset))
