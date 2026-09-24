@@ -50,6 +50,11 @@ def check_csrf(request: Request, submitted_token: str, admin: dict):
     if not auth_service.verify_csrf(request, submitted_token, admin.get("csrf_token")):
         raise HTTPException(status_code=403, detail="Invalid CSRF token")
 
+
+def require_admin_role(admin: dict, *allowed_roles: str):
+    if admin.get("role") not in allowed_roles:
+        raise HTTPException(status_code=403, detail="This action is not permitted for your admin role")
+
 # --------------------------------------------------------------------------
 # AUTHENTICATION
 # --------------------------------------------------------------------------
@@ -1268,6 +1273,72 @@ async def admin_reset_user_password(
         return RedirectResponse(url=f"/admin/users/{user_id}?msg=Password+reset+successfully", status_code=302)
     except ValueError as e:
         return RedirectResponse(url=f"/admin/users/{user_id}?error={e}", status_code=302)
+
+@router.post("/users/{user_id}/diamonds")
+async def admin_adjust_user_diamonds(
+    user_id: int,
+    request: Request,
+    amount: int = Form(...),
+    reason: str = Form(...),
+    csrf_token: str = Form(...)
+):
+    admin = check_admin(request)
+    if not admin:
+        return RedirectResponse(url="/admin/login", status_code=302)
+    check_csrf(request, csrf_token, admin)
+    require_admin_role(admin, ROLE_SUPER_ADMIN, ROLE_FINANCE_ADMIN)
+
+    try:
+        tx = user_service.admin_adjust_user_diamonds(
+            user_id=user_id,
+            amount=amount,
+            admin_id=admin["admin_id"],
+            reason=reason,
+        )
+        auth_service.log_admin_action(
+            admin_id=admin["admin_id"],
+            admin_username=admin["username"],
+            role=admin["role"],
+            action="ADJUST_USER_DIAMONDS",
+            resource="app_users",
+            resource_id=user_id,
+            ip_address=get_client_ip(request),
+            details={"amount": amount, "balance_after": tx.get("balance_after"), "reason": reason[:500]},
+        )
+        return RedirectResponse(url=f"/admin/users/{user_id}?msg=Diamonds+updated+successfully", status_code=302)
+    except ValueError as e:
+        return RedirectResponse(url=f"/admin/users/{user_id}?error={str(e).replace(' ', '+')}", status_code=302)
+
+@router.post("/users/{user_id}/delete")
+async def admin_delete_user(
+    user_id: int,
+    request: Request,
+    csrf_token: str = Form(...),
+    confirm_text: str = Form(...)
+):
+    admin = check_admin(request)
+    if not admin:
+        return RedirectResponse(url="/admin/login", status_code=302)
+    check_csrf(request, csrf_token, admin)
+    require_admin_role(admin, ROLE_SUPER_ADMIN)
+    if confirm_text.strip() != "DELETE":
+        return RedirectResponse(url=f"/admin/users/{user_id}?error=Type+DELETE+to+confirm", status_code=302)
+
+    try:
+        deleted = user_service.delete_user_if_safe(user_id)
+        auth_service.log_admin_action(
+            admin_id=admin["admin_id"],
+            admin_username=admin["username"],
+            role=admin["role"],
+            action="DELETE_APP_USER",
+            resource="app_users",
+            resource_id=user_id,
+            ip_address=get_client_ip(request),
+            before_state={"username": deleted.get("username"), "referral_code": deleted.get("referral_code")},
+        )
+        return RedirectResponse(url="/admin/users?msg=Test+user+deleted+successfully", status_code=302)
+    except ValueError as e:
+        return RedirectResponse(url=f"/admin/users/{user_id}?error={str(e).replace(' ', '+')}", status_code=302)
 
 @router.post("/users/{user_id}/revoke-sessions")
 async def admin_revoke_user_sessions(

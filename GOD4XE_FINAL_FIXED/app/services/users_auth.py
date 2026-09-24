@@ -1169,6 +1169,72 @@ def admin_reset_user_password(user_id: int, new_password: str) -> bool:
         cursor.execute("DELETE FROM user_sessions WHERE user_id = %s;", (user_id,))
     return True
 
+
+def admin_adjust_user_diamonds(user_id: int, amount: int, admin_id: int, reason: str = None) -> dict:
+    """Atomically adjust a user's diamond balance through the existing ledger."""
+    if not isinstance(amount, int) or amount == 0:
+        raise ValueError("Adjustment amount must be a non-zero integer")
+    if not get_user_by_id(user_id):
+        raise ValueError("User not found")
+
+    from app.services.wallet import credit_diamonds, deduct_diamonds
+    reason_clean = (reason or "Admin balance adjustment").strip()[:500]
+    tx_type = "ADMIN_CREDIT" if amount > 0 else "ADMIN_DEBIT"
+    if amount > 0:
+        tx = credit_diamonds(
+            user_id=user_id,
+            amount=amount,
+            tx_type=tx_type,
+            reference_id=f"ADMIN-{admin_id}",
+            admin_id=admin_id,
+            description=reason_clean,
+        )
+    else:
+        tx = deduct_diamonds(
+            user_id=user_id,
+            amount=abs(amount),
+            tx_type=tx_type,
+            reference_id=f"ADMIN-{admin_id}",
+            admin_id=admin_id,
+            description=reason_clean,
+        )
+    return tx
+
+def delete_user_if_safe(user_id: int) -> dict:
+    """Permanently delete only a clean/test account with no historical records."""
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, username, referral_code FROM app_users WHERE id = %s FOR UPDATE;", (user_id,))
+        row = cursor.fetchone()
+        if not row:
+            raise ValueError("User not found")
+        user = dict(row)
+
+        checks = {
+            "tournament participation": "SELECT COUNT(*) AS c FROM tournament_participants WHERE user_id = %s",
+            "match results": "SELECT COUNT(*) AS c FROM match_results WHERE user_id = %s",
+            "match disputes": "SELECT COUNT(*) AS c FROM match_disputes WHERE reporter_user_id = %s",
+            "diamond transactions": "SELECT COUNT(*) AS c FROM diamond_transactions WHERE user_id = %s",
+            "deposit requests": "SELECT COUNT(*) AS c FROM deposit_requests WHERE user_id = %s",
+            "withdrawal requests": "SELECT COUNT(*) AS c FROM withdrawal_requests WHERE user_id = %s",
+            "redeem history": "SELECT COUNT(*) AS c FROM redeem_history WHERE user_id = %s",
+            "referrals": "SELECT COUNT(*) AS c FROM referrals WHERE referrer_id = %s OR referee_id = %s",
+            "support tickets": "SELECT COUNT(*) AS c FROM support_tickets WHERE user_id = %s",
+            "other users using referral code": "SELECT COUNT(*) AS c FROM app_users WHERE referred_by_code = %s",
+        }
+        for label, query in checks.items():
+            params = (user_id, user_id) if label == "referrals" else ((user["referral_code"],) if label == "other users using referral code" else (user_id,))
+            cursor.execute(query, params)
+            count = cursor.fetchone()["c"]
+            if count:
+                raise ValueError(f"Cannot permanently delete this user: {label} exist. Deactivate the account instead.")
+
+        cursor.execute("DELETE FROM app_users WHERE id = %s;", (user_id,))
+        if cursor.rowcount != 1:
+            raise ValueError("User deletion failed")
+
+    return user
+
 def revoke_user_sessions(user_id: int) -> int:
     with get_db() as conn:
         cursor = conn.cursor()
