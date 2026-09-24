@@ -38,9 +38,14 @@ def credit_diamonds(
     tx_uuid = str(uuid.uuid4())
     with get_db() as conn:
         cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO diamond_accounts (user_id, balance, locked_balance)
+            VALUES (%s, 0, 0)
+            ON CONFLICT (user_id) DO NOTHING;
+        """, (user_id,))
         cursor.execute("SELECT balance FROM diamond_accounts WHERE user_id = %s FOR UPDATE;", (user_id,))
         row = cursor.fetchone()
-        current_balance = row["balance"] if isinstance(row, dict) else (row[0] if row else 0)
+        current_balance = row["balance"] if isinstance(row, dict) else row[0]
         
         new_balance = current_balance + amount
         cursor.execute("""
@@ -73,9 +78,14 @@ def deduct_diamonds(
     tx_uuid = str(uuid.uuid4())
     with get_db() as conn:
         cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO diamond_accounts (user_id, balance, locked_balance)
+            VALUES (%s, 0, 0)
+            ON CONFLICT (user_id) DO NOTHING;
+        """, (user_id,))
         cursor.execute("SELECT balance FROM diamond_accounts WHERE user_id = %s FOR UPDATE;", (user_id,))
         row = cursor.fetchone()
-        current_balance = row["balance"] if isinstance(row, dict) else (row[0] if row else 0)
+        current_balance = row["balance"] if isinstance(row, dict) else row[0]
 
         if current_balance < amount:
             raise ValueError(f"Insufficient diamonds. You have {current_balance} diamonds, but {amount} are required.")
