@@ -246,6 +246,90 @@ def get_tournament_room_credentials(tournament_id: int, user_id: int) -> dict:
             "start_time": data.get("start_time")
         }
 
+def update_tournament(
+    tournament_id: int,
+    title: str,
+    description: str = "",
+    banner_url: str = "",
+    game: str = "FREE_FIRE",
+    mode: str = "SOLO",
+    entry_type: str = "FREE",
+    entry_fee_diamonds: int = 0,
+    prize_amount_diamonds: int = 0,
+    max_slots: int = 48,
+    map_name: str = "BERMUDA",
+    start_time: str = None,
+    rules: str = "",
+    status: str = "UPCOMING",
+    is_registration_open: int = 1,
+    is_featured: int = 0,
+    is_published: int = 1,
+    room_id: str = "",
+    room_password: str = "",
+    room_instructions: str = "",
+) -> dict:
+    title = (title or "").strip()
+    if not title:
+        raise ValueError("Tournament title is required")
+    entry_type = (entry_type or "FREE").upper().strip()
+    if entry_type not in ("FREE", "DIAMONDS"):
+        raise ValueError("entry_type must be either 'FREE' or 'DIAMONDS'")
+    if entry_type == "FREE":
+        entry_fee_diamonds = 0
+    elif entry_fee_diamonds <= 0:
+        raise ValueError("entry_fee_diamonds must be greater than 0 for DIAMONDS entry_type")
+    status = (status or "UPCOMING").upper().strip()
+    if status not in ("UPCOMING", "LIVE", "COMPLETED", "CANCELLED"):
+        raise ValueError("Invalid tournament status")
+    if max_slots < 1:
+        raise ValueError("max_slots must be at least 1")
+    if prize_amount_diamonds < 0 or entry_fee_diamonds < 0:
+        raise ValueError("Diamond amounts cannot be negative")
+
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT joined_players FROM tournaments WHERE id = %s FOR UPDATE;", (tournament_id,))
+        row = cursor.fetchone()
+        if not row:
+            raise ValueError("Tournament not found")
+        joined_players = row["joined_players"] if isinstance(row, dict) else row[0]
+        if max_slots < joined_players:
+            raise ValueError(f"Max slots cannot be lower than current joined players ({joined_players})")
+
+        cursor.execute("""
+            UPDATE tournaments
+            SET title = %s,
+                banner_url = %s,
+                description = %s,
+                game = %s,
+                mode = %s,
+                entry_type = %s,
+                entry_fee_diamonds = %s,
+                prize_amount_diamonds = %s,
+                max_slots = %s,
+                rules = %s,
+                map_name = %s,
+                start_time = %s,
+                status = %s,
+                is_registration_open = %s,
+                is_featured = %s,
+                is_published = %s,
+                room_id = %s,
+                room_password = %s,
+                room_instructions = %s,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = %s;
+        """, (
+            title, banner_url or None, description or None, game, mode,
+            entry_type, entry_fee_diamonds, prize_amount_diamonds, max_slots,
+            rules or None, map_name, start_time, status, 1 if is_registration_open else 0,
+            1 if is_featured else 0, 1 if is_published else 0,
+            room_id.strip() or None, room_password.strip() or None, room_instructions or None,
+            tournament_id,
+        ))
+
+    return get_tournament_by_id(tournament_id)
+
 def update_tournament_room_credentials(tournament_id: int, room_id: str, room_password: str, instructions: str = None) -> dict:
     with get_db() as conn:
         cursor = conn.cursor()

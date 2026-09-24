@@ -704,6 +704,114 @@ async def admin_tournament_create(
             "error": str(e)
         }, status_code=400)
 
+@router.get("/tournaments/{tournament_id}/edit", response_class=HTMLResponse)
+async def admin_tournament_edit_form(tournament_id: int, request: Request, error: str = None):
+    admin = check_admin(request)
+    if not admin:
+        return RedirectResponse(url="/admin/login", status_code=302)
+    if not auth_service.has_role_permission(admin["role"], [ROLE_SUPER_ADMIN, ROLE_TOURNAMENT_ADMIN]):
+        raise HTTPException(status_code=403, detail="Unauthorized role for tournament management")
+
+    tournament = tournament_service.get_tournament_by_id(tournament_id)
+    if not tournament:
+        raise HTTPException(status_code=404, detail="Tournament not found")
+
+    return templates.TemplateResponse(request=request, name="admin/tournament_form.html", context={
+        "request": request,
+        "admin": admin,
+        "tournament": tournament,
+        "active_nav": "tournaments",
+        "edit_mode": True,
+        "error": error
+    })
+
+@router.post("/tournaments/{tournament_id}/edit")
+async def admin_tournament_edit(
+    tournament_id: int,
+    request: Request,
+    csrf_token: str = Form(...),
+    title: str = Form(...),
+    description: str = Form(""),
+    banner_url: str = Form(""),
+    game: str = Form("FREE_FIRE"),
+    mode: str = Form("SOLO"),
+    entry_type: str = Form("FREE"),
+    entry_fee_diamonds: int = Form(0),
+    prize_amount_diamonds: int = Form(0),
+    max_slots: int = Form(48),
+    map_name: str = Form("BERMUDA"),
+    start_time: str = Form(...),
+    rules: str = Form(""),
+    status: str = Form("UPCOMING"),
+    is_registration_open: int = Form(1),
+    is_featured: int = Form(0),
+    is_published: int = Form(1),
+    room_id: str = Form(""),
+    room_password: str = Form(""),
+    room_instructions: str = Form("")
+):
+    admin = check_admin(request)
+    if not admin:
+        return RedirectResponse(url="/admin/login", status_code=302)
+    check_csrf(request, csrf_token, admin)
+    if not auth_service.has_role_permission(admin["role"], [ROLE_SUPER_ADMIN, ROLE_TOURNAMENT_ADMIN]):
+        raise HTTPException(status_code=403, detail="Unauthorized role")
+
+    try:
+        updated = tournament_service.update_tournament(
+            tournament_id=tournament_id,
+            title=title,
+            description=description,
+            banner_url=banner_url,
+            game=game,
+            mode=mode,
+            entry_type=entry_type,
+            entry_fee_diamonds=entry_fee_diamonds,
+            prize_amount_diamonds=prize_amount_diamonds,
+            max_slots=max_slots,
+            map_name=map_name,
+            start_time=start_time,
+            rules=rules,
+            status=status,
+            is_registration_open=is_registration_open,
+            is_featured=is_featured,
+            is_published=is_published,
+            room_id=room_id,
+            room_password=room_password,
+            room_instructions=room_instructions,
+        )
+        auth_service.log_admin_action(
+            admin_id=admin["admin_id"],
+            admin_username=admin["username"],
+            role=admin["role"],
+            action="UPDATE_TOURNAMENT",
+            resource="tournaments",
+            resource_id=tournament_id,
+            ip_address=get_client_ip(request),
+            user_agent=request.headers.get("User-Agent"),
+            after_state={
+                "title": title,
+                "status": status,
+                "entry_type": entry_type,
+                "entry_fee": entry_fee_diamonds,
+                "max_slots": max_slots,
+                "is_registration_open": is_registration_open,
+                "room_id_set": bool(room_id.strip()),
+                "room_password_set": bool(room_password.strip()),
+            }
+        )
+        return RedirectResponse(url="/admin/tournaments?msg=Tournament+updated+successfully", status_code=302)
+    except ValueError as e:
+        tournament = tournament_service.get_tournament_by_id(tournament_id)
+        return templates.TemplateResponse(request=request, name="admin/tournament_form.html", context={
+            "request": request,
+            "admin": admin,
+            "tournament": tournament,
+            "active_nav": "tournaments",
+            "edit_mode": True,
+            "error": str(e)
+        }, status_code=400)
+
 @router.post("/tournaments/{tournament_id}/room")
 async def admin_update_room(
     tournament_id: int,

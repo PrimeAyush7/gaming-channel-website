@@ -48,8 +48,11 @@
               {{ t.status }}
             </span>
           </td>
-          <td>
-            <form action="/admin/tournaments/{{ t.id }}/status" method="POST" style="margin: 0;">
+          <td style="white-space: nowrap;">
+            {% if admin.role in ('SUPER_ADMIN', 'TOURNAMENT_ADMIN') %}
+            <a href="/admin/tournaments/{{ t.id }}/edit" class="btn-sm btn-edit" style="display:inline-block; padding:0.35rem 0.6rem; text-decoration:none; margin-right:0.35rem;">✏️ Edit</a>
+            {% endif %}
+            <form action="/admin/tournaments/{{ t.id }}/status" method="POST" style="margin: 0; display:inline-block;">
               <input type="hidden" name="csrf_token" value="{{ admin.csrf_token }}">
               <select name="status" onchange="this.form.submit()" class="form-control" style="padding: 0.35rem 0.5rem; font-size: 0.8rem; width: auto; display: inline-block;">
                 <option value="UPCOMING" {% if t.status == 'UPCOMING' %}selected{% endif %}>Upcoming</option>

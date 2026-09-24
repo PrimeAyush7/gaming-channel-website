@@ -54,7 +54,7 @@
             <td><strong style="color: var(--neon-violet); font-family: monospace;">{{ c.code }}</strong></td>
             <td style="color: #fbbf24; font-weight: 700;">💎 {{ c.reward_diamonds }}</td>
             <td>{{ c.times_used }} / {{ c.max_uses }}</td>
-            <td style="color: var(--admin-muted);">{{ c.created_at[:16] if c.created_at else '-' }}</td>
+            <td style="color: var(--admin-muted);">{{ c.created_at.strftime('%Y-%m-%d %H:%M') if c.created_at else '-' }}</td>
           </tr>
           {% else %}
           <tr>
