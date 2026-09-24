@@ -27,7 +27,8 @@ from app.services import (
     ads as ad_service,
     media as media_service,
     settings as settings_service,
-    analytics as analytics_service
+    analytics as analytics_service,
+    users_auth as user_service
 )
 
 router = APIRouter(prefix="/admin")
@@ -1150,3 +1151,144 @@ async def admin_view_audit_logs(request: Request, resource: str = None):
         "logs": logs,
         "active_nav": "audit_logs"
     })
+
+# --------------------------------------------------------------------------
+# APP USER MANAGEMENT (ALL ADMIN ROLES CAN VIEW, SUPER_ADMIN CAN MODIFY)
+# --------------------------------------------------------------------------
+@router.get("/users", response_class=HTMLResponse)
+async def admin_list_users(
+    request: Request,
+    q: str = None,
+    provider: str = None,
+    status_filter: str = None,
+    page: int = 1,
+    msg: str = None
+):
+    admin = check_admin(request)
+    if not admin:
+        return RedirectResponse(url="/admin/login", status_code=302)
+
+    limit = 30
+    offset = (page - 1) * limit
+    users, total = user_service.list_app_users(
+        search=q,
+        provider_filter=provider,
+        status_filter=status_filter,
+        limit=limit,
+        offset=offset
+    )
+    total_pages = max(1, (total + limit - 1) // limit)
+    return templates.TemplateResponse(request=request, name="admin/users.html", context={
+        "request": request,
+        "admin": admin,
+        "active_nav": "users",
+        "users": users,
+        "total": total,
+        "page": page,
+        "total_pages": total_pages,
+        "q": q or "",
+        "provider": provider or "ALL",
+        "status_filter": status_filter or "ALL",
+        "msg": msg
+    })
+
+@router.get("/users/{user_id}", response_class=HTMLResponse)
+async def admin_view_user(
+    user_id: int,
+    request: Request,
+    msg: str = None,
+    error: str = None
+):
+    admin = check_admin(request)
+    if not admin:
+        return RedirectResponse(url="/admin/login", status_code=302)
+
+    user = user_service.get_user_full_admin_details(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return templates.TemplateResponse(request=request, name="admin/user_detail.html", context={
+        "request": request,
+        "admin": admin,
+        "active_nav": "users",
+        "u": user,
+        "msg": msg,
+        "error": error
+    })
+
+@router.post("/users/{user_id}/status")
+async def admin_toggle_user_status(
+    user_id: int,
+    request: Request,
+    is_active: int = Form(...),
+    csrf_token: str = Form(...)
+):
+    admin = check_admin(request)
+    if not admin:
+        return RedirectResponse(url="/admin/login", status_code=302)
+    check_csrf(request, csrf_token, admin)
+
+    user_service.toggle_user_status(user_id, is_active)
+    state = "activated" if is_active else "deactivated"
+    auth_service.log_admin_action(
+        admin_id=admin["admin_id"],
+        admin_username=admin["username"],
+        role=admin["role"],
+        action="UPDATE_USER_STATUS",
+        resource="app_users",
+        resource_id=user_id,
+        ip_address=get_client_ip(request),
+        after_state={"is_active": is_active}
+    )
+    return RedirectResponse(url=f"/admin/users/{user_id}?msg=User+successfully+{state}", status_code=302)
+
+@router.post("/users/{user_id}/reset-password")
+async def admin_reset_user_password(
+    user_id: int,
+    request: Request,
+    new_password: str = Form(...),
+    csrf_token: str = Form(...)
+):
+    admin = check_admin(request)
+    if not admin:
+        return RedirectResponse(url="/admin/login", status_code=302)
+    check_csrf(request, csrf_token, admin)
+
+    try:
+        user_service.admin_reset_user_password(user_id, new_password)
+        auth_service.log_admin_action(
+            admin_id=admin["admin_id"],
+            admin_username=admin["username"],
+            role=admin["role"],
+            action="RESET_USER_PASSWORD",
+            resource="app_users",
+            resource_id=user_id,
+            ip_address=get_client_ip(request)
+        )
+        return RedirectResponse(url=f"/admin/users/{user_id}?msg=Password+reset+successfully", status_code=302)
+    except ValueError as e:
+        return RedirectResponse(url=f"/admin/users/{user_id}?error={e}", status_code=302)
+
+@router.post("/users/{user_id}/revoke-sessions")
+async def admin_revoke_user_sessions(
+    user_id: int,
+    request: Request,
+    csrf_token: str = Form(...)
+):
+    admin = check_admin(request)
+    if not admin:
+        return RedirectResponse(url="/admin/login", status_code=302)
+    check_csrf(request, csrf_token, admin)
+
+    count = user_service.revoke_user_sessions(user_id)
+    auth_service.log_admin_action(
+        admin_id=admin["admin_id"],
+        admin_username=admin["username"],
+        role=admin["role"],
+        action="REVOKE_USER_SESSIONS",
+        resource="app_users",
+        resource_id=user_id,
+        ip_address=get_client_ip(request),
+        details={"revoked_count": count}
+    )
+    return RedirectResponse(url=f"/admin/users/{user_id}?msg={count}+sessions+revoked", status_code=302)

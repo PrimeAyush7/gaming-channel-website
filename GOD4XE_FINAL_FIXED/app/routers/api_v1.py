@@ -55,6 +55,13 @@ class UpdateFreeFireRequest(BaseModel):
 class UpdateAvatarRequest(BaseModel):
     avatar_url: str
 
+class UpdateProfileRequest(BaseModel):
+    username: Optional[str] = None
+    display_name: Optional[str] = None
+    ff_uid: Optional[str] = None
+    ff_ign: Optional[str] = None
+    avatar_url: Optional[str] = None
+
 class JoinTournamentRequest(BaseModel):
     ff_uid: str
     ff_ign: str
@@ -166,9 +173,31 @@ async def api_logout(user: dict = Depends(get_auth_user)):
 # --------------------------------------------------------------------------
 # 2. USER PROFILE & STATS
 # --------------------------------------------------------------------------
+@router.get("/users/check-username")
+async def api_check_username(username: str = Query(...)):
+    available, message = user_service.check_username_availability(username)
+    return {"success": True, "available": available, "message": message}
+
 @router.get("/users/profile")
 async def api_get_profile(user: dict = Depends(get_auth_user)):
-    return {"success": True, "profile": user}
+    profile = user_service.get_user_by_id(user["id"])
+    return {"success": True, "profile": profile}
+
+@router.put("/users/profile")
+async def api_update_profile(req: UpdateProfileRequest, user: dict = Depends(get_auth_user)):
+    try:
+        updated = user_service.update_user_profile(
+            user_id=user["id"],
+            username=req.username,
+            display_name=req.display_name,
+            ff_uid=req.ff_uid,
+            ff_ign=req.ff_ign
+        )
+        if req.avatar_url is not None:
+            updated = user_service.update_user_avatar(user["id"], req.avatar_url)
+        return {"success": True, "profile": updated}
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 @router.put("/users/freefire")
 async def api_update_freefire(req: UpdateFreeFireRequest, user: dict = Depends(get_auth_user)):
@@ -178,9 +207,24 @@ async def api_update_freefire(req: UpdateFreeFireRequest, user: dict = Depends(g
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
-@router.put("/users/profile")
-async def api_update_avatar(req: UpdateAvatarRequest, user: dict = Depends(get_auth_user)):
-    updated = user_service.update_user_avatar(user["id"], req.avatar_url)
+@router.post("/users/avatar/upload")
+async def api_upload_avatar(file: UploadFile = File(...), user: dict = Depends(get_auth_user)):
+    try:
+        file_bytes = await file.read()
+        updated = user_service.upload_user_avatar(
+            user_id=user["id"],
+            file_bytes=file_bytes,
+            filename=file.filename or "avatar.png",
+            content_type=file.content_type or "image/png"
+        )
+        return {"success": True, "avatar_url": updated["avatar_url"], "profile": updated}
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+@router.post("/users/avatar/remove")
+@router.delete("/users/avatar")
+async def api_remove_avatar(user: dict = Depends(get_auth_user)):
+    updated = user_service.remove_user_avatar(user["id"])
     return {"success": True, "profile": updated}
 
 @router.get("/users/matches")
@@ -201,7 +245,8 @@ async def api_list_tournaments(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0)
 ):
-    tournaments = tournament_service.list_tournaments(status_filter=status, limit=limit, offset=offset)
+    normalized_status = None if (not status or status.strip().upper() == "ALL") else status.strip().upper()
+    tournaments = tournament_service.list_tournaments(status_filter=normalized_status, limit=limit, offset=offset)
     return {"success": True, "count": len(tournaments), "tournaments": tournaments}
 
 @router.get("/tournaments/{tournament_id}")

@@ -83,6 +83,26 @@ def create_tournament(
 
     return get_tournament_by_id(t_id)
 
+
+def _format_tournament_row(r: dict) -> dict:
+    if not r:
+        return r
+    for field in ("start_time", "created_at", "updated_at"):
+        val = r.get(field)
+        if val is not None:
+            if hasattr(val, "isoformat"):
+                r[field] = val.isoformat()
+            elif isinstance(val, str):
+                r[field] = val
+            else:
+                r[field] = str(val)
+    if r.get("prize_distribution") and isinstance(r["prize_distribution"], str):
+        try:
+            r["prize_distribution"] = json.loads(r["prize_distribution"])
+        except Exception:
+            pass
+    return r
+
 def get_tournament_by_id(tournament_id: int, user_id: int = None) -> dict:
     with get_db() as conn:
         cursor = conn.cursor()
@@ -90,12 +110,7 @@ def get_tournament_by_id(tournament_id: int, user_id: int = None) -> dict:
         row = cursor.fetchone()
         if not row:
             return None
-        t = dict(row)
-        if t.get("prize_distribution") and isinstance(t["prize_distribution"], str):
-            try:
-                t["prize_distribution"] = json.loads(t["prize_distribution"])
-            except Exception:
-                pass
+        t = _format_tournament_row(dict(row))
 
         # Check user registration status
         t["is_user_joined"] = False
@@ -119,20 +134,14 @@ def list_tournaments(status_filter: str = None, limit: int = 50, offset: int = 0
         params = []
         if is_published_only:
             query += " AND is_published = 1"
-        if status_filter:
+        if status_filter and status_filter.strip().upper() not in ("ALL", ""):
             query += " AND status = %s"
-            params.append(status_filter.upper())
+            params.append(status_filter.strip().upper())
         query += " ORDER BY is_featured DESC, start_time ASC LIMIT %s OFFSET %s;"
         params.extend([limit, offset])
 
         cursor.execute(query, tuple(params))
-        rows = [dict(r) for r in cursor.fetchall()]
-        for r in rows:
-            if r.get("prize_distribution") and isinstance(r["prize_distribution"], str):
-                try:
-                    r["prize_distribution"] = json.loads(r["prize_distribution"])
-                except Exception:
-                    pass
+        rows = [_format_tournament_row(dict(r)) for r in cursor.fetchall()]
         return rows
 
 def join_tournament(tournament_id: int, user_id: int, ff_uid: str, ff_ign: str) -> dict:

@@ -309,9 +309,9 @@ def register_user(
 
         # Initialize profile
         cursor.execute("""
-            INSERT INTO user_profiles (user_id, avatar_url, rank_tier)
-            VALUES (%s, %s, %s);
-        """, (user_id, "/static/images/default-avatar.png", "Bronze"))
+            INSERT INTO user_profiles (user_id, display_name, avatar_url, rank_tier, is_custom_avatar, is_custom_username)
+            VALUES (%s, %s, %s, %s, 0, 0);
+        """, (user_id, username, "/static/images/default-avatar.png", "Bronze"))
 
         # Initialize diamond ledger account with 0 diamonds (registration awards zero free diamonds)
         cursor.execute("""
@@ -551,25 +551,88 @@ def verify_google_id_token(id_token_str: str, client_id: str = None) -> dict:
     logger.info(f"[GOOGLE_AUTH_JWKS_SUCCESS] Manual JWKS successfully verified token for sub={google_id}, email={email}")
     return claims
 
+
+def generate_clean_username(cursor, name: str, email: str = "") -> str:
+    raw = (name or "").strip()
+    if not raw and email:
+        raw = email.split("@")[0]
+    clean = re.sub(r"[\s\-]+", "_", raw.lower().strip())
+    clean = re.sub(r"[^a-z0-9_]", "", clean).strip("_")
+    clean = re.sub(r"_+", "_", clean)[:20]
+    if len(clean) < 3:
+        clean = "player"
+
+    # Try clean candidate directly
+    cursor.execute("SELECT 1 FROM app_users WHERE LOWER(username) = LOWER(%s);", (clean,))
+    if not cursor.fetchone():
+        return clean
+
+    # Try sequential numerical suffixes: _01 to _99
+    for i in range(1, 100):
+        suffix = f"{i:02d}"
+        cand = f"{clean[:25]}_{suffix}" if not clean.endswith("_") else f"{clean[:25]}{suffix}"
+        cursor.execute("SELECT 1 FROM app_users WHERE LOWER(username) = LOWER(%s);", (cand,))
+        if not cursor.fetchone():
+            return cand
+
+    # Random 3-digit suffix fallback
+    for _ in range(10):
+        cand = f"{clean[:24]}_{secrets.randbelow(900) + 100}"
+        cursor.execute("SELECT 1 FROM app_users WHERE LOWER(username) = LOWER(%s);", (cand,))
+        if not cursor.fetchone():
+            return cand
+
+    return f"{clean[:20]}_{secrets.token_hex(2)}"
 def authenticate_google_user(id_token_str: str, referral_code: str = None) -> tuple[dict, str]:
     claims = verify_google_id_token(id_token_str)
 
-    google_id = str(claims["sub"])
-    email = claims["email"]
-    name = claims.get("name", "")
+    google_id = str(claims["sub"]).strip()
+    email = claims.get("email", "").lower().strip()
+    name = claims.get("name", "").strip()
     avatar = claims.get("picture", "/static/images/default-avatar.png")
 
     with get_db() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT id FROM app_users WHERE google_id = %s OR email = %s;", (google_id, email))
+        # Look up strictly by stable Google sub identity first
+        cursor.execute("SELECT id, username, email FROM app_users WHERE google_id = %s;", (google_id,))
         existing = cursor.fetchone()
+
+        if not existing and email:
+            # Check by email to link Google account to existing user
+            cursor.execute("SELECT id, username, email FROM app_users WHERE email = %s;", (email,))
+            existing = cursor.fetchone()
+            if existing:
+                user_id = existing["id"] if isinstance(existing, dict) else existing[0]
+                cursor.execute("UPDATE app_users SET google_id = %s, updated_at = CURRENT_TIMESTAMP WHERE id = %s;", (google_id, user_id))
 
         if existing:
             user_id = existing["id"] if isinstance(existing, dict) else existing[0]
-            cursor.execute("UPDATE app_users SET google_id = %s WHERE id = %s;", (google_id, user_id))
+            # Safe profile synchronization:
+            cursor.execute("SELECT display_name, avatar_url, is_custom_avatar, is_custom_username FROM user_profiles WHERE user_id = %s;", (user_id,))
+            prof = cursor.fetchone()
+            prof_dict = dict(prof) if prof else {}
+
+            p_updates = []
+            p_params = []
+
+            # Only sync avatar from Google if user has not uploaded/chosen a custom avatar
+            if not prof_dict.get("is_custom_avatar", 0) and avatar:
+                p_updates.append("avatar_url = %s")
+                p_params.append(avatar)
+
+            # Only populate display_name from Google name if display_name is not already set
+            if not prof_dict.get("display_name") and name:
+                p_updates.append("display_name = %s")
+                p_params.append(name)
+
+            if p_updates:
+                p_updates.append("updated_at = CURRENT_TIMESTAMP")
+                p_params.append(user_id)
+                cursor.execute(f"UPDATE user_profiles SET {', '.join(p_updates)} WHERE user_id = %s;", tuple(p_params))
         else:
-            base_username = re.sub(r'[^a-zA-Z0-9_]', '', name.replace(" ", "_").lower())[:15] or "gamer"
-            username = f"{base_username}_{secrets.token_hex(3)}"
+            # First-time Google registration: clean username candidate from Google name
+            clean_username = generate_clean_username(cursor, name, email)
+            display_name = name if name else clean_username
             ref_code = generate_referral_code()
 
             cursor.execute("""
@@ -577,14 +640,14 @@ def authenticate_google_user(id_token_str: str, referral_code: str = None) -> tu
                     username, email, google_id, auth_provider, referral_code, is_active, is_verified
                 ) VALUES (%s, %s, %s, %s, %s, 1, 1)
                 RETURNING id;
-            """, (username, email, google_id, "GOOGLE", ref_code))
+            """, (clean_username, email, google_id, "GOOGLE", ref_code))
             res = cursor.fetchone()
             user_id = res["id"] if isinstance(res, dict) else res[0]
 
             cursor.execute("""
-                INSERT INTO user_profiles (user_id, avatar_url, rank_tier)
-                VALUES (%s, %s, 'Bronze');
-            """, (user_id, avatar))
+                INSERT INTO user_profiles (user_id, display_name, avatar_url, rank_tier, is_custom_avatar, is_custom_username)
+                VALUES (%s, %s, %s, 'Bronze', 0, 0);
+            """, (user_id, display_name, avatar))
 
             # Initialize diamond ledger account with 0 diamonds (registration awards zero free diamonds)
             cursor.execute("""
@@ -606,18 +669,10 @@ def authenticate_google_user(id_token_str: str, referral_code: str = None) -> tu
                             ON CONFLICT (referee_id) DO NOTHING;
                         """, (ref_id, user_id))
 
-        cursor.execute("""
-            SELECT u.id, u.username, u.email, u.phone, u.referral_code, u.auth_provider,
-                   p.avatar_url, p.ff_uid, p.ff_ign, p.rank_tier, a.balance AS diamond_balance
-            FROM app_users u
-            JOIN user_profiles p ON u.id = p.user_id
-            JOIN diamond_accounts a ON u.id = a.user_id
-            WHERE u.id = %s;
-        """, (user_id,))
-        user_data = dict(cursor.fetchone())
-
+    user_data = get_user_by_id(user_id)
     token = encode_jwt({"sub": user_id, "username": user_data["username"]})
     return user_data, token
+
 
 # --------------------------------------------------------------------------
 # ZERO-COST MOBILE OTP
@@ -747,8 +802,12 @@ def get_user_by_id(user_id: int) -> dict:
         cursor = conn.cursor()
         cursor.execute("""
             SELECT u.id, u.username, u.email, u.phone, u.referral_code, u.auth_provider,
-                   u.is_active, u.is_verified, u.created_at,
-                   p.avatar_url, p.ff_uid, p.ff_ign, p.total_matches, p.wins, p.losses,
+                   u.google_id, u.is_active, u.is_verified, u.created_at,
+                   COALESCE(p.display_name, u.username) AS display_name,
+                   COALESCE(p.avatar_url, '/static/images/default-avatar.png') AS avatar_url,
+                   COALESCE(p.is_custom_avatar, 0) AS is_custom_avatar,
+                   COALESCE(p.is_custom_username, 0) AS is_custom_username,
+                   p.ff_uid, p.ff_ign, p.total_matches, p.wins, p.losses,
                    p.kills, p.points, p.rank_tier,
                    COALESCE(a.balance, 0) AS diamond_balance,
                    COALESCE(a.locked_balance, 0) AS locked_balance
@@ -758,7 +817,14 @@ def get_user_by_id(user_id: int) -> dict:
             WHERE u.id = %s;
         """, (user_id,))
         row = cursor.fetchone()
-        return dict(row) if row else None
+        if not row:
+            return None
+        u_dict = dict(row)
+        u_dict["is_google_linked"] = bool(u_dict.get("google_id"))
+        if u_dict.get("created_at") and hasattr(u_dict["created_at"], "isoformat"):
+            u_dict["created_at"] = u_dict["created_at"].isoformat()
+        return u_dict
+
 
 def get_current_user(request: Request) -> dict:
     auth_header = request.headers.get("Authorization", "")
@@ -794,27 +860,318 @@ def get_current_user(request: Request) -> dict:
     return user
 
 def update_user_freefire(user_id: int, ff_uid: str, ff_ign: str) -> dict:
-    ff_uid = ff_uid.strip() if ff_uid else ""
-    ff_ign = ff_ign.strip() if ff_ign else ""
-    if not ff_uid or not ff_ign:
-        raise ValueError("Both Free Fire UID and in-game name (IGN) are required")
-
-    with get_db() as conn:
-        cursor = conn.cursor()
-        cursor.execute("""
-            UPDATE user_profiles
-            SET ff_uid = %s, ff_ign = %s, updated_at = CURRENT_TIMESTAMP
-            WHERE user_id = %s;
-        """, (ff_uid, ff_ign, user_id))
-
-    return get_user_by_id(user_id)
+    return update_user_profile(user_id=user_id, ff_uid=ff_uid, ff_ign=ff_ign)
 
 def update_user_avatar(user_id: int, avatar_url: str) -> dict:
     with get_db() as conn:
         cursor = conn.cursor()
         cursor.execute("""
             UPDATE user_profiles
-            SET avatar_url = %s, updated_at = CURRENT_TIMESTAMP
+            SET avatar_url = %s, is_custom_avatar = 1, updated_at = CURRENT_TIMESTAMP
             WHERE user_id = %s;
         """, (avatar_url.strip(), user_id))
     return get_user_by_id(user_id)
+
+# --------------------------------------------------------------------------
+# PROFILE EDITING & VALIDATION
+# --------------------------------------------------------------------------
+def check_username_availability(username: str, exclude_user_id: int = None) -> tuple[bool, str]:
+    if not username:
+        return False, "Username is required"
+    username = username.strip()
+    if len(username) < 3 or len(username) > 30:
+        return False, "Username must be between 3 and 30 characters"
+    if not re.match(r"^[a-zA-Z0-9_]+$", username):
+        return False, "Username can only contain letters, numbers, and underscores"
+
+    with get_db() as conn:
+        cursor = conn.cursor()
+        if exclude_user_id:
+            cursor.execute("SELECT 1 FROM app_users WHERE LOWER(username) = LOWER(%s) AND id != %s;", (username, exclude_user_id))
+        else:
+            cursor.execute("SELECT 1 FROM app_users WHERE LOWER(username) = LOWER(%s);", (username,))
+        if cursor.fetchone():
+            return False, "Username is already taken"
+
+    return True, "Username is available"
+
+def update_user_profile(
+    user_id: int,
+    username: str = None,
+    display_name: str = None,
+    ff_uid: str = None,
+    ff_ign: str = None
+) -> dict:
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, username FROM app_users WHERE id = %s;", (user_id,))
+        curr = cursor.fetchone()
+        if not curr:
+            raise ValueError("User not found")
+        curr_dict = dict(curr)
+
+        # Update username if provided and changed
+        if username and username.strip() and username.strip().lower() != curr_dict["username"].lower():
+            valid, msg = check_username_availability(username, exclude_user_id=user_id)
+            if not valid:
+                raise ValueError(msg)
+            cursor.execute("""
+                UPDATE app_users
+                SET username = %s, updated_at = CURRENT_TIMESTAMP
+                WHERE id = %s;
+            """, (username.strip(), user_id))
+            cursor.execute("""
+                UPDATE user_profiles
+                SET is_custom_username = 1, updated_at = CURRENT_TIMESTAMP
+                WHERE user_id = %s;
+            """, (user_id,))
+
+        # Update profile fields
+        p_updates = []
+        p_params = []
+
+        if display_name is not None:
+            clean_disp = display_name.strip()
+            if len(clean_disp) > 50:
+                raise ValueError("Display name cannot exceed 50 characters")
+            p_updates.append("display_name = %s")
+            p_params.append(clean_disp)
+
+        if ff_uid is not None:
+            clean_uid = ff_uid.strip()
+            if clean_uid and not re.match(r"^[0-9A-Za-z_-]{4,25}$", clean_uid):
+                raise ValueError("Free Fire UID must be 4-25 characters")
+            p_updates.append("ff_uid = %s")
+            p_params.append(clean_uid)
+
+        if ff_ign is not None:
+            clean_ign = ff_ign.strip()
+            if len(clean_ign) > 50:
+                raise ValueError("Free Fire IGN cannot exceed 50 characters")
+            p_updates.append("ff_ign = %s")
+            p_params.append(clean_ign)
+
+        if p_updates:
+            p_updates.append("updated_at = CURRENT_TIMESTAMP")
+            p_params.append(user_id)
+            cursor.execute(f"""
+                UPDATE user_profiles
+                SET {', '.join(p_updates)}
+                WHERE user_id = %s;
+            """, tuple(p_params))
+
+    return get_user_by_id(user_id)
+
+def upload_user_avatar(user_id: int, file_bytes: bytes, filename: str, content_type: str) -> dict:
+    import io
+    from app.config import APP_DIR
+    if not file_bytes:
+        raise ValueError("Avatar file data is empty")
+    if len(file_bytes) > 5 * 1024 * 1024:
+        raise ValueError("Avatar image exceeds 5MB limit")
+
+    allowed_types = {
+        "image/jpeg": "jpg",
+        "image/png": "png",
+        "image/webp": "webp",
+        "image/gif": "gif"
+    }
+    ext = allowed_types.get((content_type or "").lower().strip())
+    if not ext:
+        for k, v in [(".jpg", "jpg"), (".jpeg", "jpg"), (".png", "png"), (".webp", "webp")]:
+            if filename.lower().endswith(k):
+                ext = v
+                break
+    if not ext:
+        raise ValueError("Invalid image format. Supported formats: JPEG, PNG, WEBP, GIF")
+
+    try:
+        from PIL import Image
+        img = Image.open(io.BytesIO(file_bytes))
+        img.verify()
+    except Exception:
+        raise ValueError("Corrupted or invalid image file")
+
+    safe_filename = f"avatar_{user_id}_{secrets.token_hex(6)}.{ext}"
+    target_dir = APP_DIR / "static" / "uploads"
+    target_dir.mkdir(parents=True, exist_ok=True)
+    target_path = target_dir / safe_filename
+
+    with open(target_path, "wb") as f:
+        f.write(file_bytes)
+
+    avatar_url = f"/static/uploads/{safe_filename}"
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE user_profiles
+            SET avatar_url = %s, is_custom_avatar = 1, updated_at = CURRENT_TIMESTAMP
+            WHERE user_id = %s;
+        """, (avatar_url, user_id))
+
+    return get_user_by_id(user_id)
+
+def remove_user_avatar(user_id: int) -> dict:
+    default_avatar = "/static/images/default-avatar.png"
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE user_profiles
+            SET avatar_url = %s, is_custom_avatar = 0, updated_at = CURRENT_TIMESTAMP
+            WHERE user_id = %s;
+        """, (default_avatar, user_id))
+    return get_user_by_id(user_id)
+
+# --------------------------------------------------------------------------
+# ADMIN PANEL: USER MANAGEMENT
+# --------------------------------------------------------------------------
+def list_app_users(
+    search: str = None,
+    provider_filter: str = None,
+    status_filter: str = None,
+    limit: int = 50,
+    offset: int = 0
+) -> tuple[list[dict], int]:
+    with get_db() as conn:
+        cursor = conn.cursor()
+        base_where = "WHERE 1=1"
+        params = []
+
+        if search and search.strip():
+            term = f"%{search.strip().lower()}%"
+            base_where += " AND (LOWER(u.username) LIKE %s OR LOWER(COALESCE(u.email, '')) LIKE %s OR LOWER(COALESCE(p.display_name, '')) LIKE %s OR LOWER(COALESCE(p.ff_uid, '')) LIKE %s OR LOWER(COALESCE(p.ff_ign, '')) LIKE %s)"
+            params.extend([term, term, term, term, term])
+
+        if provider_filter and provider_filter.strip().upper() not in ("ALL", ""):
+            base_where += " AND u.auth_provider = %s"
+            params.append(provider_filter.strip().upper())
+
+        if status_filter and status_filter.strip().upper() not in ("ALL", ""):
+            if status_filter.strip().upper() == "ACTIVE":
+                base_where += " AND u.is_active = 1"
+            elif status_filter.strip().upper() == "DISABLED":
+                base_where += " AND u.is_active = 0"
+
+        count_query = f"""
+            SELECT COUNT(*) AS total
+            FROM app_users u
+            LEFT JOIN user_profiles p ON u.id = p.user_id
+            {base_where};
+        """
+        cursor.execute(count_query, tuple(params))
+        total_row = cursor.fetchone()
+        total = total_row["total"] if isinstance(total_row, dict) else total_row[0]
+
+        query = f"""
+            SELECT u.id, u.username, u.email, u.phone, u.referral_code, u.auth_provider,
+                   u.google_id, u.is_active, u.is_verified, u.created_at,
+                   COALESCE(p.display_name, u.username) AS display_name,
+                   COALESCE(p.avatar_url, '/static/images/default-avatar.png') AS avatar_url,
+                   p.ff_uid, p.ff_ign, p.rank_tier,
+                   COALESCE(a.balance, 0) AS diamond_balance,
+                   (SELECT COUNT(*) FROM referrals WHERE referrer_id = u.id AND status = 'SUCCESSFUL') AS referral_count
+            FROM app_users u
+            LEFT JOIN user_profiles p ON u.id = p.user_id
+            LEFT JOIN diamond_accounts a ON u.id = a.user_id
+            {base_where}
+            ORDER BY u.id DESC
+            LIMIT %s OFFSET %s;
+        """
+        fetch_params = list(params) + [limit, offset]
+        cursor.execute(query, tuple(fetch_params))
+        users = []
+        for r in cursor.fetchall():
+            d = dict(r)
+            d["is_google_linked"] = bool(d.get("google_id"))
+            if d.get("created_at") and hasattr(d["created_at"], "isoformat"):
+                d["created_at"] = d["created_at"].isoformat()
+            users.append(d)
+
+        return users, total
+
+def get_user_full_admin_details(user_id: int) -> dict:
+    user = get_user_by_id(user_id)
+    if not user:
+        return None
+
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT id, amount, tx_type AS transaction_type, reference_id, balance_after, description, created_at
+            FROM diamond_transactions
+            WHERE user_id = %s
+            ORDER BY id DESC
+            LIMIT 30;
+        """, (user_id,))
+        txs = []
+        for row in cursor.fetchall():
+            d = dict(row)
+            if d.get("created_at") and hasattr(d["created_at"], "isoformat"):
+                d["created_at"] = d["created_at"].isoformat()
+            txs.append(d)
+        user["transactions"] = txs
+
+        cursor.execute("""
+            SELECT t.id AS tournament_id, t.title, t.game, t.mode, t.status, t.start_time,
+                   p.slot_number, p.joined_at, p.payment_status, p.diamonds_paid
+            FROM tournament_participants p
+            JOIN tournaments t ON p.tournament_id = t.id
+            WHERE p.user_id = %s
+            ORDER BY p.joined_at DESC
+            LIMIT 30;
+        """, (user_id,))
+        tourns = []
+        for row in cursor.fetchall():
+            d = dict(row)
+            if d.get("start_time") and hasattr(d["start_time"], "isoformat"):
+                d["start_time"] = d["start_time"].isoformat()
+            if d.get("joined_at") and hasattr(d["joined_at"], "isoformat"):
+                d["joined_at"] = d["joined_at"].isoformat()
+            tourns.append(d)
+        user["tournaments"] = tourns
+
+        cursor.execute("""
+            SELECT id, device_info, ip_address, expires_at, created_at
+            FROM user_sessions
+            WHERE user_id = %s
+            ORDER BY id DESC
+            LIMIT 10;
+        """, (user_id,))
+        sessions = []
+        for row in cursor.fetchall():
+            d = dict(row)
+            if d.get("expires_at") and hasattr(d["expires_at"], "isoformat"):
+                d["expires_at"] = d["expires_at"].isoformat()
+            if d.get("created_at") and hasattr(d["created_at"], "isoformat"):
+                d["created_at"] = d["created_at"].isoformat()
+            sessions.append(d)
+        user["sessions"] = sessions
+
+    return user
+
+def toggle_user_status(user_id: int, is_active: int) -> bool:
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE app_users SET is_active = %s, updated_at = CURRENT_TIMESTAMP WHERE id = %s;", (is_active, user_id))
+    return True
+
+def admin_reset_user_password(user_id: int, new_password: str) -> bool:
+    if not new_password or len(new_password) < 6:
+        raise ValueError("Password must be at least 6 characters")
+    p_hash, salt = hash_password(new_password)
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE app_users
+            SET password_hash = %s, salt = %s, updated_at = CURRENT_TIMESTAMP
+            WHERE id = %s;
+        """, (p_hash, salt, user_id))
+        cursor.execute("DELETE FROM user_sessions WHERE user_id = %s;", (user_id,))
+    return True
+
+def revoke_user_sessions(user_id: int) -> int:
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM user_sessions WHERE user_id = %s;", (user_id,))
+        count = cursor.rowcount
+    return count

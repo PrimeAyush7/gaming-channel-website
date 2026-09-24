@@ -258,12 +258,22 @@ async def public_download_apk():
         filename="god4xe_esports.apk"
     )
 
+@router.get("/download/qr")
+async def public_download_qr(format: str = "svg"):
+    from app.services import qr_generator
+    if format.lower() == "png":
+        png_bytes = qr_generator.generate_qr_png_bytes()
+        return Response(content=png_bytes, media_type="image/png")
+    svg_str = qr_generator.generate_qr_svg()
+    return Response(content=svg_str, media_type="image/svg+xml")
+
 @router.get("/tournaments", response_class=HTMLResponse)
 async def public_tournaments(request: Request, status: str = None):
     settings = settings_service.get_all_settings()
     nav_sections = section_service.get_all_sections(only_nav=True)
     ads = ad_service.get_ad_settings()
-    tournaments = tournament_service.list_tournaments(status_filter=status, limit=30, is_published_only=True)
+    normalized_status = None if (not status or status.strip().upper() == "ALL") else status.strip().upper()
+    tournaments = tournament_service.list_tournaments(status_filter=normalized_status, limit=50, is_published_only=True)
 
     return templates.TemplateResponse(request=request, name="public/tournaments.html", context={
         "request": request,
@@ -272,7 +282,7 @@ async def public_tournaments(request: Request, status: str = None):
         "nav_sections": nav_sections,
         "ads": ads,
         "tournaments": tournaments,
-        "current_filter": status or "ALL"
+        "current_filter": status.strip().upper() if status else "ALL"
     })
 
 @router.get("/tournaments/{tournament_id}", response_class=HTMLResponse)

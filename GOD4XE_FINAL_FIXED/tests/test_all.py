@@ -1485,5 +1485,265 @@ class TestEsportsFullSuite(unittest.TestCase):
         self.assertEqual(res_static.status_code, 200)
         self.assertEqual(res_static.headers.get('content-type'), 'application/vnd.android.package-archive')
 
+
+    def test_esports_16_google_clean_username_and_profile_sync(self):
+        from cryptography.hazmat.primitives.asymmetric import rsa, padding
+        from cryptography.hazmat.primitives import hashes, serialization
+        from app.services.users_auth import register_trusted_google_key
+        import base64
+        import json
+        import time
+
+        priv_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        pub_pem = priv_key.public_key().public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        ).decode('utf-8')
+        kid = 'test-clean-google-kid'
+        register_trusted_google_key(kid, pub_pem)
+
+        def make_tok(sub, name, email):
+            h = base64.urlsafe_b64encode(json.dumps({'alg': 'RS256', 'typ': 'JWT', 'kid': kid}).encode()).decode().rstrip('=')
+            now = int(time.time())
+            p = base64.urlsafe_b64encode(json.dumps({
+                'sub': sub,
+                'email': email,
+                'name': name,
+                'picture': 'https://lh3.googleusercontent.com/avatar1.jpg',
+                'iss': 'https://accounts.google.com',
+                'exp': now + 3600,
+                'iat': now
+            }).encode()).decode().rstrip('=')
+            msg = f"{h}.{p}".encode('utf-8')
+            sig = priv_key.sign(msg, padding.PKCS1v15(), hashes.SHA256())
+            return f"{h}.{p}." + base64.urlsafe_b64encode(sig).decode().rstrip('=')
+
+        # 1. First Google user: 'Ayush Rathore' -> clean username 'ayush_rathore'
+        tok1 = make_tok('google_sub_ayush_01', 'Ayush Rathore', 'ayush.rathore@example.com')
+        res1 = self.client.post('/api/v1/auth/google', json={'id_token': tok1})
+        self.assertEqual(res1.status_code, 200)
+        u1 = res1.json()['user']
+        self.assertEqual(u1['username'], 'ayush_rathore')
+        self.assertEqual(u1['display_name'], 'Ayush Rathore')
+        self.assertTrue(u1['is_google_linked'])
+
+        # 2. Second Google user with same name -> clean candidate with suffix 'ayush_rathore_01' (no ugly hex hash)
+        tok2 = make_tok('google_sub_ayush_02', 'Ayush Rathore', 'ayush.second@example.com')
+        res2 = self.client.post('/api/v1/auth/google', json={'id_token': tok2})
+        self.assertEqual(res2.status_code, 200)
+        u2 = res2.json()['user']
+        self.assertEqual(u2['username'], 'ayush_rathore_01')
+        self.assertEqual(u2['display_name'], 'Ayush Rathore')
+
+        # 3. User 1 customizes avatar and username
+        token1 = res1.json()['token']
+        up_res = self.client.put(
+            '/api/v1/users/profile',
+            headers={'Authorization': f'Bearer {token1}'},
+            json={'username': 'ayush_custom', 'display_name': 'Ayush Gaming', 'avatar_url': '/static/uploads/custom_avatar.png'}
+        )
+        self.assertEqual(up_res.status_code, 200)
+        self.assertEqual(up_res.json()['profile']['username'], 'ayush_custom')
+        self.assertEqual(up_res.json()['profile']['display_name'], 'Ayush Gaming')
+
+        # 4. User 1 logs in with Google again -> verify custom username and custom avatar are NOT overwritten
+        res1_again = self.client.post('/api/v1/auth/google', json={'id_token': tok1})
+        self.assertEqual(res1_again.status_code, 200)
+        u1_again = res1_again.json()['user']
+        self.assertEqual(u1_again['username'], 'ayush_custom')
+        self.assertEqual(u1_again['display_name'], 'Ayush Gaming')
+        self.assertEqual(u1_again['avatar_url'], '/static/uploads/custom_avatar.png')
+
+    def test_esports_17_profile_editing_and_avatar_upload(self):
+        # Register a fresh player
+        reg = self.client.post('/api/v1/auth/register', json={
+            'username': 'profile_tester',
+            'email': 'profile_tester@example.com',
+            'password': 'Password123!'
+        })
+        self.assertEqual(reg.status_code, 201)
+        token = reg.json()['token']
+
+        # 1. Check username availability
+        avail_ok = self.client.get('/api/v1/users/check-username?username=brand_new_name')
+        self.assertEqual(avail_ok.status_code, 200)
+        self.assertTrue(avail_ok.json()['available'])
+
+        avail_taken = self.client.get('/api/v1/users/check-username?username=profile_tester')
+        self.assertEqual(avail_taken.status_code, 200)
+        self.assertFalse(avail_taken.json()['available'])
+
+        avail_invalid = self.client.get('/api/v1/users/check-username?username=hi')
+        self.assertEqual(avail_invalid.status_code, 200)
+        self.assertFalse(avail_invalid.json()['available'])
+
+        # 2. Update profile (username, display name, Free Fire credentials)
+        up_res = self.client.put(
+            '/api/v1/users/profile',
+            headers={'Authorization': f'Bearer {token}'},
+            json={
+                'username': 'profile_renamed',
+                'display_name': 'Renamed Champion',
+                'ff_uid': '77889900',
+                'ff_ign': 'CHAMPION_OP'
+            }
+        )
+        self.assertEqual(up_res.status_code, 200)
+        prof = up_res.json()['profile']
+        self.assertEqual(prof['username'], 'profile_renamed')
+        self.assertEqual(prof['display_name'], 'Renamed Champion')
+        self.assertEqual(prof['ff_uid'], '77889900')
+        self.assertEqual(prof['ff_ign'], 'CHAMPION_OP')
+
+        # 3. Upload real PNG avatar
+        from PIL import Image
+        import io
+        img = Image.new('RGB', (64, 64), color=(168, 85, 247))
+        img_bytes = io.BytesIO()
+        img.save(img_bytes, format='PNG')
+        img_bytes.seek(0)
+
+        upload_res = self.client.post(
+            '/api/v1/users/avatar/upload',
+            headers={'Authorization': f'Bearer {token}'},
+            files={'file': ('avatar.png', img_bytes.getvalue(), 'image/png')}
+        )
+        self.assertEqual(upload_res.status_code, 200)
+        self.assertTrue(upload_res.json()['success'])
+        self.assertIn('/static/uploads/avatar_', upload_res.json()['avatar_url'])
+
+        # 4. Upload invalid non-image file -> MUST FAIL (HTTP 400)
+        bad_upload = self.client.post(
+            '/api/v1/users/avatar/upload',
+            headers={'Authorization': f'Bearer {token}'},
+            files={'file': ('malicious.exe', b'MZExecutableCodeNotImage', 'application/octet-stream')}
+        )
+        self.assertEqual(bad_upload.status_code, 400)
+
+        # 5. Remove avatar -> resets to default
+        rm_res = self.client.post(
+            '/api/v1/users/avatar/remove',
+            headers={'Authorization': f'Bearer {token}'}
+        )
+        self.assertEqual(rm_res.status_code, 200)
+        self.assertEqual(rm_res.json()['profile']['avatar_url'], '/static/images/default-avatar.png')
+
+    def test_esports_18_admin_user_management(self):
+        from app.services import users_auth as user_service
+        # 1. Admin setup & login
+        auth_service.create_admin_with_role("user_mgmt_admin", "AdminPass999!", "SUPER_ADMIN", "user_mgmt_admin@god4xe.com")
+        login_res = self.client.post('/admin/login', data={'username': 'user_mgmt_admin', 'password': 'AdminPass999!'}, follow_redirects=False)
+        self.assertEqual(login_res.status_code, 302)
+        cookie = login_res.cookies.get("nexus_session")
+        with get_db() as conn:
+            cur = conn.cursor()
+            cur.execute("SELECT csrf_token FROM sessions WHERE session_id = %s;", (cookie,))
+            csrf_token = cur.fetchone()["csrf_token"]
+
+        client_auth = {"nexus_session": cookie}
+
+        # 2. GET /admin/users lists all users
+        users_res = self.client.get('/admin/users', cookies=client_auth)
+        self.assertEqual(users_res.status_code, 200)
+        self.assertIn('App Users Management', users_res.text)
+        self.assertIn('ayush_rathore', users_res.text)
+
+        # 3. Security check: User password hashes/plaintext MUST NEVER be exposed in the HTML
+        self.assertNotIn('$2b$', users_res.text)
+        self.assertNotIn('pbkdf2', users_res.text)
+        self.assertNotIn('Password123!', users_res.text)
+
+        # 4. GET /admin/users/{id} shows detailed profile & ledger
+        u_info = user_service.get_user_by_id(1)
+        u_id = u_info['id']
+        detail_res = self.client.get(f'/admin/users/{u_id}', cookies=client_auth)
+        self.assertEqual(detail_res.status_code, 200)
+        self.assertIn('Diamond Ledger', detail_res.text)
+        self.assertIn('Tournament Participation', detail_res.text)
+        self.assertNotIn('Password123!', detail_res.text)
+
+        # 5. Admin deactivates user
+        stat_res = self.client.post(
+            f'/admin/users/{u_id}/status',
+            cookies=client_auth,
+            data={'is_active': 0, 'csrf_token': csrf_token},
+            follow_redirects=False
+        )
+        self.assertEqual(stat_res.status_code, 302)
+        u_deact = user_service.get_user_by_id(u_id)
+        self.assertEqual(u_deact['is_active'], 0)
+
+        # 6. Admin reactivates user
+        stat_res2 = self.client.post(
+            f'/admin/users/{u_id}/status',
+            cookies=client_auth,
+            data={'is_active': 1, 'csrf_token': csrf_token},
+            follow_redirects=False
+        )
+        self.assertEqual(stat_res2.status_code, 302)
+        u_act = user_service.get_user_by_id(u_id)
+        self.assertEqual(u_act['is_active'], 1)
+
+        # 7. Admin resets password securely
+        reset_res = self.client.post(
+            f'/admin/users/{u_id}/reset-password',
+            cookies=client_auth,
+            data={'new_password': 'NewSecurePass99!', 'csrf_token': csrf_token},
+            follow_redirects=False
+        )
+        self.assertEqual(reset_res.status_code, 302)
+
+        # 8. User can log in with new password; old password fails
+        old_login = self.client.post('/api/v1/auth/login', json={'identity': u_info['username'], 'password': 'OldPassword_Wrong'})
+        self.assertEqual(old_login.status_code, 401)
+
+        new_login = self.client.post('/api/v1/auth/login', json={'identity': u_info['username'], 'password': 'NewSecurePass99!'})
+        self.assertEqual(new_login.status_code, 200)
+    def test_esports_19_tournaments_page_all_filters_and_empty_state(self):
+        # 1. Test GET /tournaments (must return HTTP 200 without TypeError on start_time datetime)
+        t_all = self.client.get('/tournaments')
+        self.assertEqual(t_all.status_code, 200)
+        self.assertIn('Tournaments Arena', t_all.text)
+
+        # 2. Test status=ALL
+        t_filter_all = self.client.get('/tournaments?status=ALL')
+        self.assertEqual(t_filter_all.status_code, 200)
+
+        # 3. Test status=UPCOMING
+        t_up = self.client.get('/tournaments?status=UPCOMING')
+        self.assertEqual(t_up.status_code, 200)
+
+        # 4. Test status=LIVE
+        t_live = self.client.get('/tournaments?status=LIVE')
+        self.assertEqual(t_live.status_code, 200)
+
+        # 5. Test status=COMPLETED
+        t_comp = self.client.get('/tournaments?status=COMPLETED')
+        self.assertEqual(t_comp.status_code, 200)
+
+        # 6. Test empty state filter
+        t_empty = self.client.get('/tournaments?status=CANCELLED')
+        self.assertEqual(t_empty.status_code, 200)
+        self.assertIn('No Tournaments Found', t_empty.text)
+
+    def test_esports_20_scannable_qr_code_and_apk_endpoint(self):
+        # 1. Test /download/qr endpoint
+        qr_svg = self.client.get('/download/qr')
+        self.assertEqual(qr_svg.status_code, 200)
+        self.assertEqual(qr_svg.headers.get('content-type'), 'image/svg+xml')
+        self.assertIn('<svg', qr_svg.text)
+        self.assertIn('viewBox', qr_svg.text)
+
+        # 2. Test static QR SVG
+        qr_static = self.client.get('/static/images/qr_download_apk.svg')
+        self.assertEqual(qr_static.status_code, 200)
+        self.assertIn('<svg', qr_static.text)
+
+        # 3. Test desktop navigation: clean single ESPORTS item with badge, no duplicate button
+        home_page = self.client.get('/')
+        self.assertEqual(home_page.status_code, 200)
+        self.assertIn('⚡ ESPORTS', home_page.text)
+        self.assertNotIn('btn-header-esports', home_page.text)
+
 if __name__ == "__main__":
     unittest.main()

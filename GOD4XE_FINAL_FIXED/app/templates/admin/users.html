@@ -1,0 +1,155 @@
+{% extends "admin/base.html" %}
+
+{% block title %}App Users Management - Admin{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+  <div>
+    <h1 style="font-size: 1.8rem; font-weight: 800; color: #fff; margin-bottom: 0.25rem;">👤 App Users Management</h1>
+    <p style="color: var(--admin-muted); font-size: 0.9rem;">Total registered players: <strong>{{ total }}</strong></p>
+  </div>
+</div>
+
+{% if msg %}
+<div class="alert alert-success" style="margin-bottom: 1.5rem; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; padding: 0.75rem 1.25rem; border-radius: 8px;">
+  ✓ {{ msg }}
+</div>
+{% endif %}
+
+<!-- Search & Filters -->
+<div class="admin-card" style="margin-bottom: 1.5rem; padding: 1.25rem;">
+  <form method="GET" action="/admin/users" style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;">
+    <div style="flex: 1 1 240px;">
+      <input type="text" name="q" value="{{ q }}" placeholder="Search username, display name, email, Free Fire UID..." class="form-control" style="width: 100%; padding: 0.6rem 0.9rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); color: #fff; border-radius: 8px;">
+    </div>
+    <div>
+      <select name="provider" class="form-control" style="padding: 0.6rem 0.9rem; background: #1f0b38; border: 1px solid var(--border-subtle); color: #fff; border-radius: 8px;">
+        <option value="ALL" {% if provider == 'ALL' %}selected{% endif %}>All Providers</option>
+        <option value="GOOGLE" {% if provider == 'GOOGLE' %}selected{% endif %}>Google</option>
+        <option value="PASSWORD" {% if provider == 'PASSWORD' %}selected{% endif %}>Email / Password</option>
+        <option value="OTP" {% if provider == 'OTP' %}selected{% endif %}>Phone OTP</option>
+      </select>
+    </div>
+    <div>
+      <select name="status_filter" class="form-control" style="padding: 0.6rem 0.9rem; background: #1f0b38; border: 1px solid var(--border-subtle); color: #fff; border-radius: 8px;">
+        <option value="ALL" {% if status_filter == 'ALL' %}selected{% endif %}>All Statuses</option>
+        <option value="ACTIVE" {% if status_filter == 'ACTIVE' %}selected{% endif %}>Active</option>
+        <option value="DISABLED" {% if status_filter == 'DISABLED' %}selected{% endif %}>Disabled</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.25rem; border-radius: 8px; font-weight: 600;">Filter Users</button>
+    {% if q or provider != 'ALL' or status_filter != 'ALL' %}
+    <a href="/admin/users" class="btn btn-outline" style="padding: 0.6rem 1rem; text-decoration: none; border-radius: 8px; color: var(--admin-muted);">Reset</a>
+    {% endif %}
+  </form>
+</div>
+
+<!-- Users Table -->
+<div class="admin-card" style="padding: 0; overflow: hidden;">
+  <div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
+      <thead>
+        <tr style="background: rgba(168, 85, 247, 0.08); border-bottom: 1px solid var(--border-subtle); color: var(--admin-dim);">
+          <th style="padding: 1rem;">ID</th>
+          <th style="padding: 1rem;">Player</th>
+          <th style="padding: 1rem;">Email / Phone</th>
+          <th style="padding: 1rem;">Auth Provider</th>
+          <th style="padding: 1rem;">Google Status</th>
+          <th style="padding: 1rem;">Free Fire Details</th>
+          <th style="padding: 1rem;">Diamonds</th>
+          <th style="padding: 1rem;">Status</th>
+          <th style="padding: 1rem;">Registered</th>
+          <th style="padding: 1rem; text-align: right;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if users %}
+          {% for u in users %}
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.15s ease;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+            <td style="padding: 0.85rem 1rem; font-weight: 700; color: var(--admin-muted);">#{{ u.id }}</td>
+            <td style="padding: 0.85rem 1rem;">
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <img src="{{ u.avatar_url }}" alt="avatar" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-glow);" onerror="this.src='/static/images/default-avatar.png';">
+                <div>
+                  <div style="font-weight: 700; color: #fff;">{{ u.display_name }}</div>
+                  <div style="color: var(--admin-dim); font-size: 0.8rem;">@{{ u.username }}</div>
+                </div>
+              </div>
+            </td>
+            <td style="padding: 0.85rem 1rem;">
+              <div style="color: #fff;">{{ u.email or '-' }}</div>
+              {% if u.phone %}<div style="color: var(--admin-muted); font-size: 0.78rem;">{{ u.phone }}</div>{% endif %}
+            </td>
+            <td style="padding: 0.85rem 1rem;">
+              {% if u.auth_provider == 'GOOGLE' %}
+              <span class="badge" style="background: rgba(66, 133, 244, 0.2); color: #60a5fa; border: 1px solid #3b82f6;">GOOGLE</span>
+              {% elif u.auth_provider == 'PASSWORD' %}
+              <span class="badge" style="background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid #a855f7;">PASSWORD</span>
+              {% else %}
+              <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981;">{{ u.auth_provider }}</span>
+              {% endif %}
+            </td>
+            <td style="padding: 0.85rem 1rem;">
+              {% if u.is_google_linked %}
+              <span style="color: #34d399; font-weight: 600; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 0.25rem;">
+                ✓ Linked
+              </span>
+              {% else %}
+              <span style="color: var(--admin-dim); font-size: 0.8rem;">None</span>
+              {% endif %}
+            </td>
+            <td style="padding: 0.85rem 1rem;">
+              {% if u.ff_uid %}
+              <div style="color: #fff; font-weight: 600;">{{ u.ff_ign or 'IGN Unset' }}</div>
+              <div style="color: var(--admin-muted); font-size: 0.78rem;">UID: {{ u.ff_uid }}</div>
+              {% else %}
+              <span style="color: var(--admin-dim); font-size: 0.8rem;">Not Configured</span>
+              {% endif %}
+            </td>
+            <td style="padding: 0.85rem 1rem; font-weight: 700; color: #fbbf24;">
+              💎 {{ u.diamond_balance }}
+            </td>
+            <td style="padding: 0.85rem 1rem;">
+              {% if u.is_active == 1 %}
+              <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399;">ACTIVE</span>
+              {% else %}
+              <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171;">DISABLED</span>
+              {% endif %}
+            </td>
+            <td style="padding: 0.85rem 1rem; color: var(--admin-dim); font-size: 0.8rem; white-space: nowrap;">
+              {{ u.created_at[:10] if u.created_at else '-' }}
+            </td>
+            <td style="padding: 0.85rem 1rem; text-align: right; white-space: nowrap;">
+              <a href="/admin/users/{{ u.id }}" class="btn btn-outline" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; text-decoration: none; border-radius: 6px; color: #c084fc; border: 1px solid var(--border-glow);">
+                Manage &rarr;
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="10" style="padding: 3rem; text-align: center; color: var(--admin-muted);">
+              No app users found matching query criteria.
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% if total_pages > 1 %}
+  <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-top: 1px solid var(--border-subtle); font-size: 0.85rem; color: var(--admin-muted);">
+    <div>Showing page {{ page }} of {{ total_pages }} ({{ total }} total players)</div>
+    <div style="display: flex; gap: 0.5rem;">
+      {% if page > 1 %}
+      <a href="/admin/users?page={{ page - 1 }}&q={{ q }}&provider={{ provider }}&status_filter={{ status_filter }}" class="btn btn-outline" style="padding: 0.3rem 0.75rem; text-decoration: none; border-radius: 6px;">&laquo; Previous</a>
+      {% endif %}
+      {% if page < total_pages %}
+      <a href="/admin/users?page={{ page + 1 }}&q={{ q }}&provider={{ provider }}&status_filter={{ status_filter }}" class="btn btn-outline" style="padding: 0.3rem 0.75rem; text-decoration: none; border-radius: 6px;">Next &raquo;</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

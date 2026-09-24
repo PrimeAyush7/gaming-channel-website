@@ -40,6 +40,9 @@
       <a href="/admin/tournaments" class="sidebar-link {% if active_nav == 'tournaments' %}active{% endif %}">
         <span class="icon">🏆</span> Tournaments & Matches
       </a>
+      <a href="/admin/users" class="sidebar-link {% if active_nav == 'users' %}active{% endif %}">
+        <span class="icon">👤</span> App Users
+      </a>
       {% if admin and (admin.role == 'SUPER_ADMIN' or admin.role == 'FINANCE_ADMIN') %}
       <a href="/admin/deposits" class="sidebar-link {% if active_nav == 'deposits' %}active{% endif %}">
         <span class="icon">💳</span> Deposit Requests

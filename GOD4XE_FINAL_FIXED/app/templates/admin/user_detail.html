@@ -1,0 +1,229 @@
+{% extends "admin/base.html" %}
+
+{% block title %}User #{{ u.id }} - {{ u.display_name }} - Admin{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+  <div>
+    <a href="/admin/users" style="color: var(--neon-purple); text-decoration: none; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.25rem; margin-bottom: 0.5rem;">
+      &larr; Back to App Users
+    </a>
+    <h1 style="font-size: 1.8rem; font-weight: 800; color: #fff; margin-bottom: 0.25rem;">
+      {{ u.display_name }} <span style="color: var(--admin-dim); font-size: 1.1rem; font-weight: 400;">(@{{ u.username }})</span>
+    </h1>
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <span class="badge" style="background: rgba(168,85,247,0.2); color: #c084fc;">User ID #{{ u.id }}</span>
+      {% if u.is_active == 1 %}
+      <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399;">ACTIVE</span>
+      {% else %}
+      <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171;">DISABLED</span>
+      {% endif %}
+      {% if u.is_google_linked %}
+      <span class="badge" style="background: rgba(66, 133, 244, 0.2); color: #60a5fa;">GOOGLE LINKED</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+    <!-- Toggle Status Action -->
+    <form method="POST" action="/admin/users/{{ u.id }}/status" onsubmit="return confirm('Change status for this user?');">
+      <input type="hidden" name="csrf_token" value="{{ admin.csrf_token }}">
+      <input type="hidden" name="is_active" value="{{ 0 if u.is_active == 1 else 1 }}">
+      {% if u.is_active == 1 %}
+      <button type="submit" class="btn btn-danger" style="padding: 0.55rem 1.1rem; border-radius: 8px; font-weight: 600; background: #dc2626; color: #fff;">Deactivate Account</button>
+      {% else %}
+      <button type="submit" class="btn btn-primary" style="padding: 0.55rem 1.1rem; border-radius: 8px; font-weight: 600; background: #10b981; color: #fff;">Activate Account</button>
+      {% endif %}
+    </form>
+
+    <!-- Revoke Sessions Action -->
+    <form method="POST" action="/admin/users/{{ u.id }}/revoke-sessions" onsubmit="return confirm('Force sign-out user across all devices?');">
+      <input type="hidden" name="csrf_token" value="{{ admin.csrf_token }}">
+      <button type="submit" class="btn btn-outline" style="padding: 0.55rem 1.1rem; border-radius: 8px; font-weight: 600; color: #f87171; border: 1px solid #dc2626;">Force Logout</button>
+    </form>
+  </div>
+</div>
+
+{% if msg %}
+<div class="alert alert-success" style="margin-bottom: 1.5rem; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; padding: 0.75rem 1.25rem; border-radius: 8px;">
+  ✓ {{ msg }}
+</div>
+{% endif %}
+
+{% if error %}
+<div class="alert alert-danger" style="margin-bottom: 1.5rem; background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #f87171; padding: 0.75rem 1.25rem; border-radius: 8px;">
+  ⚠ {{ error }}
+</div>
+{% endif %}
+
+<!-- Grid: Profile Info & Password Reset -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+  
+  <!-- Profile & Auth Card -->
+  <div class="admin-card" style="padding: 1.5rem;">
+    <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+      <span>🪪</span> Profile & Authentication
+    </h3>
+
+    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border-subtle);">
+      <img src="{{ u.avatar_url }}" alt="avatar" style="width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 2px solid var(--neon-purple);" onerror="this.src='/static/images/default-avatar.png';">
+      <div>
+        <div style="font-size: 1.2rem; font-weight: 700; color: #fff;">{{ u.display_name }}</div>
+        <div style="color: var(--admin-dim);">@{{ u.username }}</div>
+        <div style="font-size: 0.8rem; color: #c084fc; margin-top: 0.25rem;">Rank: {{ u.rank_tier }}</div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.88rem;">
+      <div>
+        <div style="color: var(--admin-dim); font-size: 0.78rem; text-transform: uppercase;">Email Address</div>
+        <div style="font-weight: 600; color: #fff;">{{ u.email or '-' }}</div>
+        {% if u.auth_provider == 'GOOGLE' %}
+        <span style="font-size: 0.75rem; color: #34d399;">✓ Verified by Google</span>
+        {% endif %}
+      </div>
+      <div>
+        <div style="color: var(--admin-dim); font-size: 0.78rem; text-transform: uppercase;">Phone Number</div>
+        <div style="font-weight: 600; color: #fff;">{{ u.phone or 'Not Provided' }}</div>
+      </div>
+      <div>
+        <div style="color: var(--admin-dim); font-size: 0.78rem; text-transform: uppercase;">Auth Provider</div>
+        <div style="font-weight: 600; color: #c084fc;">{{ u.auth_provider }}</div>
+      </div>
+      <div>
+        <div style="color: var(--admin-dim); font-size: 0.78rem; text-transform: uppercase;">Google Identity (Sub)</div>
+        <div style="font-weight: 600; color: #fff; font-family: monospace; font-size: 0.82rem;">{{ u.google_id or 'Not Linked' }}</div>
+      </div>
+      <div>
+        <div style="color: var(--admin-dim); font-size: 0.78rem; text-transform: uppercase;">Free Fire UID</div>
+        <div style="font-weight: 600; color: #fff;">{{ u.ff_uid or 'Unset' }}</div>
+      </div>
+      <div>
+        <div style="color: var(--admin-dim); font-size: 0.78rem; text-transform: uppercase;">Free Fire IGN</div>
+        <div style="font-weight: 600; color: #fff;">{{ u.ff_ign or 'Unset' }}</div>
+      </div>
+      <div>
+        <div style="color: var(--admin-dim); font-size: 0.78rem; text-transform: uppercase;">Referral Code</div>
+        <div style="font-weight: 600; color: #fbbf24;">{{ u.referral_code }}</div>
+      </div>
+      <div>
+        <div style="color: var(--admin-dim); font-size: 0.78rem; text-transform: uppercase;">Registered At</div>
+        <div style="font-weight: 600; color: #fff;">{{ u.created_at[:16].replace('T', ' ') if u.created_at else '-' }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wallet & Security Card -->
+  <div class="admin-card" style="padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between;">
+    <div>
+      <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+        <span>💎</span> Diamond Ledger & Wallet
+      </h3>
+      <div style="background: rgba(0,0,0,0.3); padding: 1.25rem; border-radius: 10px; border: 1px solid var(--border-glow); margin-bottom: 1.5rem;">
+        <div style="font-size: 0.85rem; color: var(--admin-dim); text-transform: uppercase;">Available Diamond Balance</div>
+        <div style="font-size: 2.2rem; font-weight: 800; color: #fbbf24;">💎 {{ u.diamond_balance }}</div>
+        {% if u.locked_balance > 0 %}
+        <div style="font-size: 0.82rem; color: var(--admin-muted); margin-top: 0.25rem;">Locked in Tournaments: {{ u.locked_balance }} 💎</div>
+        {% endif %}
+      </div>
+
+      <!-- Password Reset Form (Password Users) -->
+      {% if u.auth_provider == 'PASSWORD' %}
+      <div style="border-top: 1px solid var(--border-subtle); padding-top: 1.25rem;">
+        <h4 style="font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem;">🔑 Admin Password Reset</h4>
+        <p style="font-size: 0.8rem; color: var(--admin-dim); margin-bottom: 0.75rem;">
+          Securely set a new password for this user. Plaintext passwords are never revealed and all active sessions are revoked.
+        </p>
+        <form method="POST" action="/admin/users/{{ u.id }}/reset-password" style="display: flex; gap: 0.5rem;">
+          <input type="hidden" name="csrf_token" value="{{ admin.csrf_token }}">
+          <input type="password" name="new_password" placeholder="New password (min 6 chars)" required class="form-control" style="flex: 1; padding: 0.5rem 0.75rem; font-size: 0.85rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); color: #fff; border-radius: 6px;">
+          <button type="submit" class="btn btn-outline" style="padding: 0.5rem 0.9rem; font-size: 0.85rem; border-radius: 6px; white-space: nowrap; color: #c084fc; border: 1px solid var(--border-glow);">Reset</button>
+        </form>
+      </div>
+      {% else %}
+      <div style="border-top: 1px solid var(--border-subtle); padding-top: 1.25rem; color: var(--admin-dim); font-size: 0.82rem;">
+        🔒 This user authenticates securely via <strong>{{ u.auth_provider }}</strong>. No internal password is stored or required.
+      </div>
+      {% endif %}
+    </div>
+
+    <div style="margin-top: 1.5rem; padding: 0.75rem; background: rgba(168,85,247,0.05); border-radius: 8px; font-size: 0.78rem; color: var(--admin-muted);">
+      🛡️ <strong>Security Enforced:</strong> All passwords and cryptographic credentials remain salted and hashed with zero plaintext exposure.
+    </div>
+  </div>
+</div>
+
+<!-- Tabs: Ledger & Tournaments -->
+<div class="admin-card" style="padding: 1.25rem; margin-bottom: 1.5rem;">
+  <h3 style="font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 1rem;">📊 Recent Diamond Ledger History</h3>
+  <div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
+      <thead>
+        <tr style="border-bottom: 1px solid var(--border-subtle); color: var(--admin-dim);">
+          <th style="padding: 0.6rem 0.75rem;">TX ID</th>
+          <th style="padding: 0.6rem 0.75rem;">Type</th>
+          <th style="padding: 0.6rem 0.75rem;">Amount</th>
+          <th style="padding: 0.6rem 0.75rem;">Balance After</th>
+          <th style="padding: 0.6rem 0.75rem;">Description</th>
+          <th style="padding: 0.6rem 0.75rem;">Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if u.transactions %}
+          {% for tx in u.transactions %}
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+            <td style="padding: 0.6rem 0.75rem; color: var(--admin-muted);">#{{ tx.id }}</td>
+            <td style="padding: 0.6rem 0.75rem;">
+              <span class="badge" style="background: rgba(168,85,247,0.15); color: #c084fc;">{{ tx.transaction_type }}</span>
+            </td>
+            <td style="padding: 0.6rem 0.75rem; font-weight: 700; color: {% if tx.amount > 0 %}#34d399{% else %}#f87171{% endif %};">
+              {{ '+' if tx.amount > 0 else '' }}{{ tx.amount }} 💎
+            </td>
+            <td style="padding: 0.6rem 0.75rem; color: #fbbf24;">{{ tx.balance_after }} 💎</td>
+            <td style="padding: 0.6rem 0.75rem; color: var(--admin-dim);">{{ tx.description or '-' }}</td>
+            <td style="padding: 0.6rem 0.75rem; color: var(--admin-muted); font-size: 0.78rem;">{{ tx.created_at[:16].replace('T', ' ') if tx.created_at else '-' }}</td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr><td colspan="6" style="padding: 1.5rem; text-align: center; color: var(--admin-muted);">No transactions recorded in diamond ledger.</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Tournaments Entered -->
+<div class="admin-card" style="padding: 1.25rem;">
+  <h3 style="font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 1rem;">🏆 Tournament Participation History</h3>
+  <div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
+      <thead>
+        <tr style="border-bottom: 1px solid var(--border-subtle); color: var(--admin-dim);">
+          <th style="padding: 0.6rem 0.75rem;">Tournament</th>
+          <th style="padding: 0.6rem 0.75rem;">Mode</th>
+          <th style="padding: 0.6rem 0.75rem;">Slot #</th>
+          <th style="padding: 0.6rem 0.75rem;">Status</th>
+          <th style="padding: 0.6rem 0.75rem;">Fee Paid</th>
+          <th style="padding: 0.6rem 0.75rem;">Joined At</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if u.tournaments %}
+          {% for t in u.tournaments %}
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+            <td style="padding: 0.6rem 0.75rem; font-weight: 700; color: #fff;">{{ t.title }}</td>
+            <td style="padding: 0.6rem 0.75rem; color: var(--admin-dim);">{{ t.mode }}</td>
+            <td style="padding: 0.6rem 0.75rem; color: #c084fc; font-weight: 600;">Slot {{ t.slot_number }}</td>
+            <td style="padding: 0.6rem 0.75rem;"><span class="badge">{{ t.status }}</span></td>
+            <td style="padding: 0.6rem 0.75rem; color: #fbbf24;">{{ t.diamonds_paid }} 💎</td>
+            <td style="padding: 0.6rem 0.75rem; color: var(--admin-muted); font-size: 0.78rem;">{{ t.joined_at[:16].replace('T', ' ') if t.joined_at else '-' }}</td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr><td colspan="6" style="padding: 1.5rem; text-align: center; color: var(--admin-muted);">No tournament participation records found.</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

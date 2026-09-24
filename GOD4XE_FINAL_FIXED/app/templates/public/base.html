@@ -55,7 +55,7 @@
       <!-- Dynamic Sections Desktop Navigation (Desktop Only) -->
       <nav class="desktop-nav" aria-label="Main Navigation">
         <a href="/" class="nav-link {% if request.url.path == '/' %}active{% endif %}">HOME</a>
-        <a href="/esports" class="nav-link nav-highlight {% if request.url.path == '/esports' %}active{% endif %}">⚡ ESPORTS</a>
+        <a href="/esports" class="nav-link nav-highlight {% if request.url.path == '/esports' %}active{% endif %}">⚡ ESPORTS <span class="esports-live-pulse" style="margin-left: 4px; font-size: 0.65rem;" aria-label="Live tournaments">LIVE</span></a>
         <a href="/tournaments" class="nav-link {% if request.url.path.startswith('/tournaments') %}active{% endif %}">🏆 TOURNAMENTS</a>
         <a href="/referrals" class="nav-link {% if request.url.path == '/referrals' %}active{% endif %}">👥 RANKS</a>
         {% for sec in nav_sections %}
@@ -67,11 +67,9 @@
 
       <!-- Action Buttons -->
       <div class="header-actions">
-        <!-- Standalone Premium eSports Header CTA (Distinct from blog sections) -->
-        <a href="/esports" class="btn-header-esports" title="Enter GOD4XE ESPORTS Arena">
-          <span class="esports-spark-icon">⚡</span>
-          <span class="esports-header-title">ESPORTS</span>
-          <span class="esports-live-pulse" aria-label="Live tournaments">LIVE</span>
+        <!-- Official Android App Download CTA -->
+        <a href="/download/app" class="btn btn-primary" style="padding: 0.4rem 0.9rem; font-size: 0.85rem; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap; font-weight: 700; background: linear-gradient(135deg, #a855f7, #7c3aed); color: #fff;" title="Download Official GOD4XE Android App">
+          <span>📲</span> APP
         </a>
 
 
@@ -232,7 +230,7 @@
           <span>{{ sec.icon }}</span> {{ sec.name }}
         </a>
       {% endfor %}
-      <a href="/static/downloads/god4xe_esports.apk" class="nav-link nav-app-download">📲 DOWNLOAD ANDROID APP (v1.0.1)</a>
+      <a href="/download/app" class="nav-link nav-app-download">📲 DOWNLOAD ANDROID APP (v1.0.1)</a>
     </div>
   </aside>
 

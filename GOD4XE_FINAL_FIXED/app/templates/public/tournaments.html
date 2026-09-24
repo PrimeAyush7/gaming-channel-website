@@ -16,7 +16,7 @@
           Experience competitive Free Fire tournaments directly on your smartphone. Liquid Glass dark UI, real-time custom room access, instant diamond rewards, live leaderboards and match tracking.
         </p>
         <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;">
-          <a href="/static/downloads/god4xe_esports.apk" class="btn btn-primary" style="background: linear-gradient(135deg, #a855f7, #7c3aed); color: #fff; padding: 0.85rem 1.8rem; font-weight: 700; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);">
+          <a href="/download/app" class="btn btn-primary" style="background: linear-gradient(135deg, #a855f7, #7c3aed); color: #fff; padding: 0.85rem 1.8rem; font-weight: 700; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);">
             <span>⬇️</span> Download Android APK
           </a>
           <span style="color: var(--text-muted); font-size: 0.9rem;">v1.0.0 • Verified Free Fire Companion</span>
@@ -26,10 +26,7 @@
       <!-- Desktop QR Scan Code Block -->
       <div style="background: rgba(255, 255, 255, 0.05); padding: 1.25rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); text-align: center; min-width: 0; max-width: 100%;">
         <div style="width: 130px; height: 130px; background: #fff; border-radius: 8px; margin: 0 auto 0.75rem; padding: 8px; display: flex; align-items: center; justify-content: center;">
-          <svg viewBox="0 0 100 100" width="114" height="114">
-            <rect width="100" height="100" fill="white"/>
-            <path d="M10 10h30v30h-30z M50 10h10v10h-10z M70 10h20v20h-20z M20 20h10v10h-10z M80 20h0v0z M10 50h10v10h-10z M30 50h20v10h-20z M60 50h10v10h-10z M80 50h10v20h-10z M10 70h30v30h-30z M50 70h10v20h-10z M70 80h20v20h-20z M20 80h10v10h-10z" fill="#120726"/>
-          </svg>
+<img src="/static/images/qr_download_apk.svg" alt="Scan to Install GOD4XE Esports APK" width="114" height="114" style="display: block; border-radius: 6px; width: 114px; height: 114px; object-fit: contain;">
         </div>
         <span style="font-size: 0.8rem; color: #c084fc; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Scan to Install APK</span>
       </div>
@@ -94,7 +91,7 @@
 
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.85rem; color: var(--text-muted);">
             <span>Slots: <strong style="color: #fff;">{{ t.joined_players }} / {{ t.max_slots }}</strong></span>
-            <span>Starts: <strong style="color: #fff;">{{ t.start_time[:16].replace('T', ' ') if t.start_time else 'TBA' }}</strong></span>
+            <span>Starts: <strong style="color: #fff;">{{ t.start_time[:16].replace('T', ' ') if (t.start_time and t.start_time is string) else (t.start_time.strftime('%Y-%m-%d %H:%M') if t.start_time else 'TBA') }}</strong></span>
           </div>
 
           <a href="/tournaments/{{ t.id }}" class="btn btn-outline" style="width: 100%; text-align: center; justify-content: center; display: block; text-decoration: none; padding: 0.65rem; border: 1px solid var(--neon-purple); color: #c084fc; border-radius: 8px; font-weight: 600;">

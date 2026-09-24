@@ -59,7 +59,7 @@
         <div style="background: rgba(0,0,0,0.4); padding: 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.06);">
           <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Match Schedule</div>
           <div style="font-size: 1rem; font-weight: 600; color: #fff; margin-top: 0.25rem;">
-            {{ tournament.start_time[:16].replace('T', ' ') if tournament.start_time else 'TBA' }}
+            {{ tournament.start_time[:16].replace('T', ' ') if (tournament.start_time and tournament.start_time is string) else (tournament.start_time.strftime('%Y-%m-%d %H:%M') if tournament.start_time else 'TBA') }}
           </div>
         </div>
       </div>
@@ -81,7 +81,7 @@
           To secure your slot, enter your Free Fire UID & IGN, and receive your custom Room ID & Password, install the official GOD4XE ESPORTS Android app.
         </p>
         <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
-          <a href="/static/downloads/god4xe_esports.apk" class="btn btn-primary" style="background: linear-gradient(135deg, #a855f7, #7c3aed); color: #fff; padding: 0.8rem 1.8rem; border-radius: 8px; font-weight: 700; text-decoration: none;">
+          <a href="/download/app" class="btn btn-primary" style="background: linear-gradient(135deg, #a855f7, #7c3aed); color: #fff; padding: 0.8rem 1.8rem; border-radius: 8px; font-weight: 700; text-decoration: none;">
             Download Android APK (v1.0.0)
           </a>
         </div>
