@@ -1,0 +1,23 @@
+{% extends "public/base.html" %}
+{% block title %}Register - GOD4XE{% endblock %}
+{% block content %}
+<div class="container" style="max-width:520px;padding:3rem 1rem 5rem;">
+  <div class="card" style="padding:2rem;background:rgba(18,8,35,.9);border:1px solid rgba(168,85,247,.35);border-radius:16px;">
+    <h1 style="color:#fff;margin-bottom:.5rem;">Create GOD4XE Account</h1>
+    <p style="color:var(--text-muted);margin-bottom:1.5rem;">Create your account and join Free Fire tournaments from web or Android.</p>
+    {% if error %}<div style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);color:#fca5a5;padding:.8rem;border-radius:8px;margin-bottom:1rem;">{{ error }}</div>{% endif %}
+    <form method="POST" action="/register">
+      <label>Username</label>
+      <input name="username" class="form-control" required minlength="3" style="margin:.4rem 0 1rem;">
+      <label>Email</label>
+      <input name="email" type="email" class="form-control" required style="margin:.4rem 0 1rem;">
+      <label>Password</label>
+      <input name="password" type="password" class="form-control" required minlength="6" style="margin:.4rem 0 1rem;">
+      <label>Referral Code (optional)</label>
+      <input name="referral_code" class="form-control" style="margin:.4rem 0 1.25rem;">
+      <button class="btn btn-primary" type="submit" style="width:100%;">Create Account</button>
+    </form>
+    <p style="text-align:center;color:var(--text-muted);margin-top:1.25rem;">Already registered? <a href="/login" style="color:#c084fc;">Login</a></p>
+  </div>
+</div>
+{% endblock %}

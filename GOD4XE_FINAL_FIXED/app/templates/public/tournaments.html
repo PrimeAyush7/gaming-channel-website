@@ -19,17 +19,14 @@
           <a href="/static/downloads/god4xe_esports.apk" class="btn btn-primary" style="background: linear-gradient(135deg, #a855f7, #7c3aed); color: #fff; padding: 0.85rem 1.8rem; font-weight: 700; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);">
             <span>⬇️</span> Download Android APK
           </a>
-          <span style="color: var(--text-muted); font-size: 0.9rem;">v1.0.0 • Verified Free Fire Companion</span>
+          <span style="color: var(--text-muted); font-size: 0.9rem;">v{{ apk_version }} • Official GOD4XE ESPORTS</span>
         </div>
       </div>
 
       <!-- Desktop QR Scan Code Block -->
       <div style="background: rgba(255, 255, 255, 0.05); padding: 1.25rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); text-align: center; min-width: 170px;">
         <div style="width: 130px; height: 130px; background: #fff; border-radius: 8px; margin: 0 auto 0.75rem; padding: 8px; display: flex; align-items: center; justify-content: center;">
-          <svg viewBox="0 0 100 100" width="114" height="114">
-            <rect width="100" height="100" fill="white"/>
-            <path d="M10 10h30v30h-30z M50 10h10v10h-10z M70 10h20v20h-20z M20 20h10v10h-10z M80 20h0v0z M10 50h10v10h-10z M30 50h20v10h-20z M60 50h10v10h-10z M80 50h10v20h-10z M10 70h30v30h-30z M50 70h10v20h-10z M70 80h20v20h-20z M20 80h10v10h-10z" fill="#120726"/>
-          </svg>
+          <img src="/download/qr" alt="Scan to download GOD4XE ESPORTS APK" style="width:114px;height:114px;display:block;">
         </div>
         <span style="font-size: 0.8rem; color: #c084fc; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Scan to Install APK</span>
       </div>
@@ -46,6 +43,51 @@
       <a href="/tournaments?status=COMPLETED" class="badge" style="text-decoration: none; padding: 0.5rem 1rem; {% if current_filter == 'COMPLETED' %}background: var(--neon-purple); color: #fff;{% else %}background: rgba(255,255,255,0.05); color: var(--text-muted);{% endif %}">COMPLETED</a>
     </div>
   </div>
+
+  {% if not web_user %}
+  <div class="card" style="margin-bottom:2rem;padding:1rem 1.25rem;background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.3);display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;">
+    <div><strong style="color:#fff;">Want to join a tournament from the website?</strong><div style="color:var(--text-muted);font-size:.9rem;">Login or create a GOD4XE account, then enter your Free Fire UID and IGN.</div></div>
+    <div style="display:flex;gap:.6rem;"><a class="btn btn-primary" href="/login?next=/tournaments">Login</a><a class="btn btn-outline" href="/register">Register</a></div>
+  </div>
+  {% else %}
+  <div class="card" style="margin-bottom:2rem;padding:1rem 1.25rem;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.25);color:#d1fae5;">
+    Logged in as <strong>@{{ web_user.username }}</strong> — open any tournament to join directly from the website.
+  </div>
+  {% endif %}
+
+  {% if announcements %}
+  <section style="margin-bottom:2.5rem;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+      <h2 style="font-size:1.35rem;color:#fff;margin:0;">📢 Announcements</h2>
+      <a href="/announcements" style="color:#c084fc;">View all</a>
+    </div>
+    <div style="display:grid;gap:.75rem;">
+      {% for a in announcements[:3] %}
+      <div style="padding:1rem 1.2rem;border:1px solid rgba(168,85,247,.22);border-radius:10px;background:rgba(18,8,35,.6);">
+        <strong style="color:#fff;">{{ a.title }}</strong>
+        <div style="color:var(--text-muted);margin-top:.3rem;">{{ a.message }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if updates %}
+  <section style="margin-bottom:2.5rem;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+      <h2 style="font-size:1.35rem;color:#fff;margin:0;">📰 Latest Updates</h2>
+      <a href="/announcements" style="color:#c084fc;">View all</a>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;">
+      {% for u in updates[:3] %}
+      <div style="overflow:hidden;border:1px solid rgba(168,85,247,.22);border-radius:12px;background:rgba(18,8,35,.6);">
+        {% if u.cover_image_url %}<img src="{{ u.cover_image_url }}" alt="{{ u.heading }}" style="width:100%;height:140px;object-fit:cover;">{% endif %}
+        <div style="padding:1rem;"><h3 style="color:#fff;margin:0 0 .4rem;font-size:1.05rem;">{{ u.heading }}</h3><p style="color:var(--text-muted);margin:0;line-height:1.5;">{{ u.description }}</p></div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
 
   <!-- Tournaments Grid -->
   {% if tournaments %}

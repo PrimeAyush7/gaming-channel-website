@@ -56,6 +56,7 @@
       <nav class="desktop-nav" aria-label="Main Navigation">
         <a href="/" class="nav-link {% if request.url.path == '/' %}active{% endif %}">HOME</a>
         <a href="/tournaments" class="nav-link {% if request.url.path.startswith('/tournaments') %}active{% endif %}" style="color: var(--neon-purple); font-weight: 700;">🏆 ESPORTS</a>
+        <a href="/announcements" class="nav-link {% if request.url.path.startswith('/announcements') %}active{% endif %}">📢 ANNOUNCEMENTS</a>
         {% for sec in nav_sections %}
           <a href="/section/{{ sec.slug }}" class="nav-link {% if current_section and current_section.slug == sec.slug %}active{% endif %}">
             <span>{{ sec.icon }}</span> {{ sec.name }}
@@ -65,6 +66,13 @@
 
       <!-- Action Buttons -->
       <div class="header-actions">
+        {% if web_user %}
+        <a href="/logout" class="nav-link" style="color:#c084fc; text-decoration:none;">@{{ web_user.username }} · Logout</a>
+        {% else %}
+        <a href="/login" class="nav-link" style="color:#c084fc; text-decoration:none;">Login</a>
+        <a href="/register" class="nav-link" style="color:#fff; background:linear-gradient(135deg,#a855f7,#7c3aed); padding:0.45rem 0.75rem; border-radius:7px; text-decoration:none;">Register</a>
+        {% endif %}
+
         <!-- Desktop Search Trigger Form (Desktop Only) -->
         <form action="/search" method="GET" class="header-search-form">
           <input type="text" name="q" placeholder="Search..." required class="form-control" style="padding: 0.4rem 0.75rem; font-size: 0.85rem; width: 140px; border-radius: 6px; background: rgba(168,85,247,0.1); border: 1px solid var(--border-subtle); color: #fff;">
