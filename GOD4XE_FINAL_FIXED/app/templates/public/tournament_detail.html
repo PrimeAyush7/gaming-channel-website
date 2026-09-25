@@ -74,45 +74,17 @@
       </div>
       {% endif %}
 
-      {% if request.query_params.get("joined") %}
-      <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.35);padding:1rem;border-radius:10px;color:#a7f3d0;margin-bottom:1rem;">✅ You are registered for this tournament. Room credentials will appear here when the match is eligible.</div>
-      {% endif %}
-      {% if request.query_params.get("error") %}
-      <div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.35);padding:1rem;border-radius:10px;color:#fecaca;margin-bottom:1rem;">{{ request.query_params.get("error") }}</div>
-      {% endif %}
-
-      <!-- Web Tournament Entry -->
-      <div style="background:linear-gradient(135deg,rgba(168,85,247,.15),rgba(30,10,50,.4));border:1px solid #a855f7;border-radius:12px;padding:1.75rem;text-align:center;">
-        {% if web_user %}
-          {% if tournament.is_user_joined %}
-          <h3 style="color:#fff;font-size:1.3rem;margin-bottom:.5rem;">🎮 You're In</h3>
-          <p style="color:var(--text-muted);font-size:.95rem;margin-bottom:1rem;">Your slot is registered. Keep your Free Fire UID/IGN updated before the match starts.</p>
-          {% if tournament.room_id %}
-          <div style="display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;margin:1rem 0;">
-            <div style="padding:.8rem 1.2rem;background:rgba(0,0,0,.35);border-radius:9px;color:#fff;"><small style="display:block;color:var(--text-muted);">ROOM ID</small><strong>{{ tournament.room_id }}</strong></div>
-            <div style="padding:.8rem 1.2rem;background:rgba(0,0,0,.35);border-radius:9px;color:#fff;"><small style="display:block;color:var(--text-muted);">PASSWORD</small><strong>{{ tournament.room_password }}</strong></div>
-          </div>
-          {% endif %}
-          {% else %}
-          <h3 style="color:#fff;font-size:1.3rem;margin-bottom:.5rem;">Join from Website</h3>
-          <p style="color:var(--text-muted);font-size:.95rem;margin-bottom:1.25rem;">Enter the Free Fire UID and IGN you want registered for this match.</p>
-          <form method="POST" action="/tournaments/{{ tournament.id }}/join" style="max-width:520px;margin:0 auto;text-align:left;">
-            <label style="color:#fff;">Free Fire UID</label>
-            <input name="ff_uid" class="form-control" required placeholder="Your Free Fire UID" style="margin:.4rem 0 1rem;">
-            <label style="color:#fff;">Free Fire IGN</label>
-            <input name="ff_ign" class="form-control" required placeholder="Your Free Fire in-game name" style="margin:.4rem 0 1rem;">
-            <button class="btn btn-primary" type="submit" style="width:100%;">Join Tournament</button>
-          </form>
-          {% endif %}
-        {% else %}
-          <h3 style="color:#fff;font-size:1.3rem;margin-bottom:.5rem;">Login to Join This Match</h3>
-          <p style="color:var(--text-muted);font-size:.95rem;margin-bottom:1.25rem;">You can join directly from the website. No app is required for the web entry flow.</p>
-          <div style="display:flex;justify-content:center;gap:.75rem;flex-wrap:wrap;">
-            <a href="/login?next=/tournaments/{{ tournament.id }}" class="btn btn-primary">Login & Join</a>
-            <a href="/register" class="btn btn-outline">Create Account</a>
-            <a href="/static/downloads/god4xe_esports.apk" class="btn btn-outline">Download Android v{{ apk_version }}</a>
-          </div>
-        {% endif %}
+      <!-- Android App Entry Callout -->
+      <div style="background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(30,10,50,0.4)); border: 1px solid #a855f7; border-radius: 12px; padding: 1.75rem; text-align: center;">
+        <h3 style="color: #fff; font-size: 1.3rem; margin-bottom: 0.5rem;">Join This Match from the App</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.25rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+          To secure your slot, enter your Free Fire UID & IGN, and receive your custom Room ID & Password, install the official GOD4XE ESPORTS Android app.
+        </p>
+        <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+          <a href="/static/downloads/god4xe_esports.apk" class="btn btn-primary" style="background: linear-gradient(135deg, #a855f7, #7c3aed); color: #fff; padding: 0.8rem 1.8rem; border-radius: 8px; font-weight: 700; text-decoration: none;">
+            Download Android APK (v1.0.0)
+          </a>
+        </div>
       </div>
 
     </div>

@@ -180,19 +180,3 @@ In the **Environment** tab of your Web Service, configure:
 ```bash
 python -m unittest tests/test_all.py -v
 ```
-
-
-## v1.0.4 Final Website + APK Bundle
-This package includes the user-provided release APK at `app/static/downloads/god4xe_esports.apk` (SHA-256: a909b303e0fc7b24022b45d6706215554bf6f83c01ce377ef4fa50a125deefd6).
-
-Website fixes included:
-- Dynamic QR at `/download/qr` pointing to the current `APP_URL` APK download URL.
-- Correct APK version label: v1.0.4.
-- Public Announcements and Latest Updates page at `/announcements`.
-- Announcements and Latest Updates sections restored on `/tournaments`.
-- Website login/register/logout using the existing app authentication/JWT system.
-- Website tournament join flow using the existing tournament service/API rules.
-- Joined tournament pages can display room credentials when the existing backend eligibility rules allow them.
-- Existing admin features and diamond balance controls are preserved.
-
-For a correct QR destination in production, set `APP_URL` to the public website origin (for example, the Render/custom-domain URL).
