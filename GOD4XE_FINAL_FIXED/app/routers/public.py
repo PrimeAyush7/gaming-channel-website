@@ -258,13 +258,36 @@ async def web_google_login(
     try:
         if not GOOGLE_CLIENT_ID:
             raise ValueError("Google login is not configured on the website")
-        from google.oauth2 import id_token
-        from google.auth.transport import requests as google_requests
-        verified = id_token.verify_oauth2_token(
-            credential, google_requests.Request(), GOOGLE_CLIENT_ID
-        )
+
+        # Prefer the official google-auth verifier when available.  Render
+        # deployments that have a stale dependency cache can otherwise fail
+        # with `No module named 'google'`; in that case Google's official
+        # tokeninfo endpoint performs the token validation server-side.
+        try:
+            from google.oauth2 import id_token
+            from google.auth.transport import requests as google_requests
+            verified = id_token.verify_oauth2_token(
+                credential, google_requests.Request(), GOOGLE_CLIENT_ID
+            )
+        except ModuleNotFoundError as mod_err:
+            if mod_err.name != "google":
+                raise
+            from urllib.parse import urlencode
+            from urllib.request import Request as URLRequest, urlopen
+            token_url = "https://oauth2.googleapis.com/tokeninfo?" + urlencode({"id_token": credential})
+            token_response = urlopen(URLRequest(token_url, method="GET"), timeout=10)
+            import json as _json
+            verified = _json.loads(token_response.read().decode("utf-8"))
+            if verified.get("aud") != GOOGLE_CLIENT_ID:
+                raise ValueError("Google token audience mismatch")
+
         if verified.get("iss") not in ("accounts.google.com", "https://accounts.google.com"):
             raise ValueError("Invalid Google token issuer")
+        if verified.get("aud") != GOOGLE_CLIENT_ID:
+            raise ValueError("Google token audience mismatch")
+        if not verified.get("sub") or not verified.get("email"):
+            raise ValueError("Google token is missing required account claims")
+
         user, token = user_service.authenticate_google_user(credential)
         if not user:
             raise ValueError("Google authentication failed")

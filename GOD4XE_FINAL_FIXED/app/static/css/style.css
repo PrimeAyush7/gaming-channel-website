@@ -1307,8 +1307,10 @@ body {
     font-size: 1.1rem;
     letter-spacing: 1px;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    overflow: visible;
+    text-overflow: clip;
+    color: var(--text-main);
+    font-weight: 900;
   }
 
   .header-actions {
@@ -2381,121 +2383,3 @@ body {
   .hero-search-box {
     flex-direction: column !important;
     padding: 0.5rem !important;
-
-
-/* GOD4XE FINAL MOBILE HEADER FIX — preserves full homepage/esports content */
-@media (max-width: 768px) {
-  .site-header .header-inner {
-    height: auto;
-    min-height: 64px;
-    padding: 8px 10px;
-    gap: 8px;
-    align-items: center;
-  }
-
-  .site-header .site-brand {
-    flex: 1 1 auto;
-    min-width: 0;
-    max-width: none;
-    overflow: visible;
-    gap: 7px;
-  }
-
-  .site-header .site-brand img {
-    height: 42px;
-    width: auto;
-    max-width: 120px;
-    object-fit: contain;
-    flex: 0 1 auto;
-  }
-
-  .site-header .site-brand .brand-crest-img {
-    width: 42px;
-    height: 42px;
-    min-width: 42px;
-    min-height: 42px;
-    object-fit: cover;
-  }
-
-  .site-header .site-brand-text {
-    min-width: 0;
-    font-size: 0.95rem;
-    letter-spacing: 0.5px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .site-header .header-actions {
-    flex: 0 0 auto;
-    gap: 5px;
-    min-width: 0;
-    align-items: center;
-  }
-
-  .site-header .header-actions > a.nav-link {
-    display: inline-flex !important;
-    align-items: center;
-    justify-content: center;
-    white-space: nowrap;
-    font-size: 0.72rem;
-    line-height: 1;
-    padding: 7px 8px !important;
-    min-height: 32px;
-    box-sizing: border-box;
-  }
-
-  .site-header .header-actions .mobile-search-btn,
-  .site-header .header-actions .mobile-toggle-btn {
-    width: 32px;
-    height: 32px;
-    min-width: 32px;
-    min-height: 32px;
-    flex: 0 0 32px;
-  }
-}
-
-@media (max-width: 480px) {
-  .site-header .header-inner {
-    padding: 7px 8px;
-    gap: 5px;
-  }
-
-  .site-header .site-brand {
-    gap: 5px;
-  }
-
-  .site-header .site-brand .brand-crest-img {
-    width: 38px;
-    height: 38px;
-    min-width: 38px;
-    min-height: 38px;
-  }
-
-  .site-header .site-brand img:not(.brand-crest-img) {
-    height: 38px;
-    max-width: 105px;
-  }
-
-  .site-header .site-brand-text {
-    display: none;
-  }
-
-  .site-header .header-actions {
-    gap: 3px;
-  }
-
-  .site-header .header-actions > a.nav-link {
-    font-size: 0.68rem;
-    padding: 6px 7px !important;
-    min-height: 30px;
-  }
-
-  .site-header .header-actions .mobile-search-btn,
-  .site-header .header-actions .mobile-toggle-btn {
-    width: 30px;
-    height: 30px;
-    min-width: 30px;
-    min-height: 30px;
-  }
-}

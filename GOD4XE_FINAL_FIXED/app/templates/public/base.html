@@ -45,11 +45,11 @@
       <!-- Site Logo & Brand -->
       <a href="/" class="site-brand">
         {% if settings.logo_url and settings.logo_url != '/static/images/default-logo.svg' %}
-          <img src="{{ settings.logo_url }}" alt="{{ settings.site_name }} Logo">
+          <img src="{{ settings.logo_url }}" alt="GOD4XE Logo" class="brand-crest-img">
         {% else %}
           <img src="/static/images/1000074856.jpg.jpeg" alt="GOD4XE Logo" class="brand-crest-img">
-          <div class="site-brand-text">{{ settings.site_name }} <span>GAMING</span></div>
         {% endif %}
+        <div class="site-brand-text">GOD4XE</div>
       </a>
 
       <!-- Dynamic Sections Desktop Navigation (Desktop Only) -->
@@ -71,7 +71,6 @@
         <a href="/logout" class="nav-link" style="color:#c084fc; text-decoration:none;">@{{ web_user.username }} · Logout</a>
         {% else %}
         <a href="/login" class="nav-link" style="color:#c084fc; text-decoration:none;">Login</a>
-        <a href="/register" class="nav-link" style="color:#fff; background:linear-gradient(135deg,#a855f7,#7c3aed); padding:0.45rem 0.75rem; border-radius:7px; text-decoration:none;">Register</a>
         {% endif %}
 
         <!-- Desktop Search Trigger Form (Desktop Only) -->
