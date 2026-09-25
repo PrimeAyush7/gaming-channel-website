@@ -27,6 +27,7 @@
         <tr>
           <form method="POST" action="/admin/communities/edit/{{ c.id }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="platform" value="{{ c.platform }}">
             <td><strong>{{ c.platform }}</strong></td>
             <td><input type="text" name="name" class="form-control" value="{{ c.name }}" required></td>
             <td><input type="text" name="url" class="form-control" value="{{ c.url }}" required></td>

@@ -126,7 +126,18 @@ def list_communities(only_active: bool = True) -> list[dict]:
             {where}
             ORDER BY display_order ASC, id ASC;
         """)
-        return [dict(r) for r in cursor.fetchall()]
+        rows = [dict(r) for r in cursor.fetchall()]
+        default_logos = {
+            "instagram": "https://api.iconify.design/simple-icons:instagram.png?width=96&height=96",
+            "discord": "https://api.iconify.design/simple-icons:discord.png?width=96&height=96",
+            "whatsapp": "https://api.iconify.design/simple-icons:whatsapp.png?width=96&height=96",
+            "telegram": "https://api.iconify.design/simple-icons:telegram.png?width=96&height=96",
+            "youtube": "https://api.iconify.design/simple-icons:youtube.png?width=96&height=96",
+        }
+        for row in rows:
+            if not row.get("logo_url"):
+                row["logo_url"] = default_logos.get(str(row.get("platform", "")).strip().lower())
+        return rows
 
 def update_community(comm_id: int, platform: str, name: str, url: str, logo_url: str = None, display_order: int = 0, is_active: int = 1) -> dict:
     with get_db() as conn:
