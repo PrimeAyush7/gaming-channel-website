@@ -196,3 +196,6 @@ Website fixes included:
 - Existing admin features and diamond balance controls are preserved.
 
 For a correct QR destination in production, set `APP_URL` to the public website origin (for example, the Render/custom-domain URL).
+
+
+APK download: the public Android download buttons use `/download/app`, which serves the bundled `app/static/downloads/god4xe_esports.apk`.

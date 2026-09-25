@@ -1,7 +1,7 @@
 import io
 from urllib.parse import quote
 from fastapi import APIRouter, Request, Response, HTTPException, status, Form
-from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse, StreamingResponse, FileResponse
 from app.templating import templates
 from app.config import APP_DIR, APP_URL, JWT_SECRET, GOOGLE_CLIENT_ID
 from app.services.jwt_util import decode_jwt
@@ -18,6 +18,21 @@ from app.services import (
 )
 
 router = APIRouter()
+
+# Canonical Android APK download route. The public buttons all point here so
+# the download does not depend on a stale/static filename or Render routing.
+APK_PATH = APP_DIR / "static" / "downloads" / "god4xe_esports.apk"
+
+@router.get("/download/app")
+async def download_android_app():
+    if not APK_PATH.is_file():
+        raise HTTPException(status_code=404, detail="Android APK not found")
+    return FileResponse(
+        path=str(APK_PATH),
+        media_type="application/vnd.android.package-archive",
+        filename="GOD4XE.apk",
+        headers={"Cache-Control": "no-cache"}
+    )
 # templates imported from app.templating
 
 def get_common_context(request: Request):
@@ -359,7 +374,7 @@ async def public_announcements(request: Request):
 @router.get("/download/qr")
 async def download_qr():
     import qrcode
-    apk_url = f"{APP_URL}/static/downloads/god4xe_esports.apk"
+    apk_url = f"{APP_URL}/download/app"
     img = qrcode.make(apk_url)
     buf = io.BytesIO()
     img.save(buf, format="PNG")
