@@ -1,0 +1,67 @@
+{% extends "admin/base.html" %}
+{% block title %}Allowed Weapons (Guns Only) - Admin{% endblock %}
+{% block content %}
+<div class="admin-header">
+  <div>
+    <h1>Allowed Guns (Guns Only Custom)</h1>
+    <p class="text-muted">Manage weapon options for Guns Only Custom tournaments.</p>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-top: 1.5rem; gap: 1.5rem;">
+  <div class="admin-card">
+    <h3>Add Allowed Weapon Option</h3>
+    <form method="POST" action="/admin/guns/new" style="margin-top: 1rem;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="form-group">
+        <label>Weapon Label / Option Name</label>
+        <input type="text" name="name" class="form-control" placeholder="e.g. Desert Eagle Only" required>
+      </div>
+      <div class="form-group">
+        <label>Unique Code</label>
+        <input type="text" name="code" class="form-control" placeholder="e.g. DESERT_EAGLE" required>
+      </div>
+      <div class="form-group">
+        <label>Image URL (Optional)</label>
+        <input type="text" name="image_url" class="form-control" placeholder="/static/images/guns/desert_eagle.png">
+      </div>
+      <div class="form-group">
+        <label>Display Order</label>
+        <input type="number" name="display_order" class="form-control" value="0">
+      </div>
+      <button type="submit" class="btn btn-primary" style="width: 100%;">Save Weapon Option</button>
+    </form>
+  </div>
+
+  <div class="admin-card">
+    <h3>Configured Gun Options</h3>
+    <div class="table-responsive" style="margin-top: 1rem;">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Order</th>
+            <th>Name</th>
+            <th>Code</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for g in guns %}
+          <tr>
+            <td>{{ g.display_order }}</td>
+            <td><strong>{{ g.name }}</strong></td>
+            <td><code>{{ g.code }}</code></td>
+            <td>
+              <form method="POST" action="/admin/guns/delete/{{ g.id }}" style="display: inline;" onsubmit="return confirm('Delete this gun option?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

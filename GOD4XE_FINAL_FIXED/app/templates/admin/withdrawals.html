@@ -1,0 +1,79 @@
+{% extends "admin/base.html" %}
+{% block title %}Withdrawal Requests - Admin{% endblock %}
+{% block content %}
+<div class="admin-header">
+  <div>
+    <h1>Diamond Withdrawal Requests</h1>
+    <p class="text-muted">Review, approve, and verify cash payouts for diamond withdrawals.</p>
+  </div>
+</div>
+
+<div class="admin-card" style="margin-top: 1.5rem;">
+  <div style="display: flex; gap: 1rem; border-bottom: 1px solid var(--admin-border); padding-bottom: 0.75rem;">
+    <a href="/admin/withdrawals?status=PENDING" class="btn btn-sm {% if status_filter == 'PENDING' %}btn-primary{% else %}btn-secondary{% endif %}">Pending Payouts</a>
+    <a href="/admin/withdrawals?status=APPROVED" class="btn btn-sm {% if status_filter == 'APPROVED' %}btn-primary{% else %}btn-secondary{% endif %}">Paid / Approved</a>
+    <a href="/admin/withdrawals?status=REJECTED" class="btn btn-sm {% if status_filter == 'REJECTED' %}btn-primary{% else %}btn-secondary{% endif %}">Rejected</a>
+    <a href="/admin/withdrawals" class="btn btn-sm {% if not status_filter %}btn-primary{% else %}btn-secondary{% endif %}">All</a>
+  </div>
+
+  <div class="table-responsive" style="margin-top: 1.5rem;">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>User</th>
+          <th>Amount</th>
+          <th>Payout (INR)</th>
+          <th>UPI ID</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for w in withdrawals %}
+        <tr>
+          <td>#{{ w.id }}</td>
+          <td>
+            <strong>@{{ w.username }}</strong><br>
+            <small class="text-muted">{{ w.email or w.phone }}</small>
+          </td>
+          <td><strong>💎 {{ w.amount }}</strong></td>
+          <td><strong style="color: var(--neon-green);">₹{{ (w.amount * 0.8)|int }}</strong></td>
+          <td><code>{{ w.upi_id }}</code></td>
+          <td>
+            {% if w.status == 'APPROVED' %}
+            <span class="badge badge-success">PAID</span><br><small class="text-muted">Ref: {{ w.payout_reference }}</small>
+            {% elif w.status == 'REJECTED' %}
+            <span class="badge badge-danger">REJECTED</span><br><small class="text-muted">{{ w.rejection_reason }}</small>
+            {% else %}
+            <span class="badge badge-warning">PENDING REVIEW</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if w.status == 'PENDING' %}
+            <button type="button" class="btn btn-sm btn-success" onclick="var p = prompt('Enter Bank/UPI Payout UTR reference:'); if (p) { document.getElementById('pay-form-{{ w.id }}').payout_ref.value = p; document.getElementById('pay-form-{{ w.id }}').submit(); }">Approve Payout</button>
+            <form id="pay-form-{{ w.id }}" method="POST" action="/admin/withdrawals/{{ w.id }}/review" style="display: none;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <input type="hidden" name="approve" value="1">
+              <input type="hidden" name="payout_ref" value="">
+            </form>
+
+            <button type="button" class="btn btn-sm btn-danger" onclick="var r = prompt('Rejection reason (diamonds will be refunded):'); if (r) { document.getElementById('rej-form-{{ w.id }}').reason.value = r; document.getElementById('rej-form-{{ w.id }}').submit(); }">Reject & Refund</button>
+            <form id="rej-form-{{ w.id }}" method="POST" action="/admin/withdrawals/{{ w.id }}/review" style="display: none;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <input type="hidden" name="approve" value="0">
+              <input type="hidden" name="reason" value="">
+            </form>
+            {% else %}
+            <span class="text-muted">Reviewed</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="text-center text-muted" style="padding: 2rem;">No withdrawal requests found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "admin/base.html" %}
+{% block title %}Enter Results: {{ tournament.title }} - Admin{% endblock %}
+{% block content %}
+<div class="admin-header">
+  <div>
+    <a href="/admin/tournaments" class="btn btn-sm btn-secondary" style="margin-bottom: 0.5rem;">&larr; Back to Tournaments</a>
+    <h1>Enter Results & Payout: {{ tournament.title }}</h1>
+    <p class="text-muted">Per Kill Reward: <strong>💎 {{ tournament.per_kill_diamonds or 0 }}</strong> per elimination.</p>
+  </div>
+</div>
+
+<div class="admin-card" style="margin-top: 1.5rem;">
+  <form method="POST" action="/admin/tournaments/{{ tournament.id }}/results">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    
+    <div class="form-group">
+      <label>Match Proof / Result Screenshot URL</label>
+      <input type="text" name="proof_url" class="form-control" placeholder="https://... or /static/uploads/proof_...">
+    </div>
+
+    <h3 style="margin-top: 1.5rem;">Player Placements & Eliminations</h3>
+    <div class="table-responsive" style="margin-top: 1rem;">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Slot</th>
+            <th>Player</th>
+            <th>FF IGN (UID)</th>
+            <th>Placement Rank</th>
+            <th>Kills</th>
+            <th>Placement Prize (💎)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in participants %}
+          <tr>
+            <td>#{{ p.slot_number }}</td>
+            <td>
+              <input type="hidden" name="user_id_{{ loop.index }}" value="{{ p.user_id }}">
+              <input type="hidden" name="ff_uid_{{ loop.index }}" value="{{ p.ff_uid }}">
+              <input type="hidden" name="ff_ign_{{ loop.index }}" value="{{ p.ff_ign }}">
+              <strong>@{{ p.username }}</strong>
+            </td>
+            <td>{{ p.ff_ign }} ({{ p.ff_uid }})</td>
+            <td>
+              <input type="number" name="placement_{{ loop.index }}" class="form-control" style="width: 80px;" value="{{ loop.index }}" min="1">
+            </td>
+            <td>
+              <input type="number" name="kills_{{ loop.index }}" class="form-control" style="width: 80px;" value="0" min="0">
+            </td>
+            <td>
+              <input type="number" name="placement_prize_{{ loop.index }}" class="form-control" style="width: 100px;" value="0" min="0">
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <input type="hidden" name="participant_count" value="{{ participants|length }}">
+    <div style="margin-top: 1.5rem;">
+      <button type="submit" class="btn btn-primary" style="padding: 0.75rem 2rem; font-size: 1rem;">
+        Publish Results, Award Diamonds & Mark Completed
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

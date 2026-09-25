@@ -24,14 +24,6 @@
       <textarea id="site_description" name="site_description" class="form-control" style="min-height: 80px;">{{ settings.site_description }}</textarea>
     </div>
 
-    <div class="form-group">
-      <label class="form-label" for="hero_headline">Homepage Hero Headline</label>
-      <input type="text" id="hero_headline" name="hero_headline" value="{{ settings.hero_headline or 'DOMINATE THE LOBBY' }}" class="form-control" placeholder="DOMINATE THE LOBBY">
-      <div style="font-size: 0.75rem; color: var(--admin-dim); margin-top: 0.35rem;">
-        The main headline displayed on the homepage hero section.
-      </div>
-    </div>
-
     <div class="form-row">
       <div class="form-group">
         <label class="form-label" for="logo_url">Custom Logo URL</label>
@@ -106,6 +98,60 @@
     <button type="submit" class="btn-admin-primary" style="margin-top: 1rem;">
       💾 Save Website Configuration
     </button>
-  </form>
+  
+    <!-- Financial & Tournament Rates -->
+    <div class="admin-card" style="margin-top: 1.5rem;">
+      <h3>Diamond Economy & Arena Rates</h3>
+      <p class="text-muted">Configure deposit and withdrawal rates, multiples, minimum thresholds, and Arena notices.</p>
+
+      <div class="grid grid-2" style="margin-top: 1rem; gap: 1rem;">
+        <div class="form-group">
+          <label>Deposit Rate (Diamonds per ₹10)</label>
+          <input type="number" name="deposit_diamonds_per_ten_inr" class="form-control" value="{{ settings.get('deposit_diamonds_per_ten_inr', '10') }}" min="1">
+          <small class="text-muted">Default: 10 Diamonds = ₹10 (1.0 rate)</small>
+        </div>
+
+        <div class="form-group">
+          <label>Minimum Deposit (Diamonds)</label>
+          <input type="number" name="deposit_min_diamonds" class="form-control" value="{{ settings.get('deposit_min_diamonds', '10') }}" min="1">
+        </div>
+
+        <div class="form-group">
+          <label>Deposit Multiples (Diamonds)</label>
+          <input type="number" name="deposit_multiples" class="form-control" value="{{ settings.get('deposit_multiples', '10') }}" min="1">
+        </div>
+
+        <div class="form-group">
+          <label>Withdrawal Rate (₹ per 10 Diamonds)</label>
+          <input type="number" step="0.5" name="withdraw_inr_per_ten_diamonds" class="form-control" value="{{ settings.get('withdraw_inr_per_ten_diamonds', '8') }}" min="1">
+          <small class="text-muted">Default: 10 Diamonds = ₹8 (0.8 rate)</small>
+        </div>
+
+        <div class="form-group">
+          <label>Minimum Withdrawal (Diamonds)</label>
+          <input type="number" name="withdraw_min_diamonds" class="form-control" value="{{ settings.get('withdraw_min_diamonds', '50') }}" min="10">
+        </div>
+
+        <div class="form-group">
+          <label>Withdrawal Multiples (Diamonds)</label>
+          <input type="number" name="withdraw_multiples" class="form-control" value="{{ settings.get('withdraw_multiples', '10') }}" min="1">
+        </div>
+
+        <div class="form-group">
+          <label>Enable Withdrawals</label>
+          <select name="withdrawals_enabled" class="form-control">
+            <option value="true" {% if settings.get('withdrawals_enabled', 'true') == 'true' %}selected{% endif %}>Enabled</option>
+            <option value="false" {% if settings.get('withdrawals_enabled', 'true') == 'false' %}selected{% endif %}>Disabled</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Arena Marquee Notice</label>
+          <input type="text" name="arena_notice_marquee" class="form-control" value="{{ settings.get('arena_notice_marquee', 'Please be ready before match starts') }}">
+        </div>
+      </div>
+    </div>
+
+</form>
 </div>
 {% endblock %}

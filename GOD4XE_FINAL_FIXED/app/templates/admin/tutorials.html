@@ -1,0 +1,71 @@
+{% extends "admin/base.html" %}
+{% block title %}Tutorials & Guides - Admin{% endblock %}
+{% block content %}
+<div class="admin-header">
+  <div>
+    <h1>How to Play & Tutorials</h1>
+    <p class="text-muted">Manage in-app guides (How to add UID, Join tournament, Deposit, Withdraw, Rules).</p>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-top: 1.5rem; gap: 1.5rem;">
+  <div class="admin-card">
+    <h3>Create Guide / Tutorial</h3>
+    <form method="POST" action="/admin/tutorials/new" style="margin-top: 1rem;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" name="title" class="form-control" required placeholder="e.g. How to Add Free Fire UID & IGN">
+      </div>
+      <div class="form-group">
+        <label>Slug</label>
+        <input type="text" name="slug" class="form-control" required placeholder="e.g. how-to-add-ff-uid">
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select name="category" class="form-control">
+          <option value="PROFILE">PROFILE</option>
+          <option value="TOURNAMENTS">TOURNAMENTS</option>
+          <option value="MATCHES">MATCHES</option>
+          <option value="WALLET">WALLET</option>
+          <option value="RULES">RULES</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Content / Instructions</label>
+        <textarea name="content" class="form-control" rows="5" required placeholder="Step-by-step instructions..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Image URL (Optional)</label>
+        <input type="text" name="image_url" class="form-control" placeholder="https://...">
+      </div>
+      <div class="form-group">
+        <label>Video URL (Optional)</label>
+        <input type="text" name="video_url" class="form-control" placeholder="https://youtube.com/watch?v=...">
+      </div>
+      <button type="submit" class="btn btn-primary" style="width: 100%;">Save Tutorial</button>
+    </form>
+  </div>
+
+  <div class="admin-card">
+    <h3>Published Tutorials</h3>
+    <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+      {% for t in tutorials %}
+      <div style="border: 1px solid var(--admin-border); border-radius: 8px; padding: 1rem; background: rgba(15, 7, 33, 0.4);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <div>
+            <h4>{{ t.title }}</h4>
+            <span class="badge badge-info">{{ t.category }}</span>
+          </div>
+          <form method="POST" action="/admin/tutorials/delete/{{ t.id }}" onsubmit="return confirm('Delete this tutorial?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button type="submit" class="btn btn-sm btn-danger">&times;</button>
+          </form>
+        </div>
+        <p class="text-muted" style="margin-top: 0.5rem; font-size: 0.9rem;">{{ t.content }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends "admin/base.html" %}
+{% block title %}Avatar Moderation - Admin{% endblock %}
+{% block content %}
+<div class="admin-header">
+  <div>
+    <h1>Avatar Moderation Queue</h1>
+    <p class="text-muted">Review player-uploaded avatars to enforce safety guidelines.</p>
+  </div>
+</div>
+
+<div class="admin-card" style="margin-top: 1.5rem;">
+  <div style="display: flex; gap: 1rem; border-bottom: 1px solid var(--admin-border); padding-bottom: 0.75rem;">
+    <a href="/admin/avatars?status=PENDING" class="btn btn-sm {% if status_filter == 'PENDING' %}btn-primary{% else %}btn-secondary{% endif %}">Pending Queue</a>
+    <a href="/admin/avatars?status=APPROVED" class="btn btn-sm {% if status_filter == 'APPROVED' %}btn-primary{% else %}btn-secondary{% endif %}">Approved</a>
+    <a href="/admin/avatars?status=REJECTED" class="btn btn-sm {% if status_filter == 'REJECTED' %}btn-primary{% else %}btn-secondary{% endif %}">Rejected</a>
+    <a href="/admin/avatars" class="btn btn-sm {% if not status_filter %}btn-primary{% else %}btn-secondary{% endif %}">All</a>
+  </div>
+
+  <div class="table-responsive" style="margin-top: 1.5rem;">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Preview</th>
+          <th>User</th>
+          <th>Uploaded At</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr>
+          <td>
+            <a href="{{ item.avatar_url }}" target="_blank">
+              <img src="{{ item.avatar_url }}" style="width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 1px solid var(--admin-border);">
+            </a>
+          </td>
+          <td>
+            <strong>{{ item.display_name }}</strong><br>
+            <small class="text-muted">@{{ item.username }} &bull; {{ item.email }}</small>
+          </td>
+          <td>{{ item.created_at }}</td>
+          <td>
+            {% if item.status == 'APPROVED' %}
+            <span class="badge badge-success">APPROVED</span>
+            {% elif item.status == 'REJECTED' %}
+            <span class="badge badge-danger">REJECTED</span><br><small class="text-muted">{{ item.rejection_reason }}</small>
+            {% else %}
+            <span class="badge badge-warning">PENDING REVIEW</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if item.status == 'PENDING' or item.status == 'REJECTED' %}
+            <form method="POST" action="/admin/avatars/{{ item.id }}/review" style="display: inline;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <input type="hidden" name="approve" value="1">
+              <button type="submit" class="btn btn-sm btn-success">Approve</button>
+            </form>
+            {% endif %}
+            {% if item.status == 'PENDING' or item.status == 'APPROVED' %}
+            <button type="button" class="btn btn-sm btn-danger" onclick="var r = prompt('Rejection reason:'); if (r) { document.getElementById('reject-form-{{ item.id }}').reason.value = r; document.getElementById('reject-form-{{ item.id }}').submit(); }">Reject</button>
+            <form id="reject-form-{{ item.id }}" method="POST" action="/admin/avatars/{{ item.id }}/review" style="display: none;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <input type="hidden" name="approve" value="0">
+              <input type="hidden" name="reason" value="">
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="text-center text-muted" style="padding: 2rem;">No items found in avatar queue.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

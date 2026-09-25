@@ -1,11 +1,9 @@
 {% extends "public/base.html" %}
 
 {% block content %}
-<div class="container home-page-container">
+<div class="container">
   
-  <!-- =========================================================================
-       HERO SECTION: Gaming Hub & Professional Configs
-       ========================================================================= -->
+  <!-- Hero Section -->
   <section class="hero-section">
     <div class="hero-grid">
       <div class="hero-text-col">
@@ -13,7 +11,7 @@
           <span class="pulse-dot"></span> LIVE CONTENT UPDATE
         </div>
         <h1 class="hero-title">
-          <span class="hero-headline-dynamic">{{ settings.hero_headline or 'DOMINATE THE LOBBY' }}</span> WITH <span class="gradient-text">PRO CONFIGS</span> &amp; GUIDES
+          DOMINATE THE LOBBY WITH <span class="gradient-text">PRO CONFIGS</span> & GUIDES
         </h1>
         <p class="hero-desc">
           Official gaming hub featuring battle-tested sensitivity configs, patch updates, mechanical guides, and tournament-ready downloads.
@@ -21,21 +19,12 @@
 
         <!-- Search Form -->
         <form action="/search" method="GET" class="hero-search-box">
-          <span class="search-input-icon">🔍</span>
           <input type="text" name="q" placeholder="Search sensitivity, OB updates, configs..." required>
-          <button type="submit" class="btn btn-primary hero-search-btn">Find Guide</button>
+          <button type="submit" class="btn btn-primary">Find Guide</button>
         </form>
-
-        <!-- Quick Filter Tags -->
-        <div class="hero-quick-tags">
-          <span class="quick-tag-label">POPULAR:</span>
-          <a href="/search?q=sensitivity" class="quick-tag-chip">Sensitivity</a>
-          <a href="/search?q=update" class="quick-tag-chip">OB Updates</a>
-          <a href="/esports" class="quick-tag-chip tag-highlight">⚡ eSports Arena</a>
-        </div>
       </div>
 
-      <!-- Featured Media / Video Card -->
+      <!-- Featured YouTube Video or Post Highlight -->
       <div class="hero-media-col">
         {% if featured_video %}
         <div class="featured-video-card cyber-card">
@@ -50,7 +39,7 @@
           <div class="video-card-footer">
             <div class="video-card-title">{{ featured_video.title }}</div>
             {% if settings.youtube_channel_url %}
-            <a href="{{ settings.youtube_channel_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" data-track-youtube="1">Watch Channel</a>
+            <a href="{{ settings.youtube_channel_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" data-track-youtube="1">Watch More</a>
             {% endif %}
           </div>
         </div>
@@ -61,136 +50,15 @@
           </a>
           <div class="video-card-footer">
             <div class="video-card-title">{{ featured_post.title }}</div>
-            <a href="/post/{{ featured_post.slug }}" class="btn btn-primary btn-sm">Read Guide &rarr;</a>
+            <a href="/post/{{ featured_post.slug }}" class="btn btn-primary btn-sm">Read Now</a>
           </div>
-        </div>
-        {% else %}
-        <div class="featured-video-card cyber-card placeholder-hero-media">
-          <div class="placeholder-icon">🎮</div>
-          <div class="video-card-title">GOD4XE GAMING PLATFORM</div>
-          <p class="placeholder-desc">Competitive Guides, Custom Rooms &amp; Player Resources</p>
-          <a href="/esports" class="btn btn-primary btn-sm">Explore Tournaments &rarr;</a>
         </div>
         {% endif %}
       </div>
     </div>
   </section>
 
-  <!-- =========================================================================
-       OFFICIAL TOURNAMENT TICKER (Continuous Smooth Marquee Loop)
-       ========================================================================= -->
-  <div class="esports-ticker-container" aria-label="Official Tournament Announcement">
-    <div class="esports-ticker-label">
-      <span class="ticker-fire-icon">🔥</span>
-      <span class="ticker-label-text">ANNOUNCEMENT</span>
-    </div>
-    <div class="esports-ticker-window">
-      <div class="esports-ticker-motion">
-        <div class="esports-ticker-loop">
-          <span class="ticker-highlight">⚡ OFFICIAL TOURNAMENT ORGANISING HERE</span>
-          <span class="ticker-separator">•</span>
-          <span class="ticker-item">🏆 DAILY FREE FIRE TOURNAMENTS</span>
-          <span class="ticker-separator">•</span>
-          <span class="ticker-highlight">🎮 GOD4XE ESPORTS</span>
-          <span class="ticker-separator">•</span>
-          <span class="ticker-item">🔥 COMPETE • CLIMB • WIN</span>
-          <span class="ticker-separator">•</span>
-          <span class="ticker-highlight">⚡ OFFICIAL TOURNAMENT ORGANISING HERE</span>
-          <span class="ticker-separator">•</span>
-          <span class="ticker-item">🛡️ AUTOMATED CUSTOM ROOMS &amp; LEADERBOARDS</span>
-          <span class="ticker-separator">•</span>
-        </div>
-        <div class="esports-ticker-loop" aria-hidden="true">
-          <span class="ticker-highlight">⚡ OFFICIAL TOURNAMENT ORGANISING HERE</span>
-          <span class="ticker-separator">•</span>
-          <span class="ticker-item">🏆 DAILY FREE FIRE TOURNAMENTS</span>
-          <span class="ticker-separator">•</span>
-          <span class="ticker-highlight">🎮 GOD4XE ESPORTS</span>
-          <span class="ticker-separator">•</span>
-          <span class="ticker-item">🔥 COMPETE • CLIMB • WIN</span>
-          <span class="ticker-separator">•</span>
-          <span class="ticker-highlight">⚡ OFFICIAL TOURNAMENT ORGANISING HERE</span>
-          <span class="ticker-separator">•</span>
-          <span class="ticker-item">🛡️ AUTOMATED CUSTOM ROOMS &amp; LEADERBOARDS</span>
-          <span class="ticker-separator">•</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- =========================================================================
-       PREMIUM LIQUID GLASS ESPORTS CTA SHOWCASE
-       ========================================================================= -->
-  <section class="esports-cta-showcase">
-    <div class="esports-showcase-card">
-      <div class="esports-card-ambient" aria-hidden="true"></div>
-      <div class="esports-card-body">
-        <div class="esports-card-meta">
-          <span class="esports-platform-badge">
-            <span class="pulse-beacon"></span> ⚡ GOD4XE ESPORTS
-          </span>
-          <span class="esports-game-badge">FREE FIRE BATTLE ROYALE</span>
-        </div>
-
-        <h2 class="esports-card-brand">
-          OFFICIAL FREE FIRE <span class="brand-gradient">TOURNAMENTS</span>
-        </h2>
-
-        <p class="esports-card-desc">
-          Enter the official GOD4XE competitive arena. Join daily custom room tournaments, climb dynamic ranks from Rookie to Legend on live leaderboards, and receive automatic Room ID &amp; Password access.
-        </p>
-
-        <!-- 4 Feature Cards -->
-        <div class="esports-features-grid">
-          <div class="esports-feature-box cyber-card">
-            <span class="feature-icon">🏆</span>
-            <div class="feature-text">
-              <strong>Daily Tournaments</strong>
-              <small>Solo, Duo &amp; Squad Cups</small>
-            </div>
-          </div>
-          <div class="esports-feature-box cyber-card">
-            <span class="feature-icon">💎</span>
-            <div class="feature-text">
-              <strong>Prize Pools</strong>
-              <small>Verified Diamond Payouts</small>
-            </div>
-          </div>
-          <div class="esports-feature-box cyber-card">
-            <span class="feature-icon">🛡️</span>
-            <div class="feature-text">
-              <strong>Automated Rooms</strong>
-              <small>Protected Player Credentials</small>
-            </div>
-          </div>
-          <div class="esports-feature-box cyber-card">
-            <span class="feature-icon">📊</span>
-            <div class="feature-text">
-              <strong>Dynamic Ranks</strong>
-              <small>Rookie to Legend Tiers</small>
-            </div>
-          </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="esports-card-buttons">
-          <a href="/esports" class="btn-enter-esports-primary">
-            <span>ENTER ESPORTS ARENA</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </a>
-          <a href="/download/app" class="btn-enter-esports-secondary">
-            <span>📲 Download Android App</span>
-          </a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- =========================================================================
-       DYNAMIC SECTIONS RAIL
-       ========================================================================= -->
+  <!-- Dynamic Sections Rail -->
   <section class="sections-rail-wrapper">
     <div class="section-rail">
       {% for sec in nav_sections %}
@@ -218,13 +86,11 @@
   </div>
   {% endif %}
 
-  <!-- =========================================================================
-       LATEST ARTICLES & CONFIGS
-       ========================================================================= -->
-  <section class="posts-section-wrapper">
-    <div class="section-header flex-between">
+  <!-- Latest Posts Section -->
+  <section style="margin-bottom: 3.5rem;">
+    <div class="section-header">
       <h2 class="section-title">
-        <span class="title-bar"></span> LATEST GUIDES &amp; CONFIGS
+        <span class="title-bar"></span> LATEST ARTICLES & CONFIGS
       </h2>
       <a href="/search" class="btn btn-secondary btn-sm">View All Guides &rarr;</a>
     </div>
@@ -237,7 +103,7 @@
           {% if post.thumbnail_url %}
           <img src="{{ post.thumbnail_url }}" alt="{{ post.title }}" class="post-thumb-img" loading="lazy">
           {% else %}
-          <div class="post-thumb-placeholder">🎮</div>
+          <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #1f113d, #0d0722); display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">🎮</div>
           {% endif %}
           {% if post.section_name %}
           <span class="post-badge">{{ post.section_name }}</span>
@@ -264,7 +130,7 @@
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
             </a>
             {% if post.download_url %}
-            <span class="badge badge-success">Download</span>
+            <span class="badge badge-success" style="font-size: 0.7rem;">Download Available</span>
             {% endif %}
           </div>
         </div>
@@ -272,19 +138,17 @@
       {% endfor %}
     </div>
     {% else %}
-    <div class="cyber-card empty-state-box">
-      <div class="empty-icon">🎮</div>
+    <div class="cyber-card" style="padding: 3rem; text-align: center; color: var(--text-muted);">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">🎮</div>
       <h3>No Posts Published Yet</h3>
       <p>Content will appear here as soon as published via the admin panel.</p>
     </div>
     {% endif %}
   </section>
 
-  <!-- =========================================================================
-       COMMUNITY FAVORITES
-       ========================================================================= -->
+  <!-- Popular Posts Section -->
   {% if popular_posts %}
-  <section class="posts-section-wrapper">
+  <section style="margin-bottom: 3.5rem;">
     <div class="section-header">
       <h2 class="section-title">
         <span class="title-bar"></span> COMMUNITY FAVORITES
@@ -298,7 +162,7 @@
           {% if post.thumbnail_url %}
           <img src="{{ post.thumbnail_url }}" alt="{{ post.title }}" class="post-thumb-img" loading="lazy">
           {% else %}
-          <div class="post-thumb-placeholder">🔥</div>
+          <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #1f113d, #0d0722); display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">🔥</div>
           {% endif %}
           {% if post.section_name %}
           <span class="post-badge">{{ post.section_name }}</span>
@@ -307,7 +171,7 @@
 
         <div class="post-content-box">
           <div class="post-meta-row">
-            <span class="text-accent">🔥 Popular</span>
+            <span>🔥 Popular</span>
             <span>👁️ {{ post.view_count }} views</span>
           </div>
 

@@ -1,0 +1,122 @@
+{% extends "admin/base.html" %}
+{% block title %}Tournament Categories & Subcategories - Admin{% endblock %}
+{% block content %}
+<div class="admin-header">
+  <div>
+    <h1>Tournament Categories & Subcategories</h1>
+    <p class="text-muted">Manage game modes, subcategories (Solo, Duo, Squad), display order, and badges.</p>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-top: 1.5rem; gap: 1.5rem;">
+  <!-- Add Category Form -->
+  <div class="admin-card">
+    <h3>Add Category</h3>
+    <form method="POST" action="/admin/categories/new" style="margin-top: 1rem;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="form-group">
+        <label>Category Name</label>
+        <input type="text" name="name" class="form-control" placeholder="e.g. Battle Royale" required>
+      </div>
+      <div class="form-group">
+        <label>Slug</label>
+        <input type="text" name="slug" class="form-control" placeholder="e.g. battle-royale" required>
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea name="description" class="form-control" rows="2" placeholder="Brief category description..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Icon / Image URL</label>
+        <input type="text" name="image_url" class="form-control" placeholder="/static/images/categories/battle_royale.png">
+      </div>
+      <div class="form-group">
+        <label>Display Order</label>
+        <input type="number" name="display_order" class="form-control" value="0">
+      </div>
+      <button type="submit" class="btn btn-primary" style="width: 100%;">Create Category</button>
+    </form>
+  </div>
+
+  <!-- Add Subcategory Form -->
+  <div class="admin-card">
+    <h3>Add Subcategory</h3>
+    <form method="POST" action="/admin/subcategories/new" style="margin-top: 1rem;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="form-group">
+        <label>Parent Category</label>
+        <select name="category_id" class="form-control" required>
+          {% for c in categories %}
+          <option value="{{ c.id }}">{{ c.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Subcategory Name</label>
+        <input type="text" name="name" class="form-control" placeholder="e.g. Squad (4v4)" required>
+      </div>
+      <div class="form-group">
+        <label>Slug</label>
+        <input type="text" name="slug" class="form-control" placeholder="e.g. squad" required>
+      </div>
+      <div class="form-group">
+        <label>Display Order</label>
+        <input type="number" name="display_order" class="form-control" value="0">
+      </div>
+      <button type="submit" class="btn btn-primary" style="width: 100%;">Add Subcategory</button>
+    </form>
+  </div>
+</div>
+
+<!-- Existing Categories & Subcategories -->
+<div class="admin-card" style="margin-top: 1.5rem;">
+  <h3>Active Tournament Categories</h3>
+  <div class="table-responsive" style="margin-top: 1rem;">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Order</th>
+          <th>Name</th>
+          <th>Slug</th>
+          <th>Subcategories</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in categories %}
+        <tr>
+          <td>{{ c.display_order }}</td>
+          <td><strong>{{ c.name }}</strong></td>
+          <td><code>{{ c.slug }}</code></td>
+          <td>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              {% for sub in c.subcategories %}
+              <span class="badge" style="background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3);">
+                {{ sub.name }} ({{ sub.slug }})
+              </span>
+              {% else %}
+              <span class="text-muted">None</span>
+              {% endfor %}
+            </div>
+          </td>
+          <td>
+            {% if c.is_active == 1 %}
+            <span class="badge badge-success">ACTIVE</span>
+            {% else %}
+            <span class="badge badge-danger">INACTIVE</span>
+            {% endif %}
+          </td>
+          <td>
+            <form method="POST" action="/admin/categories/delete/{{ c.id }}" style="display: inline;" onsubmit="return confirm('Delete this category?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

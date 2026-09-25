@@ -3,67 +3,57 @@
 {% block header_title %}Redeem Codes Management{% endblock %}
 
 {% block content %}
-<div class="admin-two-col-grid">
-  <!-- Generate Redeem Code Form -->
-  <div class="admin-card">
-    <div class="admin-card-header">
-      <div class="admin-card-title">🎁 Generate Redeem Code</div>
-    </div>
+<div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+  <div class="card" style="background: rgba(18, 8, 35, 0.8); border: 1px solid rgba(168,85,247,0.3); border-radius: 12px; padding: 1.5rem; height: fit-content;">
+    <h3 style="color: #fff; font-size: 1.2rem; margin-bottom: 1rem;">Generate Redeem Code</h3>
     <form action="/admin/redeem/new" method="POST">
       <input type="hidden" name="csrf_token" value="{{ admin.csrf_token }}">
 
-      <div class="form-group">
-        <label class="form-label" for="code">Code String *</label>
-        <input type="text" id="code" name="code" required placeholder="e.g. FREEFIRE50" class="form-control" style="text-transform: uppercase;">
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label style="color: #fff; font-size: 0.85rem; display: block; margin-bottom: 0.3rem;">Code String *</label>
+        <input type="text" name="code" required placeholder="e.g. FREEFIRE50" style="width: 100%; padding: 0.6rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 6px; text-transform: uppercase;">
       </div>
 
-      <div class="form-group">
-        <label class="form-label" for="reward_diamonds">Reward (Diamonds) *</label>
-        <input type="number" id="reward_diamonds" name="reward_diamonds" required value="50" min="1" class="form-control">
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label style="color: #fff; font-size: 0.85rem; display: block; margin-bottom: 0.3rem;">Reward (Diamonds) *</label>
+        <input type="number" name="reward_diamonds" required value="50" min="1" style="width: 100%; padding: 0.6rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 6px;">
       </div>
 
-      <div class="form-group">
-        <label class="form-label" for="max_uses">Max Total Uses</label>
-        <input type="number" id="max_uses" name="max_uses" value="100" min="1" class="form-control">
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label style="color: #fff; font-size: 0.85rem; display: block; margin-bottom: 0.3rem;">Max Total Uses</label>
+        <input type="number" name="max_uses" value="100" min="1" style="width: 100%; padding: 0.6rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 6px;">
       </div>
 
-      <button type="submit" class="btn-admin-primary" style="width: 100%; justify-content: center; margin-top: 1rem;">
-        Create Redeem Code
-      </button>
+      <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.65rem; border-radius: 6px; font-weight: 600;">Create Redeem Code</button>
     </form>
   </div>
 
-  <!-- Redeem Codes Table -->
-  <div class="admin-card">
-    <div class="admin-card-header">
-      <div class="admin-card-title">Active &amp; Past Redeem Codes ({{ codes | length }})</div>
-    </div>
-    <div class="table-responsive">
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>Code</th>
-            <th>Reward</th>
-            <th>Uses</th>
-            <th>Created</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for c in codes %}
-          <tr>
-            <td><strong style="color: var(--neon-violet); font-family: monospace;">{{ c.code }}</strong></td>
-            <td style="color: #fbbf24; font-weight: 700;">💎 {{ c.reward_diamonds }}</td>
-            <td>{{ c.times_used }} / {{ c.max_uses }}</td>
-            <td style="color: var(--admin-muted);">{{ c.created_at.strftime('%Y-%m-%d %H:%M') if c.created_at else '-' }}</td>
-          </tr>
-          {% else %}
-          <tr>
-            <td colspan="4" style="padding: 2rem; text-align: center; color: var(--admin-muted);">No redeem codes generated yet.</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+  <div class="card" style="background: rgba(18, 8, 35, 0.6); border: 1px solid rgba(168,85,247,0.2); border-radius: 12px; overflow-x: auto;">
+    <h3 style="color: #fff; font-size: 1.2rem; padding: 1rem 1rem 0;">Active & Past Redeem Codes</h3>
+    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
+      <thead>
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--text-muted);">
+          <th style="padding: 1rem;">Code</th>
+          <th style="padding: 1rem;">Reward</th>
+          <th style="padding: 1rem;">Uses</th>
+          <th style="padding: 1rem;">Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in codes %}
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #fff;">
+          <td style="padding: 1rem; font-weight: 700; color: #c084fc; font-family: monospace;">{{ c.code }}</td>
+          <td style="padding: 1rem; color: #fbbf24;">💎 {{ c.reward_diamonds }}</td>
+          <td style="padding: 1rem;">{{ c.times_used }} / {{ c.max_uses }}</td>
+          <td style="padding: 1rem; color: var(--text-muted);">{{ c.created_at }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="4" style="padding: 2rem; text-align: center; color: var(--text-muted);">No redeem codes generated.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 </div>
 {% endblock %}

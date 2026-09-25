@@ -42,7 +42,7 @@
     <div class="form-group">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
         <label class="form-label" for="content-editor" style="margin-bottom: 0;">Main Article Content *</label>
-        <div style="display: flex; gap: 0.35rem; flex-wrap: wrap;">
+        <div style="display: flex; gap: 0.35rem;">
           <button type="button" class="btn-sm btn-edit" data-editor-cmd="h2">H2</button>
           <button type="button" class="btn-sm btn-edit" data-editor-cmd="h3">H3</button>
           <button type="button" class="btn-sm btn-edit" data-editor-cmd="bold">B</button>
@@ -104,7 +104,7 @@
     </div>
 
     <!-- Status Toggles -->
-    <div style="display: flex; gap: 1rem; margin: 1.5rem 0 2rem; flex-wrap: wrap;">
+    <div style="display: flex; gap: 2rem; margin: 1.5rem 0 2rem;">
       <label class="toggle-label">
         <input type="checkbox" name="is_published" value="1" {% if not post or post.is_published %}checked{% endif %}>
         <span><strong>Published</strong> (Live on website)</span>
@@ -116,7 +116,7 @@
       </label>
     </div>
 
-    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+    <div style="display: flex; gap: 1rem;">
       <button type="submit" class="btn-admin-primary">
         💾 Save & Publish Post
       </button>

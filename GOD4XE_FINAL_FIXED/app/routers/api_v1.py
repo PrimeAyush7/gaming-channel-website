@@ -1,36 +1,32 @@
-import logging
-logger = logging.getLogger("api_v1")
-from fastapi import APIRouter, Request, Depends, HTTPException, status, Query, UploadFile, File, Form
-from pydantic import BaseModel, Field
+import re
+import secrets
+from pathlib import Path
 from typing import Optional, List
-from app.config import WITHDRAWALS_ENABLED, UPLOAD_DIR, GOOGLE_CLIENT_ID
-from app.services import (
-    users_auth as user_service,
-    referrals as referrals_service,
-    tournaments as tournament_service,
-    wallet as wallet_service,
-    matches as match_service,
-    leaderboards as leaderboard_service,
-    social as social_service,
-    settings as settings_service
-)
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Request, UploadFile, File
+from pydantic import BaseModel, EmailStr, Field
+
+from app.services import users_auth as user_service
+from app.services import tournaments as tournament_service
+from app.services import wallet as wallet_service
+from app.services import leaderboards as leaderboard_service
+from app.services import social as social_service
+from app.services import content_features
+from app.services import settings as settings_service
+from app.config import GOOGLE_CLIENT_ID, UPLOAD_DIR, WITHDRAWALS_ENABLED
 
 router = APIRouter(prefix="/api/v1")
 
-# --------------------------------------------------------------------------
-# DEPENDENCY: GET CURRENT USER
-# --------------------------------------------------------------------------
 def get_auth_user(request: Request) -> dict:
     return user_service.get_current_user(request)
 
 # --------------------------------------------------------------------------
-# PYDANTIC SCHEMAS
+# SCHEMAS
 # --------------------------------------------------------------------------
 class RegisterRequest(BaseModel):
-    username: str = Field(..., min_length=3, max_length=50)
+    username: str
     email: Optional[str] = None
     phone: Optional[str] = None
-    password: Optional[str] = Field(None, min_length=6)
+    password: str
     referral_code: Optional[str] = None
 
 class LoginRequest(BaseModel):
@@ -48,6 +44,12 @@ class OTPVerifyRequest(BaseModel):
     phone: str
     otp: str
 
+class UpdateProfileRequest(BaseModel):
+    username: Optional[str] = None
+    display_name: Optional[str] = None
+    ff_uid: Optional[str] = None
+    ff_ign: Optional[str] = None
+
 class UpdateFreeFireRequest(BaseModel):
     ff_uid: str
     ff_ign: str
@@ -55,47 +57,46 @@ class UpdateFreeFireRequest(BaseModel):
 class UpdateAvatarRequest(BaseModel):
     avatar_url: str
 
-class UpdateProfileRequest(BaseModel):
-    username: Optional[str] = None
-    display_name: Optional[str] = None
-    ff_uid: Optional[str] = None
-    ff_ign: Optional[str] = None
-    avatar_url: Optional[str] = None
-
 class JoinTournamentRequest(BaseModel):
     ff_uid: str
     ff_ign: str
 
-class DepositRequestSchema(BaseModel):
-    amount: int = Field(..., ge=10)
-    utr_reference: str = Field(..., min_length=6)
-    payment_proof_url: str = Field(..., min_length=5)
-
-class WithdrawalRequestSchema(BaseModel):
-    amount: int = Field(..., ge=100)
-    upi_id: str = Field(..., min_length=5)
-
-class RedeemCodeRequest(BaseModel):
-    code: str = Field(..., min_length=3)
-
-class SupportTicketRequest(BaseModel):
-    subject: str = Field(..., min_length=5)
-    category: str = Field(default="GENERAL")
-    priority: str = Field(default="NORMAL")
-    message: str = Field(..., min_length=10)
-
-class SupportReplyRequest(BaseModel):
-    message: str = Field(..., min_length=1)
+class ParticipantCredentialsRequest(BaseModel):
+    ff_uid: str
+    ff_ign: str
 
 class DisputeRequest(BaseModel):
-    match_id: int
-    tournament_id: int
-    reason: str
+    dispute_type: str = Field(..., alias="reason")
+    description: str
     proof_url: Optional[str] = None
-    description: Optional[str] = None
+
+    class Config:
+        allow_population_by_field_name = True
+
+class DepositRequestSchema(BaseModel):
+    amount: int
+    utr_reference: str
+    payment_proof_url: Optional[str] = None
+
+class WithdrawalRequestSchema(BaseModel):
+    amount: int
+    upi_id: str
+
+class RedeemCodeRequest(BaseModel):
+    code: str
+
+class SupportTicketRequest(BaseModel):
+    subject: str
+    category: str = "TOURNAMENT"
+    priority: str = "NORMAL"
+    message: str
+
+class SupportReplyRequest(BaseModel):
+    message: str
+
 
 # --------------------------------------------------------------------------
-# 1. AUTHENTICATION ENDPOINTS
+# 1. AUTHENTICATION
 # --------------------------------------------------------------------------
 @router.post("/auth/register", status_code=status.HTTP_201_CREATED)
 async def api_register(req: RegisterRequest):
@@ -122,7 +123,7 @@ async def api_login(req: LoginRequest, request: Request):
 @router.get("/auth/config")
 async def api_auth_config():
     all_settings = settings_service.get_all_settings()
-    configured_client_id = GOOGLE_CLIENT_ID or all_settings.get("google_client_id", "") or "399321991405-ojrb4vtnhpcigg56fu0e8glgsdqob8ap.apps.googleusercontent.com"
+    configured_client_id = GOOGLE_CLIENT_ID or all_settings.get("google_client_id", "")
     return {
         "success": True,
         "google_client_id": configured_client_id
@@ -134,17 +135,7 @@ async def api_google_auth(req: GoogleAuthRequest):
         user, token = user_service.authenticate_google_user(req.id_token, referral_code=req.referral_code)
         return {"success": True, "user": user, "token": token}
     except ValueError as e:
-        logger.error(f"[GOOGLE_AUTH_FAILED] Token verification rejected: {e}")
-        err_msg = str(e)
-        # Protect internal JWKS / key-loading infrastructure details from being leaked to client
-        if any(term in err_msg.lower() for term in ["public signing key", "unable to load", "jwks", "cert cache", "connection", "urlopen"]):
-            client_msg = "Google authentication failed: unable to verify signing keys."
-        else:
-            client_msg = err_msg
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=client_msg)
-    except Exception as e:
-        logger.error(f"[GOOGLE_AUTH_ERROR] Unexpected error during Google authentication: {e}", exc_info=True)
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Authentication failed due to a server error")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 @router.post("/auth/otp/request")
 async def api_otp_request(req: OTPRequest):
@@ -170,18 +161,14 @@ async def api_me(user: dict = Depends(get_auth_user)):
 async def api_logout(user: dict = Depends(get_auth_user)):
     return {"success": True, "message": "Logged out successfully"}
 
+
 # --------------------------------------------------------------------------
 # 2. USER PROFILE & STATS
 # --------------------------------------------------------------------------
-@router.get("/users/check-username")
-async def api_check_username(username: str = Query(...)):
-    available, message = user_service.check_username_availability(username)
-    return {"success": True, "available": available, "message": message}
-
 @router.get("/users/profile")
 async def api_get_profile(user: dict = Depends(get_auth_user)):
-    profile = user_service.get_user_by_id(user["id"])
-    return {"success": True, "profile": profile}
+    full_user = user_service.get_user_by_id(user["id"])
+    return {"success": True, "profile": full_user or user}
 
 @router.put("/users/profile")
 async def api_update_profile(req: UpdateProfileRequest, user: dict = Depends(get_auth_user)):
@@ -193,9 +180,7 @@ async def api_update_profile(req: UpdateProfileRequest, user: dict = Depends(get
             ff_uid=req.ff_uid,
             ff_ign=req.ff_ign
         )
-        if req.avatar_url is not None:
-            updated = user_service.update_user_avatar(user["id"], req.avatar_url)
-        return {"success": True, "profile": updated}
+        return {"success": True, "profile": updated, "message": "Profile updated successfully"}
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
@@ -203,58 +188,104 @@ async def api_update_profile(req: UpdateProfileRequest, user: dict = Depends(get
 async def api_update_freefire(req: UpdateFreeFireRequest, user: dict = Depends(get_auth_user)):
     try:
         updated = user_service.update_user_freefire(user["id"], req.ff_uid, req.ff_ign)
-        return {"success": True, "profile": updated}
+        return {"success": True, "profile": updated, "message": "Free Fire credentials saved"}
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
-@router.post("/users/avatar/upload")
+@router.get("/users/check-username")
+async def api_check_username(username: str = Query(...), user: dict = Depends(get_auth_user)):
+    valid, msg = user_service.check_username_availability(username, exclude_user_id=user["id"])
+    return {"success": True, "available": valid, "message": msg}
+
+@router.post("/users/avatar")
 async def api_upload_avatar(file: UploadFile = File(...), user: dict = Depends(get_auth_user)):
+    contents = await file.read()
     try:
-        file_bytes = await file.read()
         updated = user_service.upload_user_avatar(
             user_id=user["id"],
-            file_bytes=file_bytes,
-            filename=file.filename or "avatar.png",
-            content_type=file.content_type or "image/png"
+            file_bytes=contents,
+            filename=file.filename,
+            content_type=file.content_type
         )
-        return {"success": True, "avatar_url": updated["avatar_url"], "profile": updated}
+        return {"success": True, "profile": updated, "message": "Profile avatar uploaded successfully!"}
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
-@router.post("/users/avatar/remove")
 @router.delete("/users/avatar")
 async def api_remove_avatar(user: dict = Depends(get_auth_user)):
     updated = user_service.remove_user_avatar(user["id"])
-    return {"success": True, "profile": updated}
+    return {"success": True, "profile": updated, "message": "Profile avatar removed."}
 
-@router.get("/users/matches")
-async def api_user_matches(
-    limit: int = Query(20, ge=1, le=100),
-    offset: int = Query(0, ge=0),
-    user: dict = Depends(get_auth_user)
-):
-    history = match_service.get_user_match_history(user["id"], limit=limit, offset=offset)
-    return {"success": True, "count": len(history), "matches": history}
+@router.get("/users/{user_id}/public-profile")
+async def api_get_public_profile(user_id: int):
+    public_prof = user_service.get_public_profile(user_id)
+    if not public_prof:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player profile not found.")
+    return {"success": True, "player": public_prof}
+
+@router.get("/users/{user_id}/achievements")
+async def api_get_achievements(user_id: int):
+    achs = user_service.get_user_achievements(user_id)
+    return {"success": True, "achievements": achs}
+
 
 # --------------------------------------------------------------------------
-# 3. TOURNAMENTS
+# 3. TOURNAMENT CATEGORIES & GUNS
+# --------------------------------------------------------------------------
+@router.get("/tournaments/categories")
+async def api_list_categories():
+    cats = tournament_service.list_categories(only_active=True)
+    return {"success": True, "categories": cats}
+
+@router.get("/tournaments/guns")
+async def api_list_guns():
+    guns = tournament_service.list_guns(only_active=True)
+    return {"success": True, "guns": guns}
+
+
+# --------------------------------------------------------------------------
+# 4. TOURNAMENTS & ARENA
 # --------------------------------------------------------------------------
 @router.get("/tournaments")
 async def api_list_tournaments(
     status: Optional[str] = None,
-    limit: int = Query(20, ge=1, le=100),
-    offset: int = Query(0, ge=0)
+    category: Optional[str] = None,
+    subcategory: Optional[str] = None,
+    entry_type: Optional[str] = None,
+    search: Optional[str] = None,
+    joined: bool = False,
+    limit: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    request: Request = None
 ):
-    normalized_status = None if (not status or status.strip().upper() == "ALL") else status.strip().upper()
-    tournaments = tournament_service.list_tournaments(status_filter=normalized_status, limit=limit, offset=offset)
+    user_id = None
+    if request:
+        try:
+            auth_u = user_service.get_current_user(request)
+            user_id = auth_u["id"]
+        except Exception:
+            pass
+
+    tournaments = tournament_service.list_tournaments(
+        status_filter=status,
+        category_slug=category,
+        subcategory_slug=subcategory,
+        entry_type=entry_type,
+        search_query=search,
+        user_id=user_id,
+        joined_only=joined,
+        is_published_only=True,
+        limit=limit,
+        offset=offset
+    )
     return {"success": True, "count": len(tournaments), "tournaments": tournaments}
 
 @router.get("/tournaments/{tournament_id}")
 async def api_tournament_detail(tournament_id: int, request: Request):
     user_id = None
     try:
-        user = user_service.get_current_user(request)
-        user_id = user["id"]
+        u = user_service.get_current_user(request)
+        user_id = u["id"]
     except Exception:
         pass
 
@@ -280,6 +311,33 @@ async def api_join_tournament(
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
+@router.put("/tournaments/{tournament_id}/participant-credentials")
+async def api_update_participant_credentials(
+    tournament_id: int,
+    req: ParticipantCredentialsRequest,
+    user: dict = Depends(get_auth_user)
+):
+    try:
+        res = tournament_service.update_participant_credentials(
+            tournament_id=tournament_id,
+            user_id=user["id"],
+            ff_uid=req.ff_uid,
+            ff_ign=req.ff_ign
+        )
+        return res
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+@router.get("/tournaments/{tournament_id}/participants")
+async def api_tournament_participants(tournament_id: int):
+    parts = tournament_service.list_tournament_participants(tournament_id)
+    return {"success": True, "count": len(parts), "participants": parts}
+
+@router.get("/tournaments/{tournament_id}/results")
+async def api_tournament_results(tournament_id: int):
+    results = tournament_service.get_tournament_results(tournament_id)
+    return {"success": True, "results": results}
+
 @router.get("/tournaments/{tournament_id}/room")
 async def api_tournament_room(
     tournament_id: int,
@@ -291,17 +349,60 @@ async def api_tournament_room(
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
 
+@router.post("/tournaments/{tournament_id}/favorite")
+async def api_toggle_favorite(tournament_id: int, user: dict = Depends(get_auth_user)):
+    fav = tournament_service.toggle_favorite(user["id"], tournament_id)
+    return {"success": True, "is_favorited": fav, "message": "Saved to favorites" if fav else "Removed from favorites"}
+
+@router.get("/tournaments/favorites/all")
+@router.get("/tournaments/favorites")
+async def api_list_favorites(user: dict = Depends(get_auth_user)):
+    favs = tournament_service.list_user_favorites(user["id"])
+    return {"success": True, "count": len(favs), "tournaments": favs}
+
+@router.post("/tournaments/{tournament_id}/disputes", status_code=status.HTTP_201_CREATED)
+async def api_create_tournament_dispute(
+    tournament_id: int,
+    req: DisputeRequest,
+    user: dict = Depends(get_auth_user)
+):
+    disp = tournament_service.create_tournament_dispute(
+        tournament_id=tournament_id,
+        user_id=user["id"],
+        dispute_type=req.dispute_type,
+        description=req.description,
+        proof_url=req.proof_url
+    )
+    return {"success": True, "message": "Dispute lodged. Admin will investigate.", "dispute": disp}
+
+@router.get("/arena/notice")
+async def api_arena_notice():
+    all_settings = settings_service.get_all_settings()
+    notice = all_settings.get("arena_notice_marquee", "Please be ready before match starts")
+    return {"success": True, "notice": notice}
+
+
 # --------------------------------------------------------------------------
-# 4. WALLET & DIAMOND LEDGER
+# 5. WALLET & DIAMOND LEDGER
 # --------------------------------------------------------------------------
 @router.get("/wallet/balance")
 async def api_wallet_balance(user: dict = Depends(get_auth_user)):
     info = wallet_service.get_wallet_info(user["id"])
     return {"success": True, **info}
 
+@router.get("/wallet/rates")
+async def api_wallet_rates():
+    dep = wallet_service.get_deposit_settings()
+    wit = wallet_service.get_withdrawal_settings()
+    return {
+        "success": True,
+        "deposit": dep,
+        "withdrawal": wit
+    }
+
 @router.get("/wallet/transactions")
 async def api_wallet_transactions(
-    limit: int = Query(20, ge=1, le=100),
+    limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
     user: dict = Depends(get_auth_user)
 ):
@@ -310,40 +411,22 @@ async def api_wallet_transactions(
 
 @router.get("/wallet/deposit-info")
 async def api_wallet_deposit_info():
-    all_settings = settings_service.get_all_settings()
-    upi_id = all_settings.get("upi_id", "god4xe@upi")
-    payee_name = all_settings.get("upi_payee_name", "GOD4XE ESPORTS")
-    min_dep = int(all_settings.get("min_deposit_diamonds", "50"))
-    instructions = all_settings.get("deposit_instructions", "Scan QR or send UPI payment, then enter UTR reference.")
-
-    upi_qr_img = all_settings.get("upi_qr_image_url", "")
-    return {
-        "success": True,
-        "upi_id": upi_id,
-        "payee_name": payee_name,
-        "min_deposit_diamonds": min_dep,
-        "instructions": instructions,
-        "upi_qr_string": f"upi://pay?pa={upi_id}&pn={payee_name}&cu=INR",
-        "upi_qr_image_url": upi_qr_img
-    }
-
+    dep_cfg = wallet_service.get_deposit_settings()
+    return {"success": True, **dep_cfg}
 
 @router.post("/wallet/upload-screenshot")
 async def api_upload_payment_screenshot(
     file: UploadFile = File(...),
     user: dict = Depends(get_auth_user)
 ):
-    import secrets
     allowed_exts = {"jpg", "jpeg", "png", "webp"}
     ext = file.filename.split(".")[-1].lower() if file.filename and "." in file.filename else ""
     content_type = (file.content_type or "").lower()
-    
     if ext not in allowed_exts and content_type not in ("image/jpeg", "image/jpg", "image/png", "image/webp"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid image format. Allowed formats: JPG, JPEG, PNG, WEBP."
         )
-
     contents = await file.read()
     if len(contents) > 5 * 1024 * 1024:
         raise HTTPException(
@@ -355,12 +438,10 @@ async def api_upload_payment_screenshot(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Empty screenshot file uploaded."
         )
-
     safe_name = f"proof_{user['id']}_{secrets.token_hex(8)}.{ext if ext in allowed_exts else 'png'}"
     target_path = UPLOAD_DIR / safe_name
     with open(target_path, "wb") as f_out:
         f_out.write(contents)
-
     screenshot_url = f"/static/uploads/{safe_name}"
     return {
         "success": True,
@@ -386,17 +467,59 @@ async def api_my_deposit_requests(user: dict = Depends(get_auth_user)):
     requests = wallet_service.list_user_deposit_requests(user["id"])
     return {"success": True, "count": len(requests), "requests": requests}
 
-@router.post("/wallet/withdraw")
+@router.post("/wallet/withdraw", status_code=status.HTTP_201_CREATED)
 async def api_withdraw(req: WithdrawalRequestSchema, user: dict = Depends(get_auth_user)):
-    if not WITHDRAWALS_ENABLED:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Withdrawal features are currently review-gated and disabled pending regulatory and platform compliance."
+    try:
+        created = wallet_service.create_withdrawal_request(
+            user_id=user["id"],
+            amount=req.amount,
+            upi_id=req.upi_id
         )
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Withdrawals are not enabled in this environment.")
+        return {"success": True, "message": "Withdrawal request submitted for admin review.", "withdrawal": created}
+    except ValueError as e:
+        if "disabled" in str(e).lower():
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+@router.get("/wallet/withdrawals")
+async def api_my_withdrawals(user: dict = Depends(get_auth_user)):
+    reqs = wallet_service.list_user_withdrawal_requests(user["id"])
+    return {"success": True, "count": len(reqs), "withdrawals": reqs}
+
 
 # --------------------------------------------------------------------------
-# 5. LEADERBOARDS
+# 6. CONTENT, UPDATES, ANNOUNCEMENTS, COMMUNITIES, TUTORIALS
+# --------------------------------------------------------------------------
+@router.get("/updates/latest")
+async def api_latest_updates():
+    updates = content_features.list_latest_updates(only_published=True)
+    return {"success": True, "updates": updates}
+
+@router.get("/announcements")
+async def api_announcements():
+    ann = content_features.list_announcements(only_active=True)
+    return {"success": True, "announcements": ann}
+
+@router.get("/social/communities")
+async def api_communities():
+    comm = content_features.list_communities(only_active=True)
+    return {"success": True, "communities": comm}
+
+@router.get("/tutorials")
+async def api_tutorials():
+    tuts = content_features.list_tutorials(only_published=True)
+    return {"success": True, "tutorials": tuts}
+
+@router.get("/tutorials/{slug}")
+async def api_tutorial_detail(slug: str):
+    tut = content_features.get_tutorial_by_slug(slug)
+    if not tut:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tutorial not found")
+    return {"success": True, "tutorial": tut}
+
+
+# --------------------------------------------------------------------------
+# 7. LEADERBOARDS
 # --------------------------------------------------------------------------
 @router.get("/leaderboards")
 async def api_leaderboards(
@@ -406,8 +529,9 @@ async def api_leaderboards(
     board = leaderboard_service.get_leaderboard(board_type=type, limit=limit)
     return {"success": True, **board}
 
+
 # --------------------------------------------------------------------------
-# 6. SOCIAL, REDEEM, REFERRALS, NOTIFICATIONS, SUPPORT
+# 8. SOCIAL, REDEEM, REFERRALS, NOTIFICATIONS, SUPPORT
 # --------------------------------------------------------------------------
 @router.post("/redeem/apply")
 async def api_redeem(req: RedeemCodeRequest, user: dict = Depends(get_auth_user)):
@@ -417,24 +541,10 @@ async def api_redeem(req: RedeemCodeRequest, user: dict = Depends(get_auth_user)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
-@router.get("/referrals/me")
 @router.get("/referrals/stats")
-async def api_referrals_me(user: dict = Depends(get_auth_user)):
-    summary = referrals_service.get_user_referral_summary(user["id"])
+async def api_referrals_stats(user: dict = Depends(get_auth_user)):
+    summary = social_service.get_user_referral_summary(user["id"])
     return summary
-
-@router.get("/referrals/leaderboard")
-async def api_referrals_leaderboard(
-    limit: int = Query(50, ge=1, le=100),
-    offset: int = Query(0, ge=0)
-):
-    board = referrals_service.get_referral_leaderboard(limit=limit, offset=offset)
-    return board
-
-@router.get("/referrals/ranks")
-async def api_referrals_ranks():
-    ranks = referrals_service.get_active_ranks()
-    return {"success": True, "ranks": ranks}
 
 @router.get("/notifications")
 async def api_notifications(user: dict = Depends(get_auth_user)):
@@ -445,6 +555,13 @@ async def api_notifications(user: dict = Depends(get_auth_user)):
 async def api_mark_notification(note_id: int, user: dict = Depends(get_auth_user)):
     social_service.mark_notification_as_read(note_id, user["id"])
     return {"success": True, "message": "Notification marked as read"}
+
+@router.post("/notifications/read-all")
+async def api_mark_all_notifications(user: dict = Depends(get_auth_user)):
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE notifications SET is_read = 1 WHERE user_id = %s;", (user["id"],))
+    return {"success": True, "message": "All notifications marked as read"}
 
 @router.get("/support/tickets")
 async def api_tickets(user: dict = Depends(get_auth_user)):
@@ -478,12 +595,12 @@ async def api_reply_ticket(ticket_id: int, req: SupportReplyRequest, user: dict 
     return {"success": True, "message": msg}
 
 @router.post("/disputes", status_code=status.HTTP_201_CREATED)
-async def api_create_dispute(req: DisputeRequest, user: dict = Depends(get_auth_user)):
+async def api_create_dispute_legacy(req: DisputeRequest, user: dict = Depends(get_auth_user)):
     disp = social_service.create_match_dispute(
-        match_id=req.match_id,
-        tournament_id=req.tournament_id,
+        match_id=1,
+        tournament_id=1,
         reporter_user_id=user["id"],
-        reason=req.reason,
+        reason=req.dispute_type,
         proof_url=req.proof_url,
         description=req.description
     )

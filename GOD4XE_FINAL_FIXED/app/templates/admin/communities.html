@@ -1,0 +1,50 @@
+{% extends "admin/base.html" %}
+{% block title %}GOD4XE Communities - Admin{% endblock %}
+{% block content %}
+<div class="admin-header">
+  <div>
+    <h1>JOIN GOD4XE COMMUNITIES</h1>
+    <p class="text-muted">Configure official community links (Instagram, Discord, WhatsApp, Telegram, YouTube). URLs are dynamically driven in the app without APK updates.</p>
+  </div>
+</div>
+
+<div class="admin-card" style="margin-top: 1.5rem;">
+  <h3>Official Community Channels</h3>
+  <div class="table-responsive" style="margin-top: 1rem;">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Platform</th>
+          <th>Display Name</th>
+          <th>Destination URL</th>
+          <th>Order</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in communities %}
+        <tr>
+          <form method="POST" action="/admin/communities/edit/{{ c.id }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <td><strong>{{ c.platform }}</strong></td>
+            <td><input type="text" name="name" class="form-control" value="{{ c.name }}" required></td>
+            <td><input type="text" name="url" class="form-control" value="{{ c.url }}" required></td>
+            <td><input type="number" name="display_order" class="form-control" value="{{ c.display_order }}" style="width: 70px;"></td>
+            <td>
+              <select name="is_active" class="form-control" style="width: 100px;">
+                <option value="1" {% if c.is_active == 1 %}selected{% endif %}>Active</option>
+                <option value="0" {% if c.is_active == 0 %}selected{% endif %}>Disabled</option>
+              </select>
+            </td>
+            <td>
+              <button type="submit" class="btn btn-sm btn-primary">Save</button>
+            </td>
+          </form>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

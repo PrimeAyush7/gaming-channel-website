@@ -55,9 +55,7 @@
       <!-- Dynamic Sections Desktop Navigation (Desktop Only) -->
       <nav class="desktop-nav" aria-label="Main Navigation">
         <a href="/" class="nav-link {% if request.url.path == '/' %}active{% endif %}">HOME</a>
-        <a href="/esports" class="nav-link nav-highlight {% if request.url.path == '/esports' %}active{% endif %}">⚡ ESPORTS <span class="esports-live-pulse" style="margin-left: 4px; font-size: 0.65rem;" aria-label="Live tournaments">LIVE</span></a>
-        <a href="/tournaments" class="nav-link {% if request.url.path.startswith('/tournaments') %}active{% endif %}">🏆 TOURNAMENTS</a>
-        <a href="/referrals" class="nav-link {% if request.url.path == '/referrals' %}active{% endif %}">👥 RANKS</a>
+        <a href="/tournaments" class="nav-link {% if request.url.path.startswith('/tournaments') %}active{% endif %}" style="color: var(--neon-purple); font-weight: 700;">🏆 ESPORTS</a>
         {% for sec in nav_sections %}
           <a href="/section/{{ sec.slug }}" class="nav-link {% if current_section and current_section.slug == sec.slug %}active{% endif %}">
             <span>{{ sec.icon }}</span> {{ sec.name }}
@@ -67,13 +65,6 @@
 
       <!-- Action Buttons -->
       <div class="header-actions">
-        <!-- Official Android App Download CTA -->
-        <a href="/download/app" class="btn btn-primary" style="padding: 0.4rem 0.9rem; font-size: 0.85rem; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap; font-weight: 700; background: linear-gradient(135deg, #a855f7, #7c3aed); color: #fff;" title="Download Official GOD4XE Android App">
-          <span>📲</span> APP
-        </a>
-
-
-
         <!-- Desktop Search Trigger Form (Desktop Only) -->
         <form action="/search" method="GET" class="header-search-form">
           <input type="text" name="q" placeholder="Search..." required class="form-control" style="padding: 0.4rem 0.75rem; font-size: 0.85rem; width: 140px; border-radius: 6px; background: rgba(168,85,247,0.1); border: 1px solid var(--border-subtle); color: #fff;">
@@ -197,40 +188,19 @@
     {% endif %}
   </header>
 
-  <!-- Backdrop -->
-  <div id="mobile-drawer-backdrop" class="mobile-drawer-backdrop" aria-hidden="true"></div>
-
   <!-- Mobile Navigation Drawer -->
   <aside id="mobile-drawer" class="mobile-drawer">
-    <div class="mobile-drawer-header">
-      <div class="site-brand-text">{{ settings.site_name }} <span>NAVIGATION</span></div>
-      <button id="mobile-drawer-close" class="mobile-drawer-close-btn" aria-label="Close Navigation Menu">&times;</button>
-    </div>
-    <form action="/search" method="GET" class="mobile-drawer-search">
+    <form action="/search" method="GET" style="display: flex; gap: 0.5rem;">
       <input type="text" name="q" placeholder="Search guides, configs..." class="form-control" style="flex: 1;">
-      <button type="submit" class="btn btn-primary" style="padding: 0.65rem 1.1rem; white-space: nowrap;">Search</button>
+      <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.25rem;">Search</button>
     </form>
-    <!-- Dedicated Premium eSports Experience Card in Mobile Drawer -->
-    <a href="/esports" class="mobile-drawer-esports-card">
-      <div class="drawer-esports-icon-box">⚡</div>
-      <div class="drawer-esports-text">
-        <div class="drawer-esports-title">GOD4XE ESPORTS</div>
-        <div class="drawer-esports-subtitle">Official Free Fire Tournaments</div>
-      </div>
-      <span class="drawer-esports-badge">ENTER &rarr;</span>
-    </a>
-
     <div class="mobile-nav-links">
       <a href="/" class="nav-link">🏠 HOME</a>
-      <a href="/esports" class="nav-link nav-highlight">⚡ GOD4XE ESPORTS ARENA</a>
-      <a href="/tournaments" class="nav-link">🏆 TOURNAMENTS &amp; CUPS</a>
-      <a href="/referrals" class="nav-link">👥 REFER &amp; EARN RANKS</a>
       {% for sec in nav_sections %}
         <a href="/section/{{ sec.slug }}" class="nav-link">
           <span>{{ sec.icon }}</span> {{ sec.name }}
         </a>
       {% endfor %}
-      <a href="/download/app" class="nav-link nav-app-download">📲 DOWNLOAD ANDROID APP (v1.0.3)</a>
     </div>
   </aside>
 

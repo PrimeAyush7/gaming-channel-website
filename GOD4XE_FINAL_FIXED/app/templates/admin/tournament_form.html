@@ -1,146 +1,129 @@
 {% extends "admin/base.html" %}
 
-{% block header_title %}{% if edit_mode %}Edit Tournament{% else %}Create Free Fire Tournament{% endif %}{% endblock %}
+{% block header_title %}Create Free Fire Tournament{% endblock %}
 
 {% block content %}
-<div class="admin-card" style="max-width: 900px;">
-  {% if error %}
-  <div class="alert alert-danger" style="margin-bottom: 1rem;">⚠ {{ error }}</div>
-  {% endif %}
-  <form action="{% if edit_mode %}/admin/tournaments/{{ tournament.id }}/edit{% else %}/admin/tournaments/new{% endif %}" method="POST">
+<div class="card" style="max-width: 800px; background: rgba(18, 8, 35, 0.8); border: 1px solid rgba(168,85,247,0.3); border-radius: 12px; padding: 2rem;">
+  <form action="/admin/tournaments/new" method="POST">
     <input type="hidden" name="csrf_token" value="{{ admin.csrf_token }}">
 
-    <div class="form-group">
-      <label class="form-label" for="title">Tournament Title *</label>
-      <input type="text" id="title" name="title" required class="form-control" value="{{ tournament.title if tournament else '' }}" placeholder="e.g. Free Fire Bermuda Clash - Solo">
+    <div class="form-group" style="margin-bottom: 1.25rem;">
+      <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Tournament Title *</label>
+      <input type="text" name="title" required placeholder="e.g. Free Fire Bermuda Clash - Solo" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">
     </div>
 
-    <div class="form-group">
-      <label class="form-label" for="banner_url">Banner Image URL</label>
-      <input type="text" id="banner_url" name="banner_url" class="form-control" value="{{ tournament.banner_url if tournament else '' }}" placeholder="/static/images/banners/banner1.jpg or external URL">
+    <div class="form-group" style="margin-bottom: 1.25rem;">
+      <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Banner Image URL</label>
+      <input type="text" name="banner_url" placeholder="/static/images/banners/banner1.jpg or external URL" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">
     </div>
 
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label" for="mode">Mode</label>
-        <select id="mode" name="mode" class="form-control">
-          {% for value,label in [('SOLO','Solo'),('DUO','Duo'),('SQUAD','Squad'),('1V1','1v1')] %}
-          <option value="{{ value }}" {% if tournament and tournament.mode == value %}selected{% endif %}>{{ label }}</option>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+      <div>
+        <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Tournament Category</label>
+        <select name="category_id" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">
+          <option value="">None (Standard)</option>
+          {% for c in categories %}
+          <option value="{{ c.id }}" {% if tournament and tournament.category_id == c.id %}selected{% endif %}>{{ c.name }}</option>
           {% endfor %}
         </select>
       </div>
-      <div class="form-group">
-        <label class="form-label" for="map_name">Map</label>
-        <select id="map_name" name="map_name" class="form-control">
-          {% for value in ['BERMUDA','PURGATORY','KALAHARI','ALPINE'] %}
-          <option value="{{ value }}" {% if tournament and tournament.map_name == value %}selected{% endif %}>{{ value|title }}</option>
+
+      <div>
+        <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Subcategory</label>
+        <select name="subcategory_id" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">
+          <option value="">None (Default)</option>
+          {% for s in subcategories %}
+          <option value="{{ s.id }}" {% if tournament and tournament.subcategory_id == s.id %}selected{% endif %}>{{ s.name }}</option>
           {% endfor %}
         </select>
       </div>
     </div>
 
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label" for="entry_type_select">Entry Type *</label>
-        <select name="entry_type" id="entry_type_select" class="form-control">
-          <option value="FREE" {% if not tournament or tournament.entry_type == 'FREE' %}selected{% endif %}>FREE</option>
-          <option value="DIAMONDS" {% if tournament and tournament.entry_type == 'DIAMONDS' %}selected{% endif %}>DIAMONDS</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label" for="entry_fee_input">Entry Fee (Diamonds)</label>
-        <input type="number" name="entry_fee_diamonds" id="entry_fee_input" value="{{ tournament.entry_fee_diamonds if tournament else 0 }}" min="0" class="form-control">
-      </div>
-    </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label" for="prize_amount_diamonds">Prize Amount (Diamonds) *</label>
-        <input type="number" id="prize_amount_diamonds" name="prize_amount_diamonds" value="{{ tournament.prize_amount_diamonds if tournament else 1000 }}" min="0" class="form-control">
-      </div>
-      <div class="form-group">
-        <label class="form-label" for="max_slots">Max Player Slots</label>
-        <input type="number" id="max_slots" name="max_slots" value="{{ tournament.max_slots if tournament else 48 }}" min="1" max="10000" class="form-control">
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label class="form-label" for="start_time">Scheduled Start Time *</label>
-      <input type="datetime-local" id="start_time" name="start_time" required class="form-control" value="{{ tournament.start_time.replace(' ', 'T')[:16] if tournament and tournament.start_time else '' }}">
-    </div>
-
-    {% if edit_mode %}
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label" for="status">Tournament Status</label>
-        <select id="status" name="status" class="form-control">
-          {% for value in ['UPCOMING','LIVE','COMPLETED','CANCELLED'] %}
-          <option value="{{ value }}" {% if tournament.status == value %}selected{% endif %}>{{ value }}</option>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+      <div>
+        <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Allowed Gun (Guns Only Custom)</label>
+        <select name="allowed_gun_id" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">
+          <option value="">Any Weapon / Standard</option>
+          {% for g in guns %}
+          <option value="{{ g.id }}" {% if tournament and tournament.allowed_gun_id == g.id %}selected{% endif %}>{{ g.name }}</option>
           {% endfor %}
         </select>
       </div>
-      <div class="form-group">
-        <label class="form-label" for="is_registration_open">Registration</label>
-        <select id="is_registration_open" name="is_registration_open" class="form-control">
-          <option value="1" {% if tournament.is_registration_open|int != 0 %}selected{% endif %}>OPEN</option>
-          <option value="0" {% if tournament.is_registration_open|int == 0 %}selected{% endif %}>CLOSED</option>
+
+      <div>
+        <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Per Elimination Reward (Diamonds)</label>
+        <input type="number" name="per_kill_diamonds" value="{{ tournament.per_kill_diamonds if tournament else 0 }}" min="0" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+      <div>
+        <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Mode</label>
+        <select name="mode" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">
+          <option value="SOLO">Solo</option>
+          <option value="DUO">Duo</option>
+          <option value="SQUAD">Squad</option>
         </select>
       </div>
-    </div>
-    {% else %}
-      <input type="hidden" name="status" value="UPCOMING">
-      <input type="hidden" name="is_registration_open" value="1">
-    {% endif %}
 
-    <div class="form-group">
-      <label class="form-label" for="description">Tournament Description</label>
-      <textarea id="description" name="description" rows="3" class="form-control">{{ tournament.description if tournament else '' }}</textarea>
-    </div>
-
-    <div class="form-group">
-      <label class="form-label" for="rules">Rules & Instructions</label>
-      <textarea id="rules" name="rules" rows="4" class="form-control">{{ tournament.rules if tournament else '1. Emulators strictly forbidden. Mobile players only.\n2. Teaming with opponents results in immediate disqualification.\n3. Room details will be revealed 10 minutes before start.' }}</textarea>
-    </div>
-
-    <div class="admin-card" style="padding: 1rem; margin: 1rem 0; background: rgba(168,85,247,0.05); border: 1px solid var(--border-glow);">
-      <h3 style="color:#fff; margin-bottom:.35rem;">🎮 Free Fire Room Credentials</h3>
-      <p style="color:var(--admin-muted); font-size:.8rem; margin-bottom:1rem;">Set the Custom Room ID and Password here. Confirmed participants can receive these through the app when the room is available.</p>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label" for="room_id">Room ID</label>
-          <input type="text" id="room_id" name="room_id" class="form-control" value="{{ tournament.room_id if tournament and tournament.room_id else '' }}" placeholder="e.g. 123456789">
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="room_password">Room Password</label>
-          <input type="text" id="room_password" name="room_password" class="form-control" value="{{ tournament.room_password if tournament and tournament.room_password else '' }}" placeholder="Room password">
-        </div>
-      </div>
-      <div class="form-group" style="margin-bottom:0;">
-        <label class="form-label" for="room_instructions">Room Instructions</label>
-        <textarea id="room_instructions" name="room_instructions" rows="2" class="form-control">{{ tournament.room_instructions if tournament and tournament.room_instructions else 'Join the custom room using the Room ID and Password 10 minutes prior to scheduled start.' }}</textarea>
-      </div>
-    </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label" for="is_featured">Featured</label>
-        <select id="is_featured" name="is_featured" class="form-control">
-          <option value="0" {% if not tournament or tournament.is_featured|int == 0 %}selected{% endif %}>NO</option>
-          <option value="1" {% if tournament and tournament.is_featured|int == 1 %}selected{% endif %}>YES</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label" for="is_published">Published</label>
-        <select id="is_published" name="is_published" class="form-control">
-          <option value="1" {% if not tournament or tournament.is_published|int != 0 %}selected{% endif %}>YES</option>
-          <option value="0" {% if tournament and tournament.is_published|int == 0 %}selected{% endif %}>NO</option>
+      <div>
+        <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Map</label>
+        <select name="map_name" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">
+          <option value="BERMUDA">Bermuda</option>
+          <option value="PURGATORY">Purgatory</option>
+          <option value="KALAHARI">Kalahari</option>
+          <option value="ALPINE">Alpine</option>
         </select>
       </div>
     </div>
 
-    <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem;">
-      <button type="submit" class="btn-admin-primary">💾 {% if edit_mode %}Save Tournament Changes{% else %}Save &amp; Publish Tournament{% endif %}</button>
-      <a href="/admin/tournaments" class="btn-sm btn-edit" style="padding: 0.75rem 1.25rem; text-decoration: none;">Cancel</a>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+      <div>
+        <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Entry Type *</label>
+        <select name="entry_type" id="entry_type_select" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">
+          <option value="FREE">FREE</option>
+          <option value="DIAMONDS">DIAMONDS</option>
+        </select>
+      </div>
+
+      <div>
+        <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Entry Fee (Diamonds)</label>
+        <input type="number" name="entry_fee_diamonds" id="entry_fee_input" value="0" min="0" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+      <div>
+        <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Prize Amount (Diamonds) *</label>
+        <input type="number" name="prize_amount_diamonds" value="1000" min="0" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">
+      </div>
+
+      <div>
+        <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Max Player Slots</label>
+        <input type="number" name="max_slots" value="48" min="2" max="100" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 1.25rem;">
+      <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Scheduled Start Time *</label>
+      <input type="datetime-local" name="start_time" required style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">
+    </div>
+
+    <div class="form-group" style="margin-bottom: 1.25rem;">
+      <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Tournament Description</label>
+      <textarea name="description" rows="3" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;"></textarea>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 1.5rem;">
+      <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Rules & Instructions</label>
+      <textarea name="rules" rows="4" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">1. Emulators strictly forbidden. Mobile players only.
+2. Teaming with opponents results in immediate disqualification.
+3. Room details will be revealed 10 minutes before start.</textarea>
+    </div>
+
+    <div style="display: flex; gap: 1rem;">
+      <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.8rem; border-radius: 8px; font-weight: 700;">Save & Publish Tournament</button>
+      <a href="/admin/tournaments" class="btn btn-outline" style="padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none;">Cancel</a>
     </div>
   </form>
 </div>

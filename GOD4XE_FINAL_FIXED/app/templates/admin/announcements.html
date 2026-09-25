@@ -1,0 +1,84 @@
+{% extends "admin/base.html" %}
+{% block title %}Announcements & Notice - Admin{% endblock %}
+{% block content %}
+<div class="admin-header">
+  <div>
+    <h1>Announcements & Arena Notice</h1>
+    <p class="text-muted">Manage system broadcast announcements and the Arena scrolling notice.</p>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-top: 1.5rem; gap: 1.5rem;">
+  <!-- Arena Scrolling Notice -->
+  <div class="admin-card">
+    <h3>Arena Scrolling Notice (Marquee)</h3>
+    <p class="text-muted">This text continuously scrolls below the Arena header in the app.</p>
+    <form method="POST" action="/admin/announcements/notice" style="margin-top: 1rem;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="form-group">
+        <label>Marquee Notice Text</label>
+        <textarea name="arena_notice" class="form-control" rows="3" required>{{ arena_notice }}</textarea>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width: 100%;">Save Arena Notice</button>
+    </form>
+  </div>
+
+  <!-- Create Announcement -->
+  <div class="admin-card">
+    <h3>Publish Broadcast Announcement</h3>
+    <form method="POST" action="/admin/announcements/new" style="margin-top: 1rem;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" name="title" class="form-control" required placeholder="e.g. Server Maintenance or New Tournament">
+      </div>
+      <div class="form-group">
+        <label>Message Content</label>
+        <textarea name="message" class="form-control" rows="3" required placeholder="Announcement message..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Type</label>
+        <select name="type" class="form-control">
+          <option value="INFO">INFO (Blue)</option>
+          <option value="EVENT">EVENT (Purple)</option>
+          <option value="WARNING">WARNING (Yellow)</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width: 100%;">Broadcast Announcement</button>
+    </form>
+  </div>
+</div>
+
+<div class="admin-card" style="margin-top: 1.5rem;">
+  <h3>Active Announcements</h3>
+  <div class="table-responsive" style="margin-top: 1rem;">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Message</th>
+          <th>Type</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in announcements %}
+        <tr>
+          <td><strong>{{ a.title }}</strong></td>
+          <td>{{ a.message }}</td>
+          <td><span class="badge badge-info">{{ a.type }}</span></td>
+          <td>{{ a.created_at }}</td>
+          <td>
+            <form method="POST" action="/admin/announcements/delete/{{ a.id }}" onsubmit="return confirm('Delete this announcement?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

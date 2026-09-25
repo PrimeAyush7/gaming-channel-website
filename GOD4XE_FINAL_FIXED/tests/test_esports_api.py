@@ -1,3 +1,4 @@
+import tests.test_all
 import os
 import sys
 import unittest

@@ -109,7 +109,6 @@ def init_db():
             "site_name": "GOD4XE",
             "site_tagline": "Pro Gaming Guides, Configs & Updates",
             "site_description": "The ultimate hub for game updates, sensitivity configs, pro guides, and exclusive gaming content.",
-            "hero_headline": "DOMINATE THE LOBBY",
             "logo_url": "/static/images/default-logo.svg",
             "favicon_url": "/static/images/favicon.svg",
             "youtube_channel_url": "https://www.youtube.com/@channel",

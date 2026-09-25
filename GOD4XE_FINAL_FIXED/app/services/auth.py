@@ -82,7 +82,7 @@ def log_admin_action(
     action: str,
     resource: str,
     resource_id: str,
-    ip_address: str = '127.0.0.1',
+    ip_address: str,
     user_agent: str = None,
     before_state: dict = None,
     after_state: dict = None
@@ -291,6 +291,3 @@ def bootstrap_admin_from_env() -> bool:
         """, (username, pwd_hash, salt, ROLE_SUPER_ADMIN))
         print(f"[BOOTSTRAP] Initial super admin '{username}' provisioned safely from environment.")
         return True
-
-# Backward-compatible alias
-record_audit_log = log_admin_action

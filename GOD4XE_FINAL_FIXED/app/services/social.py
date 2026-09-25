@@ -97,7 +97,7 @@ def get_referral_stats(user_id: int) -> dict:
         "referral_code": ref_code,
         "total_invited": len(invited),
         "total_earned_diamonds": total_earned,
-        "referral_reward_per_user": 25,
+        "referral_reward_per_user": 0,
         "invited_users": invited
     }
 
@@ -241,3 +241,5 @@ def list_active_banners() -> list[dict]:
             SELECT * FROM banners WHERE is_active = 1 ORDER BY sort_order ASC, id DESC;
         """)
         return [dict(r) for r in cursor.fetchall()]
+
+get_user_referral_summary = get_referral_stats

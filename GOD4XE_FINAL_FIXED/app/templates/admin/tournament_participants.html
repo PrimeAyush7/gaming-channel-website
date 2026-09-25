@@ -1,0 +1,46 @@
+{% extends "admin/base.html" %}
+{% block title %}Participants for {{ tournament.title }} - Admin{% endblock %}
+{% block content %}
+<div class="admin-header">
+  <div>
+    <a href="/admin/tournaments" class="btn btn-sm btn-secondary" style="margin-bottom: 0.5rem;">&larr; Back to Tournaments</a>
+    <h1>Participants: {{ tournament.title }}</h1>
+    <p class="text-muted">Slots Booked: {{ participants|length }} / {{ tournament.max_slots }}</p>
+  </div>
+</div>
+
+<div class="admin-card" style="margin-top: 1.5rem;">
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Slot #</th>
+          <th>Username</th>
+          <th>Display Name</th>
+          <th>Free Fire UID</th>
+          <th>Free Fire IGN</th>
+          <th>Payment</th>
+          <th>Diamonds Paid</th>
+          <th>Join Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in participants %}
+        <tr>
+          <td><strong style="color: var(--neon-purple);">#{{ p.slot_number }}</strong></td>
+          <td><strong>@{{ p.username }}</strong></td>
+          <td>{{ p.display_name }}</td>
+          <td><code>{{ p.ff_uid }}</code></td>
+          <td><strong>{{ p.ff_ign }}</strong></td>
+          <td><span class="badge badge-success">{{ p.payment_status }}</span></td>
+          <td>💎 {{ p.diamonds_paid }}</td>
+          <td>{{ p.joined_at }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" class="text-center text-muted" style="padding: 2rem;">No participants have joined this tournament yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

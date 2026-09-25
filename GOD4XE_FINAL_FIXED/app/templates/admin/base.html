@@ -40,19 +40,43 @@
       <a href="/admin/tournaments" class="sidebar-link {% if active_nav == 'tournaments' %}active{% endif %}">
         <span class="icon">🏆</span> Tournaments & Matches
       </a>
+      <a href="/admin/categories" class="sidebar-link {% if active_nav == 'categories' %}active{% endif %}">
+        <span class="icon">📂</span> Categories & Modes
+      </a>
+      <a href="/admin/guns" class="sidebar-link {% if active_nav == 'guns' %}active{% endif %}">
+        <span class="icon">🔫</span> Allowed Guns (Customs)
+      </a>
+      <a href="/admin/disputes" class="sidebar-link {% if active_nav == 'disputes' %}active{% endif %}">
+        <span class="icon">⚖️</span> Match Disputes
+      </a>
       <a href="/admin/users" class="sidebar-link {% if active_nav == 'users' %}active{% endif %}">
-        <span class="icon">👤</span> App Users
+        <span class="icon">👥</span> App Players
+      </a>
+      <a href="/admin/avatars" class="sidebar-link {% if active_nav == 'avatars' %}active{% endif %}">
+        <span class="icon">🖼️</span> Avatar Moderation
       </a>
       {% if admin and (admin.role == 'SUPER_ADMIN' or admin.role == 'FINANCE_ADMIN') %}
       <a href="/admin/deposits" class="sidebar-link {% if active_nav == 'deposits' %}active{% endif %}">
         <span class="icon">💳</span> Deposit Requests
       </a>
+      <a href="/admin/withdrawals" class="sidebar-link {% if active_nav == 'withdrawals' %}active{% endif %}">
+        <span class="icon">💸</span> Withdrawal Payouts
+      </a>
       {% endif %}
+      <a href="/admin/updates" class="sidebar-link {% if active_nav == 'updates' %}active{% endif %}">
+        <span class="icon">📢</span> Latest Updates
+      </a>
+      <a href="/admin/announcements" class="sidebar-link {% if active_nav == 'announcements' %}active{% endif %}">
+        <span class="icon">📣</span> Notices & Marquee
+      </a>
+      <a href="/admin/tutorials" class="sidebar-link {% if active_nav == 'tutorials' %}active{% endif %}">
+        <span class="icon">📚</span> How to Play Guides
+      </a>
+      <a href="/admin/communities" class="sidebar-link {% if active_nav == 'communities' %}active{% endif %}">
+        <span class="icon">🌐</span> GOD4XE Communities
+      </a>
       <a href="/admin/redeem" class="sidebar-link {% if active_nav == 'redeem' %}active{% endif %}">
         <span class="icon">🎁</span> Redeem Codes
-      </a>
-      <a href="/admin/referrals" class="sidebar-link {% if active_nav == 'referrals' %}active{% endif %}">
-        <span class="icon">👥</span> Referral System &amp; Ranks
       </a>
       {% if admin and admin.role == 'SUPER_ADMIN' %}
       <a href="/admin/admins" class="sidebar-link {% if active_nav == 'admins' %}active{% endif %}">

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request, Response, HTTPException, status
-from fastapi.responses import HTMLResponse, PlainTextResponse, FileResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse
 from app.templating import templates
 from app.config import APP_DIR, APP_URL
 from app.services import (
@@ -190,90 +190,13 @@ async def sitemap_xml_view():
 
 
 from app.services import tournaments as tournament_service
-from app.services import referrals as referrals_service
-from app.services import users_auth as user_service
-
-
-@router.get("/referrals", response_class=HTMLResponse)
-async def public_referrals(request: Request, ref: str = None):
-    ctx = get_common_context(request)
-    
-    current_user = None
-    user_summary = None
-    try:
-        current_user = user_service.get_current_user(request)
-        if current_user:
-            user_summary = referrals_service.get_user_referral_summary(current_user["id"])
-    except Exception:
-        pass
-
-    leaderboard_data = referrals_service.get_referral_leaderboard(limit=50)
-    ranks = referrals_service.get_active_ranks()
-
-    ctx.update({
-        "current_user": current_user,
-        "user_summary": user_summary,
-        "leaderboard": leaderboard_data["leaderboard"],
-        "total_referrers": leaderboard_data["total"],
-        "ranks": ranks,
-        "prefill_ref": ref or ""
-    })
-    return templates.TemplateResponse(request=request, name="public/referrals.html", context=ctx)
-
-@router.get("/esports", response_class=HTMLResponse)
-async def public_esports_landing(request: Request):
-    ctx = get_common_context(request)
-    
-    current_user = None
-    try:
-        current_user = user_service.get_current_user(request)
-    except Exception:
-        pass
-
-    upcoming_tournaments = tournament_service.list_tournaments(status_filter="UPCOMING", limit=6, is_published_only=True)
-    live_tournaments = tournament_service.list_tournaments(status_filter="LIVE", limit=6, is_published_only=True)
-    completed_tournaments = tournament_service.list_tournaments(status_filter="COMPLETED", limit=4, is_published_only=True)
-    leaderboard_data = referrals_service.get_referral_leaderboard(limit=5)
-    ranks = referrals_service.get_active_ranks()
-
-    ctx.update({
-        "current_user": current_user,
-        "upcoming_tournaments": upcoming_tournaments,
-        "live_tournaments": live_tournaments,
-        "completed_tournaments": completed_tournaments,
-        "leaderboard": leaderboard_data.get("leaderboard", []),
-        "ranks": ranks,
-    })
-    return templates.TemplateResponse(request=request, name="public/esports.html", context=ctx)
-
-@router.get("/download/app")
-@router.get("/download/apk")
-async def public_download_apk():
-    apk_path = APP_DIR / "static" / "downloads" / "god4xe_esports.apk"
-    if not apk_path.exists():
-        raise HTTPException(status_code=404, detail="APK download package not found")
-    return FileResponse(
-        path=str(apk_path),
-        media_type="application/vnd.android.package-archive",
-        filename="god4xe_esports.apk"
-    )
-
-@router.get("/download/qr")
-async def public_download_qr(format: str = "svg"):
-    from app.services import qr_generator
-    if format.lower() == "png":
-        png_bytes = qr_generator.generate_qr_png_bytes()
-        return Response(content=png_bytes, media_type="image/png")
-    svg_str = qr_generator.generate_qr_svg()
-    return Response(content=svg_str, media_type="image/svg+xml")
 
 @router.get("/tournaments", response_class=HTMLResponse)
 async def public_tournaments(request: Request, status: str = None):
     settings = settings_service.get_all_settings()
     nav_sections = section_service.get_all_sections(only_nav=True)
     ads = ad_service.get_ad_settings()
-    normalized_status = None if (not status or status.strip().upper() == "ALL") else status.strip().upper()
-    tournaments = tournament_service.list_tournaments(status_filter=normalized_status, limit=50, is_published_only=True)
+    tournaments = tournament_service.list_tournaments(status_filter=status, limit=30, is_published_only=True)
 
     return templates.TemplateResponse(request=request, name="public/tournaments.html", context={
         "request": request,
@@ -282,7 +205,7 @@ async def public_tournaments(request: Request, status: str = None):
         "nav_sections": nav_sections,
         "ads": ads,
         "tournaments": tournaments,
-        "current_filter": status.strip().upper() if status else "ALL"
+        "current_filter": status or "ALL"
     })
 
 @router.get("/tournaments/{tournament_id}", response_class=HTMLResponse)

@@ -1,0 +1,72 @@
+{% extends "admin/base.html" %}
+{% block title %}Tournament Disputes - Admin{% endblock %}
+{% block content %}
+<div class="admin-header">
+  <div>
+    <h1>Tournament Disputes & Issue Reports</h1>
+    <p class="text-muted">Review player reports for wrong results, room credentials, UID mismatches, and rewards.</p>
+  </div>
+</div>
+
+<div class="admin-card" style="margin-top: 1.5rem;">
+  <div style="display: flex; gap: 1rem; border-bottom: 1px solid var(--admin-border); padding-bottom: 0.75rem;">
+    <a href="/admin/disputes?status=PENDING" class="btn btn-sm {% if status_filter == 'PENDING' %}btn-primary{% else %}btn-secondary{% endif %}">Pending</a>
+    <a href="/admin/disputes?status=RESOLVED" class="btn btn-sm {% if status_filter == 'RESOLVED' %}btn-primary{% else %}btn-secondary{% endif %}">Resolved</a>
+    <a href="/admin/disputes?status=REJECTED" class="btn btn-sm {% if status_filter == 'REJECTED' %}btn-primary{% else %}btn-secondary{% endif %}">Rejected</a>
+    <a href="/admin/disputes" class="btn btn-sm {% if not status_filter %}btn-primary{% else %}btn-secondary{% endif %}">All</a>
+  </div>
+
+  <div class="table-responsive" style="margin-top: 1.5rem;">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Tournament</th>
+          <th>Reporter</th>
+          <th>Type</th>
+          <th>Description & Proof</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in disputes %}
+        <tr>
+          <td>#{{ d.id }}</td>
+          <td><strong>{{ d.tournament_title }}</strong></td>
+          <td>@{{ d.username }}</td>
+          <td><span class="badge badge-warning">{{ d.dispute_type }}</span></td>
+          <td>
+            {{ d.description }}
+            {% if d.proof_url %}
+            <br><a href="{{ d.proof_url }}" target="_blank" style="color: var(--neon-purple); font-size: 0.85rem;">View Uploaded Proof &rarr;</a>
+            {% endif %}
+          </td>
+          <td>
+            {% if d.status == 'RESOLVED' %}
+            <span class="badge badge-success">RESOLVED</span><br><small class="text-muted">{{ d.admin_response }}</small>
+            {% elif d.status == 'REJECTED' %}
+            <span class="badge badge-danger">REJECTED</span><br><small class="text-muted">{{ d.admin_response }}</small>
+            {% else %}
+            <span class="badge badge-warning">PENDING</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if d.status == 'PENDING' %}
+            <button type="button" class="btn btn-sm btn-success" onclick="var r = prompt('Resolution response to player:'); if (r) { document.getElementById('res-form-{{ d.id }}').resp.value = r; document.getElementById('res-form-{{ d.id }}').submit(); }">Resolve</button>
+            <form id="res-form-{{ d.id }}" method="POST" action="/admin/disputes/{{ d.id }}/resolve" style="display: none;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <input type="hidden" name="status" value="RESOLVED">
+              <input type="hidden" name="resp" value="">
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="text-center text-muted" style="padding: 2rem;">No disputes found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,7 +1,7 @@
 /**
  * GOD4XE GAMING - Core Interactive Script
  * - Smooth Desktop Cursor Glow
- * - Mobile Navigation Drawer & Backdrop
+ * - Mobile Navigation Drawer
  * - Card Lighting Interaction
  * - First-party Download & YouTube Click Analytics
  */
@@ -47,6 +47,7 @@ function initCursorGlow() {
   });
 
   function animateCursor() {
+    // Smooth interpolation (lerp)
     currentX += (mouseX - currentX) * 0.15;
     currentY += (mouseY - currentY) * 0.15;
     
@@ -77,13 +78,11 @@ function initCardLighting() {
 }
 
 /* --------------------------------------------------------------------------
-   MOBILE NAVIGATION DRAWER & BACKDROP
+   MOBILE NAVIGATION DRAWER
    -------------------------------------------------------------------------- */
 function initMobileNav() {
   const toggleBtn = document.getElementById('mobile-nav-toggle');
-  const closeBtn = document.getElementById('mobile-drawer-close');
   const drawer = document.getElementById('mobile-drawer');
-  const backdrop = document.getElementById('mobile-drawer-backdrop');
   const header = document.querySelector('.site-header');
 
   if (!toggleBtn || !drawer) return;
@@ -94,48 +93,17 @@ function initMobileNav() {
     }
   }
 
-  function openDrawer() {
-    updateDrawerPosition();
-    drawer.classList.add('open');
-    if (backdrop) backdrop.classList.add('open');
-    toggleBtn.setAttribute('aria-expanded', 'true');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeDrawer() {
-    drawer.classList.remove('open');
-    if (backdrop) backdrop.classList.remove('open');
-    toggleBtn.setAttribute('aria-expanded', 'false');
-    document.body.style.overflow = '';
-  }
-
   toggleBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    if (drawer.classList.contains('open')) {
-      closeDrawer();
+    updateDrawerPosition();
+    const isOpen = drawer.classList.contains('open');
+    if (isOpen) {
+      drawer.classList.remove('open');
+      toggleBtn.setAttribute('aria-expanded', 'false');
     } else {
-      openDrawer();
+      drawer.classList.add('open');
+      toggleBtn.setAttribute('aria-expanded', 'true');
     }
-  });
-
-  if (closeBtn) {
-    closeBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      closeDrawer();
-    });
-  }
-
-  if (backdrop) {
-    backdrop.addEventListener('click', () => {
-      closeDrawer();
-    });
-  }
-
-  // Close when clicking nav links inside drawer
-  drawer.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', () => {
-      closeDrawer();
-    });
   });
 
   window.addEventListener('resize', () => {
@@ -144,10 +112,19 @@ function initMobileNav() {
     }
   }, { passive: true });
 
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    if (drawer.classList.contains('open') && !drawer.contains(e.target) && e.target !== toggleBtn) {
+      drawer.classList.remove('open');
+      toggleBtn.setAttribute('aria-expanded', 'false');
+    }
+  });
+
   // Close on Escape key
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && drawer.classList.contains('open')) {
-      closeDrawer();
+      drawer.classList.remove('open');
+      toggleBtn.setAttribute('aria-expanded', 'false');
     }
   });
 }
@@ -156,6 +133,7 @@ function initMobileNav() {
    ANALYTICS CLICK TRACKING
    -------------------------------------------------------------------------- */
 function initAnalyticsTracking() {
+  // Download button click tracker
   const downloadBtns = document.querySelectorAll('[data-track-download]');
   downloadBtns.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -166,6 +144,7 @@ function initAnalyticsTracking() {
     });
   });
 
+  // YouTube action tracking
   const ytTriggers = document.querySelectorAll('[data-track-youtube]');
   ytTriggers.forEach(trigger => {
     trigger.addEventListener('click', () => {
