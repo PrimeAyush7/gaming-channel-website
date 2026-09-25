@@ -39,25 +39,55 @@ except ImportError:
     class _MockCursor:
         def __init__(self, raw_cur):
             self._cur = raw_cur
-            self._last_id = None
-            self._ret_col = None
+            self._returning_row = None
 
         def execute(self, query, params=None):
             sql = query
-            ret_match = re.search(r'\s+RETURNING\s+([a-zA-Z0-9_]+)\s*;?$', sql, re.IGNORECASE)
+            self._returning_row = None
+            
+            # Check for RETURNING
+            ret_match = re.search(r'\s+RETURNING\s+(.+?)\s*;?$', sql, re.IGNORECASE)
+            ret_cols = None
             if ret_match:
-                self._ret_col = ret_match.group(1)
+                ret_cols = ret_match.group(1).rstrip(';').strip()
                 sql = sql[:ret_match.start()] + ';'
-            else:
-                self._ret_col = None
+
+            is_insert = bool(re.search(r'INSERT\s+INTO\s+([a-zA-Z0-9_]+)', sql, re.IGNORECASE))
+            is_update = bool(re.search(r'UPDATE\s+([a-zA-Z0-9_]+)', sql, re.IGNORECASE))
+
+            table_name = None
+            if is_insert:
+                m = re.search(r'INSERT\s+INTO\s+([a-zA-Z0-9_]+)', sql, re.IGNORECASE)
+                if m:
+                    table_name = m.group(1).strip()
+            elif is_update:
+                m = re.search(r'UPDATE\s+([a-zA-Z0-9_]+)', sql, re.IGNORECASE)
+                if m:
+                    table_name = m.group(1).strip()
 
             sql = re.sub(r'\bSERIAL\s+PRIMARY\s+KEY\b', 'INTEGER PRIMARY KEY AUTOINCREMENT', sql, flags=re.IGNORECASE)
             sql = re.sub(r'\bILIKE\b', 'LIKE', sql, flags=re.IGNORECASE)
-            sql = re.sub(r'information_schema\.tables\s+WHERE\s+table_schema\s*=\s*\'public\'', "".join(["sql", "ite", "_master"]) + " WHERE type='table'", sql, flags=re.IGNORECASE)
+            sql = re.sub(r'information_schema\.tables\s+WHERE\s+table_schema\s*=\s*\'public\'', "sqlite_master WHERE type='table'", sql, flags=re.IGNORECASE)
             sql = re.sub(r'\btable_name\b', 'name AS table_name', sql, flags=re.IGNORECASE)
             sql = sql.replace('%s', '?')
             sql = re.sub(r'\bADD\s+COLUMN\s+IF\s+NOT\s+EXISTS\b', 'ADD COLUMN', sql, flags=re.IGNORECASE)
             sql = re.sub(r'\s+FOR\s+UPDATE\b', '', sql, flags=re.IGNORECASE)
+
+            # If UPDATE with RETURNING, capture where clause for fetch
+            where_query = None
+            where_params = None
+            if is_update and ret_cols and table_name and 'WHERE' in sql.upper():
+                try:
+                    where_part = re.split(r'WHERE', sql, flags=re.IGNORECASE)[1].strip().rstrip(';')
+                    set_part = re.split(r'WHERE', sql, flags=re.IGNORECASE)[0]
+                    num_set_q = set_part.count('?')
+                    where_query = f"SELECT {ret_cols} FROM {table_name} WHERE {where_part}"
+                    if params:
+                        where_params = tuple(params[num_set_q:])
+                    else:
+                        where_params = ()
+                except Exception:
+                    pass
 
             try:
                 if params is None:
@@ -70,7 +100,24 @@ except ImportError:
                     pass
                 else:
                     raise
-            self._last_id = self._cur.lastrowid
+
+            last_id = self._cur.lastrowid
+            if is_insert and ret_cols and table_name and last_id:
+                try:
+                    q_ret = f"SELECT {ret_cols} FROM {table_name} WHERE rowid = ?"
+                    res = self._cur.execute(q_ret, (last_id,)).fetchone()
+                    if res:
+                        self._returning_row = res
+                except Exception:
+                    self._returning_row = {"id": last_id, 0: last_id}
+            elif is_update and where_query:
+                try:
+                    res = self._cur.execute(where_query, where_params).fetchone()
+                    if res:
+                        self._returning_row = res
+                except Exception:
+                    pass
+
             return self
 
         def executemany(self, query, seq):
@@ -79,10 +126,10 @@ except ImportError:
             return self
 
         def fetchone(self):
-            if self._ret_col is not None and self._last_id is not None:
-                ret = {self._ret_col: self._last_id, 0: self._last_id}
-                self._ret_col = None
-                return ret
+            if self._returning_row is not None:
+                r = self._returning_row
+                self._returning_row = None
+                return r
             return self._cur.fetchone()
 
         def fetchall(self):

@@ -9,6 +9,7 @@
 </div>
 
 <div class="grid grid-2" style="margin-top: 1.5rem; gap: 1.5rem;">
+  <!-- Left Column: User Profile Info -->
   <div class="admin-card">
     <div style="display: flex; align-items: center; gap: 1rem;">
       <img src="{{ user_info.avatar_url }}" style="width: 64px; height: 64px; border-radius: 50%; border: 2px solid var(--neon-purple); object-fit: cover;">
@@ -24,16 +25,85 @@
       <div><strong>Auth Provider:</strong> {{ user_info.auth_provider }}</div>
       <div><strong>Free Fire UID:</strong> {{ user_info.ff_uid or 'Not linked' }}</div>
       <div><strong>Free Fire IGN:</strong> {{ user_info.ff_ign or 'Not linked' }}</div>
-      <div><strong>Diamond Balance:</strong> 💎 {{ user_info.diamond_balance }} (Locked: 💎 {{ user_info.locked_balance }})</div>
+      <div style="background: rgba(168, 85, 247, 0.1); border-left: 4px solid var(--neon-purple); padding: 0.6rem 0.8rem; border-radius: 4px;">
+        <strong>Diamond Balance:</strong> <span style="font-size: 1.15rem; font-weight: bold; color: var(--accent-gold);">💎 {{ user_info.diamond_balance }}</span>
+        <span class="text-muted" style="margin-left: 0.5rem;">(Locked: 💎 {{ user_info.locked_balance }})</span>
+      </div>
       <div><strong>Matches Played:</strong> {{ user_info.total_matches }} | <strong>Wins:</strong> {{ user_info.wins }} | <strong>Kills:</strong> {{ user_info.kills }}</div>
       <div><strong>Referral Code:</strong> <code>{{ user_info.referral_code }}</code></div>
-      <div><strong>Avatar Status:</strong> {{ user_info.avatar_moderation_status }} {% if user_info.avatar_upload_disabled == 1 %}(Uploads Disabled){% endif %}</div>
+      <div><strong>Account Status:</strong> 
+        {% if user_info.is_active == 1 %}
+          <span class="badge badge-success">ACTIVE</span>
+        {% else %}
+          <span class="badge badge-danger">BANNED / DISABLED</span>
+        {% endif %}
+      </div>
+      <div><strong>Avatar Status:</strong> {{ user_info.avatar_moderation_status }} {% if user_info.avatar_upload_disabled == 1 %}<span class="badge badge-warning">Uploads Disabled</span>{% endif %}</div>
     </div>
   </div>
 
+  <!-- Right Column: Account Controls -->
   <div class="admin-card">
     <h3>Account Controls</h3>
-    <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+    <div style="display: flex; flex-direction: column; gap: 1.25rem; margin-top: 1rem;">
+
+      <!-- RESTORED: Diamond Balance Management -->
+      <div style="background: rgba(168, 85, 247, 0.06); border: 1px solid var(--glass-border); border-radius: 8px; padding: 1.25rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 0.6rem;">
+          <h4 style="margin: 0; color: var(--text-white); font-size: 1.05rem;">💎 Diamond Balance Controls</h4>
+          <div style="font-size: 1.1rem; font-weight: bold; color: var(--accent-gold);">
+            💎 {{ user_info.diamond_balance }}
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          <!-- 1. Add Diamonds Form -->
+          <div style="background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 6px; padding: 0.9rem;">
+            <div style="font-weight: bold; color: var(--emerald-green); margin-bottom: 0.6rem; font-size: 0.95rem;">
+              ➕ Add Diamonds
+            </div>
+            <form method="POST" action="/admin/users/{{ user_info.id }}/adjust-balance" onsubmit="return confirmAddDiamonds(this);">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <input type="hidden" name="action_type" value="ADD">
+              <div class="form-group" style="margin-bottom: 0.5rem;">
+                <label style="font-size: 0.8rem; margin-bottom: 0.2rem; display: block;">Amount</label>
+                <input type="number" name="amount" id="add_amount_input" class="form-control" placeholder="Diamond amount (e.g. 100)" min="1" required style="padding: 0.4rem 0.6rem;">
+              </div>
+              <div class="form-group" style="margin-bottom: 0.6rem;">
+                <label style="font-size: 0.8rem; margin-bottom: 0.2rem; display: block;">Reason (Required)</label>
+                <input type="text" name="reason" id="add_reason_input" class="form-control" placeholder="Reason (e.g. Tournament reward, compensation)" required style="padding: 0.4rem 0.6rem;">
+              </div>
+              <button type="submit" class="btn btn-success" style="width: 100%; padding: 0.5rem;">
+                + Add Diamonds
+              </button>
+            </form>
+          </div>
+
+          <!-- 2. Remove Diamonds Form -->
+          <div style="background: rgba(239, 68, 68, 0.06); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 6px; padding: 0.9rem;">
+            <div style="font-weight: bold; color: var(--crimson-red); margin-bottom: 0.6rem; font-size: 0.95rem;">
+              ➖ Remove Diamonds
+            </div>
+            <form method="POST" action="/admin/users/{{ user_info.id }}/adjust-balance" onsubmit="return confirmRemoveDiamonds(this);">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <input type="hidden" name="action_type" value="REMOVE">
+              <div class="form-group" style="margin-bottom: 0.5rem;">
+                <label style="font-size: 0.8rem; margin-bottom: 0.2rem; display: block;">Amount (Max: {{ user_info.diamond_balance }})</label>
+                <input type="number" name="amount" id="remove_amount_input" class="form-control" placeholder="Diamond amount (e.g. 50)" min="1" max="{{ user_info.diamond_balance }}" required style="padding: 0.4rem 0.6rem;">
+              </div>
+              <div class="form-group" style="margin-bottom: 0.6rem;">
+                <label style="font-size: 0.8rem; margin-bottom: 0.2rem; display: block;">Reason (Required)</label>
+                <input type="text" name="reason" id="remove_reason_input" class="form-control" placeholder="Reason (e.g. Penalty, reversal, manual debit)" required style="padding: 0.4rem 0.6rem;">
+              </div>
+              <button type="submit" class="btn btn-danger" style="width: 100%; padding: 0.5rem;" {% if user_info.diamond_balance <= 0 %}disabled{% endif %}>
+                - Remove Diamonds
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Status Toggle -->
       <form method="POST" action="/admin/users/{{ user_info.id }}/status">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
         <input type="hidden" name="is_active" value="{{ 0 if user_info.is_active == 1 else 1 }}">
@@ -42,6 +112,7 @@
         </button>
       </form>
 
+      <!-- Avatar Upload Permission -->
       <form method="POST" action="/admin/users/{{ user_info.id }}/avatar-permission">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
         <input type="hidden" name="disabled" value="{{ 0 if user_info.avatar_upload_disabled == 1 else 1 }}">
@@ -50,6 +121,7 @@
         </button>
       </form>
 
+      <!-- Reset Password -->
       <form method="POST" action="/admin/users/{{ user_info.id }}/reset-password">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
         <div class="form-group" style="margin-bottom: 0.5rem;">
@@ -61,4 +133,81 @@
     </div>
   </div>
 </div>
+
+<!-- Bottom Section: Diamond Ledger Transaction History -->
+<div class="admin-card" style="margin-top: 1.5rem;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+    <h3 style="margin: 0;">💎 Diamond Ledger History</h3>
+    <span class="text-muted" style="font-size: 0.85rem;">Showing last 30 transactions</span>
+  </div>
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Type</th>
+          <th>Amount</th>
+          <th>Balance After</th>
+          <th>Reason / Description</th>
+          <th>Reference ID</th>
+          <th>Timestamp</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if user_info.transactions and user_info.transactions|length > 0 %}
+          {% for tx in user_info.transactions %}
+          <tr>
+            <td>#{{ tx.id }}</td>
+            <td>
+              <span class="badge {% if 'CREDIT' in tx.transaction_type or tx.amount > 0 %}badge-success{% else %}badge-warning{% endif %}">
+                {{ tx.transaction_type }}
+              </span>
+            </td>
+            <td style="font-weight: bold; color: {% if tx.amount > 0 %}var(--emerald-green){% else %}var(--crimson-red){% endif %};">
+              {% if tx.amount > 0 %}+{% endif %}{{ tx.amount }} 💎
+            </td>
+            <td style="font-weight: 600;">💎 {{ tx.balance_after }}</td>
+            <td>{{ tx.description or '-' }}</td>
+            <td><code style="font-size: 0.8rem;">{{ tx.reference_id or '-' }}</code></td>
+            <td class="text-muted" style="font-size: 0.85rem;">{{ tx.created_at }}</td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="7" class="text-muted" style="text-align: center; padding: 2rem;">
+              No diamond transactions recorded for this user yet.
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+function confirmAddDiamonds(form) {
+  const amt = form.amount.value;
+  const username = {{ user_info.username|tojson }};
+  if (!amt || parseInt(amt) <= 0) {
+    alert("Please enter a valid diamond amount greater than 0.");
+    return false;
+  }
+  return confirm("Add " + amt + " Diamonds to @" + username + "?");
+}
+
+function confirmRemoveDiamonds(form) {
+  const amt = form.amount.value;
+  const current = {{ user_info.diamond_balance }};
+  const username = {{ user_info.username|tojson }};
+  if (!amt || parseInt(amt) <= 0) {
+    alert("Please enter a valid diamond amount greater than 0.");
+    return false;
+  }
+  if (parseInt(amt) > current) {
+    alert("Cannot remove " + amt + " Diamonds. User only has " + current + " Diamonds.");
+    return false;
+  }
+  return confirm("Remove " + amt + " Diamonds from @" + username + "?");
+}
+</script>
 {% endblock %}

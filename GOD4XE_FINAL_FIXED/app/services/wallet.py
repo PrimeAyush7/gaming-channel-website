@@ -1,3 +1,4 @@
+import time
 import uuid
 import datetime
 from app.database import get_db
@@ -79,6 +80,7 @@ def get_wallet_info(user_id: int) -> dict:
         info["min_deposit_diamonds"] = dep_cfg["min_deposit_diamonds"]
         return info
 
+
 def credit_diamonds(
     user_id: int,
     amount: int,
@@ -93,7 +95,17 @@ def credit_diamonds(
     tx_uuid = str(uuid.uuid4())
     with get_db() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT balance FROM diamond_accounts WHERE user_id = %s FOR UPDATE;", (user_id,))
+        cursor.execute("""
+            INSERT INTO diamond_accounts (user_id, balance, locked_balance)
+            VALUES (%s, 0, 0)
+            ON CONFLICT (user_id) DO NOTHING;
+        """, (user_id,))
+        cursor.execute("""
+            SELECT balance, locked_balance 
+            FROM diamond_accounts 
+            WHERE user_id = %s 
+            FOR UPDATE;
+        """, (user_id,))
         row = cursor.fetchone()
         current_balance = row["balance"] if isinstance(row, dict) else (row[0] if row else 0)
         
@@ -130,12 +142,22 @@ def deduct_diamonds(
     tx_uuid = str(uuid.uuid4())
     with get_db() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT balance FROM diamond_accounts WHERE user_id = %s FOR UPDATE;", (user_id,))
+        cursor.execute("""
+            INSERT INTO diamond_accounts (user_id, balance, locked_balance)
+            VALUES (%s, 0, 0)
+            ON CONFLICT (user_id) DO NOTHING;
+        """, (user_id,))
+        cursor.execute("""
+            SELECT balance, locked_balance 
+            FROM diamond_accounts 
+            WHERE user_id = %s 
+            FOR UPDATE;
+        """, (user_id,))
         row = cursor.fetchone()
         current_balance = row["balance"] if isinstance(row, dict) else (row[0] if row else 0)
 
         if current_balance < amount:
-            raise ValueError(f"Insufficient diamonds. You have {current_balance} diamonds, but {amount} are required.")
+            raise ValueError(f"Insufficient diamonds. User only has {current_balance} diamonds, but {amount} requested for removal.")
 
         new_balance = current_balance - amount
         cursor.execute("""
@@ -155,6 +177,44 @@ def deduct_diamonds(
         if tx.get("created_at") and hasattr(tx["created_at"], "isoformat"):
             tx["created_at"] = tx["created_at"].isoformat()
     return tx
+
+def admin_adjust_diamonds(
+    user_id: int,
+    amount: int,
+    action: str,
+    reason: str,
+    admin_id: int = None
+) -> dict:
+    if not reason or not reason.strip():
+        raise ValueError("Reason is required for diamond balance adjustment")
+    if amount <= 0:
+        raise ValueError("Amount must be a positive integer greater than zero")
+
+    action = action.upper().strip()
+    if action not in ("ADD", "REMOVE", "CREDIT", "DEBIT"):
+        raise ValueError(f"Invalid adjustment action: {action}")
+
+    clean_reason = reason.strip()
+    ref_id = f"ADMIN_MANUAL_{admin_id or 0}_{int(time.time())}"
+
+    if action in ("ADD", "CREDIT"):
+        return credit_diamonds(
+            user_id=user_id,
+            amount=amount,
+            tx_type="ADMIN_CREDIT",
+            reference_id=ref_id,
+            admin_id=admin_id,
+            description=f"Admin credit: {clean_reason}"
+        )
+    else:
+        return deduct_diamonds(
+            user_id=user_id,
+            amount=amount,
+            tx_type="ADMIN_DEBIT",
+            reference_id=ref_id,
+            admin_id=admin_id,
+            description=f"Admin debit: {clean_reason}"
+        )
 
 def list_transactions(user_id: int, limit: int = 50, offset: int = 0) -> list[dict]:
     with get_db() as conn:

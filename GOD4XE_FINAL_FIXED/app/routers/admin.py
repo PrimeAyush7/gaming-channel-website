@@ -1,3 +1,5 @@
+import urllib.parse
+import time
 
 from app.services import content_features
 from app.services import users_auth as user_service
@@ -1162,7 +1164,7 @@ async def admin_users(
     })
 
 @router.get("/users/{user_id}", response_class=HTMLResponse)
-async def admin_user_detail(user_id: int, request: Request, admin: dict = Depends(get_current_admin)):
+async def admin_user_detail(user_id: int, request: Request, msg: str = None, error: str = None, admin: dict = Depends(get_current_admin)):
     u_info = user_service.get_user_full_admin_details(user_id)
     if not u_info:
         raise HTTPException(status_code=404, detail="User not found")
@@ -1171,6 +1173,8 @@ async def admin_user_detail(user_id: int, request: Request, admin: dict = Depend
         "admin": admin,
         "active_nav": "users",
         "user_info": u_info,
+        "msg": msg,
+        "error": error,
         "csrf_token": admin["csrf_token"]
     })
 
@@ -1178,19 +1182,137 @@ async def admin_user_detail(user_id: int, request: Request, admin: dict = Depend
 async def admin_user_toggle_status(user_id: int, is_active: int = Form(...), csrf_token: str = Form(...), admin: dict = Depends(get_current_admin)):
     verify_csrf(admin, csrf_token)
     user_service.toggle_user_status(user_id, is_active)
-    return RedirectResponse(url=f"/admin/users/{user_id}", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse(url=f"/admin/users/{user_id}?msg=User+status+updated+successfully", status_code=status.HTTP_303_SEE_OTHER)
 
 @router.post("/users/{user_id}/avatar-permission")
 async def admin_user_avatar_permission(user_id: int, disabled: int = Form(...), csrf_token: str = Form(...), admin: dict = Depends(get_current_admin)):
     verify_csrf(admin, csrf_token)
     user_service.toggle_user_avatar_permission(user_id, disabled)
-    return RedirectResponse(url=f"/admin/users/{user_id}", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse(url=f"/admin/users/{user_id}?msg=Avatar+permission+updated+successfully", status_code=status.HTTP_303_SEE_OTHER)
 
 @router.post("/users/{user_id}/reset-password")
 async def admin_user_reset_pw(user_id: int, new_password: str = Form(...), csrf_token: str = Form(...), admin: dict = Depends(get_current_admin)):
     verify_csrf(admin, csrf_token)
     user_service.admin_reset_user_password(user_id, new_password)
-    return RedirectResponse(url=f"/admin/users/{user_id}", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse(url=f"/admin/users/{user_id}?msg=Password+reset+successfully", status_code=status.HTTP_303_SEE_OTHER)
+
+@router.post("/users/{user_id}/adjust-balance")
+async def admin_user_adjust_balance(
+    user_id: int,
+    request: Request,
+    action_type: str = Form(...),
+    amount: int = Form(...),
+    reason: str = Form(...),
+    csrf_token: str = Form(...),
+    admin: dict = Depends(get_current_admin)
+):
+    verify_csrf(admin, csrf_token)
+    admin_id = admin.get("admin_id") or admin.get("id")
+
+    if not reason or not reason.strip():
+        return RedirectResponse(url=f"/admin/users/{user_id}?error=Reason+is+required+for+diamond+adjustment", status_code=status.HTTP_303_SEE_OTHER)
+
+    if amount <= 0:
+        return RedirectResponse(url=f"/admin/users/{user_id}?error=Amount+must+be+greater+than+0+diamonds", status_code=status.HTTP_303_SEE_OTHER)
+
+    action_clean = action_type.strip().upper()
+    if action_clean not in ("ADD", "REMOVE", "CREDIT", "DEBIT"):
+        return RedirectResponse(url=f"/admin/users/{user_id}?error=Invalid+action+type", status_code=status.HTTP_303_SEE_OTHER)
+
+    try:
+        w_info = wallet_service.get_wallet_info(user_id)
+        before_balance = w_info.get("balance", 0)
+
+        if action_clean in ("ADD", "CREDIT"):
+            tx = wallet_service.credit_diamonds(
+                user_id=user_id,
+                amount=amount,
+                tx_type="ADMIN_CREDIT",
+                reference_id=f"ADMIN_MANUAL_{admin_id}_{int(time.time())}",
+                admin_id=admin_id,
+                description=f"Admin credit: {reason.strip()}"
+            )
+            log_action = "ADD_DIAMONDS"
+            success_msg = f"Successfully+credited+{amount}+diamonds+to+@{w_info.get('username', 'user')}"
+        else:
+            if before_balance < amount:
+                return RedirectResponse(
+                    url=f"/admin/users/{user_id}?error=Cannot+remove+{amount}+diamonds.+User+only+has+{before_balance}+diamonds.",
+                    status_code=status.HTTP_303_SEE_OTHER
+                )
+            tx = wallet_service.deduct_diamonds(
+                user_id=user_id,
+                amount=amount,
+                tx_type="ADMIN_DEBIT",
+                reference_id=f"ADMIN_MANUAL_{admin_id}_{int(time.time())}",
+                admin_id=admin_id,
+                description=f"Admin debit: {reason.strip()}"
+            )
+            log_action = "REMOVE_DIAMONDS"
+            success_msg = f"Successfully+removed+{amount}+diamonds+from+@{w_info.get('username', 'user')}"
+
+        # Audit logging
+        auth_service.log_admin_action(
+            admin_id=admin_id,
+            admin_username=admin.get("username", "admin"),
+            role=admin.get("role", "SUPER_ADMIN"),
+            action=log_action,
+            resource="diamond_accounts",
+            resource_id=str(user_id),
+            ip_address=get_client_ip(request),
+            user_agent=request.headers.get("User-Agent"),
+            before_state={"balance": before_balance},
+            after_state={
+                "balance": tx.get("balance_after"),
+                "amount": amount,
+                "reason": reason.strip(),
+                "transaction_uuid": tx.get("transaction_uuid")
+            }
+        )
+
+        return RedirectResponse(url=f"/admin/users/{user_id}?msg={success_msg}", status_code=status.HTTP_303_SEE_OTHER)
+    except ValueError as e:
+        return RedirectResponse(url=f"/admin/users/{user_id}?error={urllib.parse.quote_plus(str(e))}", status_code=status.HTTP_303_SEE_OTHER)
+    except Exception as e:
+        return RedirectResponse(url=f"/admin/users/{user_id}?error=Operation+failed:+{urllib.parse.quote_plus(str(e))}", status_code=status.HTTP_303_SEE_OTHER)
+
+@router.post("/users/{user_id}/add-diamonds")
+async def admin_user_add_diamonds(
+    user_id: int,
+    request: Request,
+    amount: int = Form(...),
+    reason: str = Form(...),
+    csrf_token: str = Form(...),
+    admin: dict = Depends(get_current_admin)
+):
+    return await admin_user_adjust_balance(
+        user_id=user_id,
+        request=request,
+        action_type="ADD",
+        amount=amount,
+        reason=reason,
+        csrf_token=csrf_token,
+        admin=admin
+    )
+
+@router.post("/users/{user_id}/remove-diamonds")
+async def admin_user_remove_diamonds(
+    user_id: int,
+    request: Request,
+    amount: int = Form(...),
+    reason: str = Form(...),
+    csrf_token: str = Form(...),
+    admin: dict = Depends(get_current_admin)
+):
+    return await admin_user_adjust_balance(
+        user_id=user_id,
+        request=request,
+        action_type="REMOVE",
+        amount=amount,
+        reason=reason,
+        csrf_token=csrf_token,
+        admin=admin
+    )
 
 @router.get("/avatars", response_class=HTMLResponse)
 async def admin_avatars_view(request: Request, status: str = None, admin: dict = Depends(get_current_admin)):
