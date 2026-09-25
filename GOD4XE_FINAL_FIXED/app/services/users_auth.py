@@ -937,6 +937,22 @@ def get_user_full_admin_details(user_id: int) -> dict:
 
     return user
 
+def delete_user_permanently(user_id: int) -> dict:
+    """Permanently delete an app user and all FK-cascaded player data.
+    Returns a small snapshot for admin audit logging.
+    """
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, username, email, phone FROM app_users WHERE id = %s FOR UPDATE;", (user_id,))
+        row = cursor.fetchone()
+        if not row:
+            raise ValueError("User not found")
+        user = dict(row)
+        cursor.execute("DELETE FROM app_users WHERE id = %s;", (user_id,))
+        if cursor.rowcount != 1:
+            raise ValueError("User could not be deleted")
+    return user
+
 def toggle_user_status(user_id: int, is_active: int) -> bool:
     with get_db() as conn:
         cursor = conn.cursor()

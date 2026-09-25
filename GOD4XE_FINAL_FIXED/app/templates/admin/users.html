@@ -35,6 +35,7 @@
           <th>Free Fire UID/IGN</th>
           <th>Diamonds</th>
           <th>Status</th>
+          <th>Avatar Upload</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -68,11 +69,26 @@
             {% endif %}
           </td>
           <td>
+            <form method="POST" action="/admin/users/{{ u.id }}/avatar-permission" style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <input type="hidden" name="disabled" value="{{ 0 if u.avatar_upload_disabled == 1 else 1 }}">
+              <button type="submit" class="btn btn-sm {% if u.avatar_upload_disabled == 1 %}btn-success{% else %}btn-secondary{% endif %}">
+                {% if u.avatar_upload_disabled == 1 %}Allow Avatar{% else %}Deny Avatar{% endif %}
+              </button>
+            </form>
+          </td>
+          <td>
             <a href="/admin/users/{{ u.id }}" class="btn btn-sm btn-secondary">View Profile</a>
+            {% if admin.role == 'SUPER_ADMIN' %}
+            <form method="POST" action="/admin/users/{{ u.id }}/delete" style="display:inline; margin-left:0.35rem;" onsubmit="return confirm('Permanently delete @{{ u.username }}? This cannot be undone.');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+            </form>
+            {% endif %}
           </td>
         </tr>
         {% else %}
-        <tr><td colspan="7" class="text-center text-muted" style="padding: 2rem;">No players found matching criteria.</td></tr>
+        <tr><td colspan="8" class="text-center text-muted" style="padding: 2rem;">No players found matching criteria.</td></tr>
         {% endfor %}
       </tbody>
     </table>

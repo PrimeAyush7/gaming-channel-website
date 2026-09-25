@@ -113,13 +113,25 @@
       </form>
 
       <!-- Avatar Upload Permission -->
-      <form method="POST" action="/admin/users/{{ user_info.id }}/avatar-permission">
+      <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+        <form method="POST" action="/admin/users/{{ user_info.id }}/avatar-permission">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="disabled" value="0">
+          <button type="submit" class="btn btn-success">Allow Avatar Upload</button>
+        </form>
+        <form method="POST" action="/admin/users/{{ user_info.id }}/avatar-permission">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="disabled" value="1">
+          <button type="submit" class="btn btn-secondary">Deny Avatar Upload</button>
+        </form>
+      </div>
+
+      {% if admin.role == 'SUPER_ADMIN' %}
+      <form method="POST" action="/admin/users/{{ user_info.id }}/delete" onsubmit="return confirm('Permanently delete @{{ user_info.username }}? This cannot be undone.');">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-        <input type="hidden" name="disabled" value="{{ 0 if user_info.avatar_upload_disabled == 1 else 1 }}">
-        <button type="submit" class="btn btn-secondary" style="width: 100%;">
-          {% if user_info.avatar_upload_disabled == 1 %}Re-Enable Avatar Uploads{% else %}Disable Avatar Uploads For User{% endif %}
-        </button>
+        <button type="submit" class="btn btn-danger" style="width:100%;">🗑️ Permanently Delete User</button>
       </form>
+      {% endif %}
 
       <!-- Reset Password -->
       <form method="POST" action="/admin/users/{{ user_info.id }}/reset-password">

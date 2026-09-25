@@ -1178,6 +1178,31 @@ async def admin_user_detail(user_id: int, request: Request, msg: str = None, err
         "csrf_token": admin["csrf_token"]
     })
 
+@router.post("/users/{user_id}/delete")
+async def admin_user_delete(user_id: int, request: Request, csrf_token: str = Form(...), admin: dict = Depends(get_current_admin)):
+    verify_csrf(admin, csrf_token)
+    if admin.get("role") != ROLE_SUPER_ADMIN:
+        raise HTTPException(status_code=403, detail="Only Super Admin can permanently delete users.")
+    try:
+        deleted = user_service.delete_user_permanently(user_id)
+        auth_service.log_admin_action(
+            admin_id=admin.get("id"),
+            admin_username=admin.get("username", "admin"),
+            role=admin.get("role", ROLE_SUPER_ADMIN),
+            action="DELETE_USER",
+            resource="app_users",
+            resource_id=str(user_id),
+            ip_address=get_client_ip(request),
+            user_agent=request.headers.get("User-Agent"),
+            before_state=deleted,
+            after_state=None
+        )
+        return RedirectResponse(url="/admin/users?msg=User+deleted+successfully", status_code=status.HTTP_303_SEE_OTHER)
+    except ValueError as e:
+        return RedirectResponse(url=f"/admin/users/{user_id}?error={urllib.parse.quote_plus(str(e))}", status_code=status.HTTP_303_SEE_OTHER)
+    except Exception as e:
+        return RedirectResponse(url=f"/admin/users/{user_id}?error=Delete+failed:+{urllib.parse.quote_plus(str(e))}", status_code=status.HTTP_303_SEE_OTHER)
+
 @router.post("/users/{user_id}/status")
 async def admin_user_toggle_status(user_id: int, is_active: int = Form(...), csrf_token: str = Form(...), admin: dict = Depends(get_current_admin)):
     verify_csrf(admin, csrf_token)
