@@ -1140,7 +1140,7 @@ async def admin_tournament_results_submit(tournament_id: int, request: Request, 
 
 
 # --------------------------------------------------------------------------
-# USERS & AVATAR MODERATION
+# USERS & AVATAR CONTROLS
 # --------------------------------------------------------------------------
 @router.get("/users", response_class=HTMLResponse)
 async def admin_users(
@@ -1338,25 +1338,6 @@ async def admin_user_remove_diamonds(
         csrf_token=csrf_token,
         admin=admin
     )
-
-@router.get("/avatars", response_class=HTMLResponse)
-async def admin_avatars_view(request: Request, status: str = None, admin: dict = Depends(get_current_admin)):
-    items = user_service.list_avatar_moderation_queue(status_filter=status, limit=100)
-    return templates.TemplateResponse("admin/avatars.html", {
-        "request": request,
-        "admin": admin,
-        "active_nav": "avatars",
-        "items": items,
-        "status_filter": status,
-        "csrf_token": admin["csrf_token"]
-    })
-
-@router.post("/avatars/{queue_id}/review")
-async def admin_avatar_review(queue_id: int, approve: int = Form(...), reason: str = Form(None), csrf_token: str = Form(...), admin: dict = Depends(get_current_admin)):
-    verify_csrf(admin, csrf_token)
-    user_service.moderate_avatar(queue_id, admin["id"], bool(approve), reason)
-    return RedirectResponse(url="/admin/avatars", status_code=status.HTTP_303_SEE_OTHER)
-
 
 # --------------------------------------------------------------------------
 # WITHDRAWALS

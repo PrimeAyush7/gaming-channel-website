@@ -38,7 +38,7 @@
           <span class="badge badge-danger">BANNED / DISABLED</span>
         {% endif %}
       </div>
-      <div><strong>Avatar Status:</strong> {{ user_info.avatar_moderation_status }} {% if user_info.avatar_upload_disabled == 1 %}<span class="badge badge-warning">Uploads Disabled</span>{% endif %}</div>
+      <div><strong>Avatar Uploads:</strong> {% if user_info.avatar_upload_disabled == 1 %}<span class="badge badge-warning">DISABLED</span>{% else %}<span class="badge badge-success">ALLOWED</span>{% endif %}</div>
     </div>
   </div>
 
