@@ -3,7 +3,7 @@ from urllib.parse import quote
 from fastapi import APIRouter, Request, Response, HTTPException, status, Form
 from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse, StreamingResponse
 from app.templating import templates
-from app.config import APP_DIR, APP_URL, JWT_SECRET
+from app.config import APP_DIR, APP_URL, JWT_SECRET, GOOGLE_CLIENT_ID
 from app.services.jwt_util import decode_jwt
 from app.services import users_auth as user_service, content_features
 from app.services import (
@@ -231,6 +231,7 @@ async def web_login(request: Request):
     ctx = get_common_context(request)
     ctx["error"] = request.query_params.get("error")
     ctx["next_url"] = request.query_params.get("next", "/tournaments")
+    ctx["google_client_id"] = GOOGLE_CLIENT_ID
     return templates.TemplateResponse(request=request, name="public/login.html", context=ctx)
 
 @router.post("/login")
@@ -247,12 +248,39 @@ async def web_login_submit(
     _set_web_auth_cookie(response, token_or_err)
     return response
 
+@router.post("/login/google")
+async def web_google_login(
+    request: Request,
+    credential: str = Form(...),
+    next_url: str = Form("/tournaments")
+):
+    """Sign in to the web session with a verified Google ID token."""
+    try:
+        if not GOOGLE_CLIENT_ID:
+            raise ValueError("Google login is not configured on the website")
+        from google.oauth2 import id_token
+        from google.auth.transport import requests as google_requests
+        verified = id_token.verify_oauth2_token(
+            credential, google_requests.Request(), GOOGLE_CLIENT_ID
+        )
+        if verified.get("iss") not in ("accounts.google.com", "https://accounts.google.com"):
+            raise ValueError("Invalid Google token issuer")
+        user, token = user_service.authenticate_google_user(credential)
+        if not user:
+            raise ValueError("Google authentication failed")
+        response = RedirectResponse(next_url if next_url.startswith("/") else "/tournaments", status_code=303)
+        _set_web_auth_cookie(response, token)
+        return response
+    except Exception as exc:
+        return RedirectResponse(f"/login?error={quote(str(exc))}&next={quote(next_url)}", status_code=303)
+
 @router.get("/register", response_class=HTMLResponse)
 async def web_register(request: Request):
     if _get_web_user(request):
         return RedirectResponse("/tournaments", status_code=303)
     ctx = get_common_context(request)
     ctx["error"] = request.query_params.get("error")
+    ctx["google_client_id"] = GOOGLE_CLIENT_ID
     return templates.TemplateResponse(request=request, name="public/register.html", context=ctx)
 
 @router.post("/register")
