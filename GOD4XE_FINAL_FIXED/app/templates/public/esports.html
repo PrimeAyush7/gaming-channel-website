@@ -1,0 +1,48 @@
+{% extends "public/base.html" %}
+{% block title %}GOD4XE ESPORTS - Official Free Fire Arena{% endblock %}
+{% block content %}
+<div class="container esports-page-container">
+  <section class="esports-hero-section">
+    <div class="esports-hero-ambient" aria-hidden="true"></div>
+    <div class="esports-hero-content">
+      <span class="esports-platform-badge"><span class="pulse-beacon"></span> OFFICIAL FREE FIRE ARENA</span>
+      <h1 class="esports-hero-title">GOD4XE <span class="gradient-text">ESPORTS</span></h1>
+      <p class="esports-hero-subtitle">Official Free Fire Tournaments</p>
+      <p class="esports-hero-desc">Enter the GOD4XE competitive arena. Browse tournaments, join directly from the website after login, or continue your tournament journey through the Android app.</p>
+      <div class="esports-hero-actions">
+        <a href="#tournaments-section" class="btn-enter-esports-primary">VIEW TOURNAMENTS →</a>
+        <a href="/static/downloads/god4xe_esports.apk" class="btn-enter-esports-secondary">📲 DOWNLOAD APP</a>
+      </div>
+      <div class="esports-stats-ribbon">
+        <div class="esports-stat-item"><span class="stat-number">FREE</span><span class="stat-label">Free Entry Cups</span></div>
+        <div class="esports-stat-item"><span class="stat-number">24/7</span><span class="stat-label">Tournament Updates</span></div>
+        <div class="esports-stat-item"><span class="stat-number">WEB</span><span class="stat-label">Direct Join</span></div>
+        <div class="esports-stat-item"><span class="stat-number">APP</span><span class="stat-label">Mobile Experience</span></div>
+      </div>
+    </div>
+  </section>
+
+  {% if announcements %}
+  <section class="esports-section">
+    <div class="section-header"><span class="section-tag">OFFICIAL NEWS</span><h2 class="section-title">ANNOUNCEMENTS</h2></div>
+    <div class="posts-grid">
+      {% for a in announcements[:4] %}<article class="post-card cyber-card" style="padding:1.2rem;"><span class="badge">{{ a.type }}</span><h3 class="post-card-title" style="margin-top:.8rem;">{{ a.title }}</h3><p class="post-excerpt">{{ a.message }}</p></article>{% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <section id="tournaments-section" class="esports-section">
+    <div class="section-header flex-between"><div><span class="section-tag">OFFICIAL SCHEDULE</span><h2 class="section-title">TOURNAMENTS ARENA</h2></div><a href="/tournaments" class="btn btn-secondary btn-sm">VIEW ALL →</a></div>
+    {% if live_tournaments or upcoming_tournaments %}
+    <div class="tournaments-grid">
+      {% for t in live_tournaments %}<div class="tournament-card live-card cyber-card"><div class="tournament-badge live-badge">🔴 LIVE</div><div class="tournament-card-header"><h3 class="t-title">{{ t.title }}</h3><span class="t-format">{{ t.mode }} • {{ t.map_name }}</span></div><div class="t-stats-row"><div class="t-stat"><span class="t-stat-label">Prize Pool</span><span class="t-stat-val val-gold">💎 {{ t.prize_pool_diamonds }}</span></div><div class="t-stat"><span class="t-stat-label">Slots</span><span class="t-stat-val">{{ t.participant_count }} / {{ t.max_participants }}</span></div></div><div class="tournament-card-actions"><a href="/tournaments/{{ t.id }}" class="btn btn-primary btn-block">MATCH INFO</a></div></div>{% endfor %}
+      {% for t in upcoming_tournaments %}<div class="tournament-card cyber-card"><div class="tournament-badge upcoming-badge">⚡ UPCOMING</div><div class="tournament-card-header"><h3 class="t-title">{{ t.title }}</h3><span class="t-format">{{ t.mode }} • {{ t.map_name }}</span></div><div class="t-stats-row"><div class="t-stat"><span class="t-stat-label">Prize Pool</span><span class="t-stat-val val-gold">💎 {{ t.prize_pool_diamonds }}</span></div><div class="t-stat"><span class="t-stat-label">Entry</span><span class="t-stat-val">{% if t.entry_fee_diamonds == 0 %}FREE{% else %}💎 {{ t.entry_fee_diamonds }}{% endif %}</span></div><div class="t-stat"><span class="t-stat-label">Slots</span><span class="t-stat-val">{{ t.participant_count }} / {{ t.max_participants }}</span></div></div><div class="tournament-card-actions"><a href="/tournaments/{{ t.id }}" class="btn btn-primary btn-block">VIEW & JOIN →</a></div></div>{% endfor %}
+    </div>
+    {% else %}<div class="cyber-card empty-state-box"><div class="empty-icon">🎮</div><h3>Tournaments Scheduled Daily</h3><p>Upcoming matches are currently being scheduled.</p><a href="/tournaments" class="btn btn-primary">BROWSE ALL</a></div>{% endif %}
+  </section>
+
+  <section class="esports-section app-download-showcase">
+    <div class="app-showcase-grid"><div><span class="section-tag">ANDROID EXPERIENCE</span><h2 class="app-title">DOWNLOAD GOD4XE ESPORTS APP</h2><p class="app-desc">Get the complete Free Fire tournament experience on Android, including your wallet, arena, rankings and match updates.</p><div class="app-cta-row"><a href="/static/downloads/god4xe_esports.apk" class="btn-enter-esports-primary">DOWNLOAD APK</a><a href="/tournaments" class="btn-enter-esports-secondary">OPEN WEB ARENA</a></div></div><div style="display:flex;justify-content:center;align-items:center;"><img src="/download/qr" alt="Scan to download GOD4XE ESPORTS APK" style="width:180px;height:180px;background:#fff;padding:10px;border-radius:14px;"></div></div>
+  </section>
+</div>
+{% endblock %}

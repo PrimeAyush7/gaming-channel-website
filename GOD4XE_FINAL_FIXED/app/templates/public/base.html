@@ -55,7 +55,8 @@
       <!-- Dynamic Sections Desktop Navigation (Desktop Only) -->
       <nav class="desktop-nav" aria-label="Main Navigation">
         <a href="/" class="nav-link {% if request.url.path == '/' %}active{% endif %}">HOME</a>
-        <a href="/tournaments" class="nav-link {% if request.url.path.startswith('/tournaments') %}active{% endif %}" style="color: var(--neon-purple); font-weight: 700;">🏆 ESPORTS</a>
+        <a href="/esports" class="nav-link {% if request.url.path == '/esports' %}active{% endif %}" style="color: var(--neon-purple); font-weight: 700;">⚡ ESPORTS ARENA</a>
+        <a href="/tournaments" class="nav-link {% if request.url.path.startswith('/tournaments') %}active{% endif %}">🏆 TOURNAMENTS</a>
         <a href="/announcements" class="nav-link {% if request.url.path.startswith('/announcements') %}active{% endif %}">📢 ANNOUNCEMENTS</a>
         {% for sec in nav_sections %}
           <a href="/section/{{ sec.slug }}" class="nav-link {% if current_section and current_section.slug == sec.slug %}active{% endif %}">
@@ -204,6 +205,9 @@
     </form>
     <div class="mobile-nav-links">
       <a href="/" class="nav-link">🏠 HOME</a>
+      <a href="/esports" class="nav-link">⚡ GOD4XE ESPORTS ARENA</a>
+      <a href="/tournaments" class="nav-link">🏆 TOURNAMENTS</a>
+      <a href="/announcements" class="nav-link">📢 ANNOUNCEMENTS</a>
       {% for sec in nav_sections %}
         <a href="/section/{{ sec.slug }}" class="nav-link">
           <span>{{ sec.icon }}</span> {{ sec.name }}

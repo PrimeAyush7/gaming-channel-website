@@ -74,6 +74,8 @@ async def home_view(request: Request):
         "popular_posts": popular_posts,
         "featured_video": featured_video,
         "featured_post": featured_post,
+        "announcements": content_features.list_announcements(only_active=True),
+        "updates": content_features.list_latest_updates(only_published=True),
     })
     return templates.TemplateResponse(request=request, name="public/home.html", context=ctx)
 
@@ -279,6 +281,19 @@ async def web_logout():
     response = RedirectResponse("/tournaments", status_code=303)
     response.delete_cookie("god4xe_web_token", path="/")
     return response
+
+@router.get("/esports", response_class=HTMLResponse)
+async def public_esports_landing(request: Request):
+    ctx = get_common_context(request)
+    ctx.update({
+        "web_user": _get_web_user(request),
+        "upcoming_tournaments": tournament_service.list_tournaments(status_filter="UPCOMING", limit=8, is_published_only=True),
+        "live_tournaments": tournament_service.list_tournaments(status_filter="LIVE", limit=8, is_published_only=True),
+        "completed_tournaments": tournament_service.list_tournaments(status_filter="COMPLETED", limit=6, is_published_only=True),
+        "announcements": content_features.list_announcements(only_active=True),
+        "updates": content_features.list_latest_updates(only_published=True),
+    })
+    return templates.TemplateResponse(request=request, name="public/esports.html", context=ctx)
 
 @router.get("/announcements", response_class=HTMLResponse)
 async def public_announcements(request: Request):
