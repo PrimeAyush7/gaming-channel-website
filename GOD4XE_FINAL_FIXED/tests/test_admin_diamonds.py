@@ -469,3 +469,150 @@ class TestAdminDiamondBalanceManagement(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class TestV11Features(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        init_db()
+        cls.client = TestClient(app)
+
+    def test_01_pwa_assets_available(self):
+        """Verify manifest.json and sw.js are served correctly."""
+        res_m = self.client.get("/static/manifest.json")
+        self.assertEqual(res_m.status_code, 200)
+        data = res_m.json()
+        self.assertEqual(data["name"], "GOD4XE ESPORTS")
+        self.assertEqual(data["theme_color"], "#06030b")
+        self.assertGreaterEqual(len(data["icons"]), 1)
+
+        res_sw = self.client.get("/static/sw.js")
+        self.assertEqual(res_sw.status_code, 200)
+        self.assertIn("CACHE_NAME", res_sw.text)
+
+    def test_02_opengraph_tags_in_tournament_detail(self):
+        """Verify dynamic Open Graph and Twitter Card tags render on tournament page."""
+        from app.services import tournaments as tournament_service
+        t = tournament_service.create_tournament(
+            title="OG Meta Showcase Cup",
+            entry_type="FREE",
+            mode="SQUAD",
+            map_name="PURGATORY",
+            prize_amount_diamonds=1500,
+            max_slots=12
+        )
+        res = self.client.get(f"/tournaments/{t['id']}")
+        self.assertEqual(res.status_code, 200)
+        html = res.text
+        self.assertIn('property="og:title"', html)
+        self.assertIn("OG Meta Showcase Cup", html)
+        self.assertIn("1500", html)
+        self.assertIn('name="twitter:card"', html)
+        self.assertIn("api.whatsapp.com/send", html)
+
+    def test_03_squad_registration_and_roster(self):
+        """Verify team captain can register team name and teammates in tournament."""
+        from app.services import users_auth as user_service
+        from app.services import tournaments as tournament_service
+        import random
+
+        u_cap = user_service.register_user(
+            username=f"captain_{random.randint(100000, 999999)}",
+            email=f"cap_{random.randint(100000, 999999)}@test.com",
+            phone=f"+9198{random.randint(10000000, 99999999)}",
+            password="CaptainPassword123!"
+        )["user"]
+
+        t = tournament_service.create_tournament(
+            title="Squad Clash Tournament",
+            entry_type="FREE",
+            mode="SQUAD",
+            max_slots=12
+        )
+
+        teammates_data = [
+            {"ff_uid": "11223344", "ff_ign": "Racer_One"},
+            {"ff_uid": "55667788", "ff_ign": "Sniper_Two"},
+            {"ff_uid": "99001122", "ff_ign": "Rusher_Three"}
+        ]
+
+        join_res = tournament_service.join_tournament(
+            tournament_id=t["id"],
+            user_id=u_cap["id"],
+            ff_uid="10002000",
+            ff_ign="Cap_Alpha",
+            team_name="TEAM GOD4XE ELITE",
+            teammates=teammates_data
+        )
+        self.assertTrue(join_res["success"])
+
+        # Fetch participants list and verify team roster is stored
+        parts = tournament_service.list_tournament_participants(t["id"])
+        self.assertEqual(len(parts), 1)
+        p = parts[0]
+        self.assertEqual(p["team_name"], "TEAM GOD4XE ELITE")
+        self.assertEqual(p["team_role"], "CAPTAIN")
+        self.assertEqual(len(p["teammates"]), 3)
+        self.assertEqual(p["teammates"][0]["ff_ign"], "Racer_One")
+
+    def test_04_cloudinary_helper_safe_fallback(self):
+        """Verify Cloudinary upload gracefully falls back to local disk when unconfigured."""
+        from app.services import media as media_service
+        res_cloud = media_service.upload_to_cloudinary(b"test_bytes", "test.png")
+        self.assertIsNone(res_cloud)  # Unconfigured in test environment
+    def test_05_discord_and_telegram_settings_and_broadcast(self):
+        """Verify saving Discord & Telegram credentials and manual tournament broadcast."""
+        from app.services import content_features as bot_notifications
+        from app.services import tournaments as tournament_service
+        from app.services import auth as auth_service
+
+        admin_user = f"adm_bot_{int(time.time()*1000)%1000000}"
+        admin_pass = "AdminBotPass123!"
+        auth_service.create_admin_with_role(admin_user, admin_pass, role="SUPER_ADMIN")
+        login_res = self.client.post("/admin/login", data={"username": admin_user, "password": admin_pass}, follow_redirects=False)
+        session_cookie = login_res.cookies.get("nexus_session")
+        with get_db() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT csrf_token FROM sessions WHERE session_id = %s;", (session_cookie,))
+            csrf_token = cursor.fetchone()["csrf_token"]
+
+        # Save settings via admin POST
+        settings_res = self.client.post(
+            "/admin/settings",
+            data={
+                "csrf_token": csrf_token,
+                "site_name": "GOD4XE TEST",
+                "discord_webhook_url": "https://discord.com/api/webhooks/123/mock",
+                "discord_activity_webhook": "https://discord.com/api/webhooks/123/act_mock",
+                "telegram_bot_token": "999999999:AAFakeTokenForTesting",
+                "telegram_chat_id": "@god4xe_test_channel",
+                "notify_discord_enabled": "true",
+                "notify_telegram_enabled": "true"
+            },
+            cookies={"nexus_session": session_cookie},
+            follow_redirects=False
+        )
+        self.assertIn(settings_res.status_code, (302, 303))
+
+        # Verify settings saved
+        cfg = bot_notifications.get_notification_settings()
+        self.assertEqual(cfg["discord_webhook_url"], "https://discord.com/api/webhooks/123/mock")
+        self.assertEqual(cfg["telegram_chat_id"], "@god4xe_test_channel")
+        self.assertEqual(cfg["notify_discord_enabled"], "true")
+        self.assertEqual(cfg["notify_telegram_enabled"], "true")
+
+        # Create tournament and test manual broadcast endpoint
+        t = tournament_service.create_tournament(
+            title="Broadcast Test Tournament",
+            entry_type="FREE",
+            mode="SQUAD",
+            max_slots=12
+        )
+        bc_res = self.client.post(
+            f"/admin/tournaments/{t['id']}/broadcast",
+            data={"csrf_token": csrf_token},
+            cookies={"nexus_session": session_cookie},
+            follow_redirects=False
+        )
+        self.assertEqual(bc_res.status_code, 303)
+        self.assertIn("msg=", bc_res.headers["location"])
+

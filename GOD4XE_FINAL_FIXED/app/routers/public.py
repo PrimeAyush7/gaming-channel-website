@@ -1,11 +1,7 @@
-import io
-from urllib.parse import quote
 from fastapi import APIRouter, Request, Response, HTTPException, status, Form
-from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse, StreamingResponse, FileResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse, FileResponse
 from app.templating import templates
-from app.config import APP_DIR, APP_URL, JWT_SECRET, GOOGLE_CLIENT_ID
-from app.services.jwt_util import decode_jwt
-from app.services import users_auth as user_service, content_features
+from app.config import APP_DIR, APP_URL
 from app.services import (
     posts as post_service,
     sections as section_service,
@@ -14,26 +10,34 @@ from app.services import (
     ads as ad_service,
     settings as settings_service,
     analytics as analytics_service,
-    formatter
+    formatter,
+    tournaments as tournament_service,
+    content_features as content_features_service,
+    users_auth as users_auth_service,
+    jwt_util
 )
 
 router = APIRouter()
 
-# Canonical Android APK download route. The public buttons all point here so
-# the download does not depend on a stale/static filename or Render routing.
-APK_PATH = APP_DIR / "static" / "downloads" / "god4xe_esports.apk"
+def get_optional_current_user(request: Request) -> dict | None:
+    token = None
+    auth_header = request.headers.get("Authorization", "")
+    if auth_header.startswith("Bearer "):
+        token = auth_header[7:].strip()
+    elif request.cookies.get("god4xe_user_token"):
+        token = request.cookies.get("god4xe_user_token")
 
-@router.get("/download/app")
-async def download_android_app():
-    if not APK_PATH.is_file():
-        raise HTTPException(status_code=404, detail="Android APK not found")
-    return FileResponse(
-        path=str(APK_PATH),
-        media_type="application/vnd.android.package-archive",
-        filename="GOD4XE.apk",
-        headers={"Cache-Control": "no-cache"}
-    )
-# templates imported from app.templating
+    if not token:
+        return None
+
+    try:
+        payload = jwt_util.decode_jwt(token)
+        user_id = int(payload.get("sub", 0))
+        if user_id:
+            return users_auth_service.get_user_by_id(user_id)
+    except Exception:
+        return None
+    return None
 
 def get_common_context(request: Request):
     return {
@@ -42,33 +46,8 @@ def get_common_context(request: Request):
         "settings": settings_service.get_all_settings(),
         "nav_sections": section_service.get_all_sections(only_nav=True),
         "ads": ad_service.get_ad_settings(),
-        "web_user": _get_web_user(request)
+        "current_user": get_optional_current_user(request)
     }
-def _get_web_user(request: Request):
-    token = request.cookies.get("god4xe_web_token")
-    if not token:
-        return None
-    try:
-        claims = decode_jwt(token)
-        return {
-            "id": int(claims.get("sub")),
-            "username": claims.get("username", "")
-        }
-    except Exception:
-        return None
-
-def _set_web_auth_cookie(response: Response, token: str):
-    response.set_cookie(
-        "god4xe_web_token",
-        token,
-        max_age=30 * 86400,
-        httponly=True,
-        samesite="lax",
-        secure=APP_URL.startswith("https://"),
-        path="/"
-    )
-
-
 
 @router.get("/", response_class=HTMLResponse)
 async def home_view(request: Request):
@@ -81,6 +60,15 @@ async def home_view(request: Request):
     featured_post_data = post_service.get_posts(page=1, per_page=1, is_featured=True, only_published=True)
     featured_post = featured_post_data["posts"][0] if featured_post_data["posts"] else None
 
+    # Esports tournaments for homepage arena section
+    esports_tournaments = tournament_service.list_tournaments(status_filter="UPCOMING", limit=4, is_published_only=True)
+    if not esports_tournaments:
+        esports_tournaments = tournament_service.list_tournaments(limit=4, is_published_only=True)
+
+    # Announcements for homepage ticker & highlights
+    announcements = content_features_service.list_announcements(only_active=True)[:4]
+    arena_notice = settings_service.get_setting("arena_notice", "")
+
     # Record page view event
     analytics_service.record_event("page_view", page_path="/")
 
@@ -89,8 +77,9 @@ async def home_view(request: Request):
         "popular_posts": popular_posts,
         "featured_video": featured_video,
         "featured_post": featured_post,
-        "announcements": content_features.list_announcements(only_active=True),
-        "updates": content_features.list_latest_updates(only_published=True),
+        "esports_tournaments": esports_tournaments,
+        "announcements": announcements,
+        "arena_notice": arena_notice,
     })
     return templates.TemplateResponse(request=request, name="public/home.html", context=ctx)
 
@@ -101,14 +90,10 @@ async def post_detail_view(request: Request, slug: str):
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
 
-    # Increment view counter & record analytics
     post_service.increment_post_view(post["id"])
     analytics_service.record_event("post_view", target_id=post["id"], page_path=f"/post/{slug}")
 
-    # Format content safely
     formatted_content = formatter.format_post_content(post["content"])
-    
-    # Related posts & popular posts
     related = post_service.get_related_posts(post["id"], post.get("section_id"), limit=4)
     popular = post_service.get_popular_posts(limit=5)
 
@@ -181,6 +166,206 @@ async def search_view(request: Request, q: str = "", page: int = 1):
     })
     return templates.TemplateResponse(request=request, name="public/search.html", context=ctx)
 
+@router.get("/esports", response_class=HTMLResponse)
+async def esports_view(request: Request):
+    ctx = get_common_context(request)
+    tournaments = tournament_service.list_tournaments(limit=20, is_published_only=True)
+    ctx.update({
+        "tournaments": tournaments
+    })
+    return templates.TemplateResponse(request=request, name="public/esports.html", context=ctx)
+
+@router.get("/announcements", response_class=HTMLResponse)
+async def announcements_view(request: Request):
+    ctx = get_common_context(request)
+    announcements = content_features_service.list_announcements(only_active=True)
+    arena_notice = settings_service.get_setting("arena_notice", "")
+    ctx.update({
+        "announcements": announcements,
+        "arena_notice": arena_notice
+    })
+    return templates.TemplateResponse(request=request, name="public/announcements.html", context=ctx)
+
+@router.get("/login", response_class=HTMLResponse)
+async def login_page(request: Request, error: str = None, success: str = None):
+    ctx = get_common_context(request)
+    if ctx.get("current_user"):
+        return RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
+    ctx.update({
+        "error": error,
+        "success_msg": success
+    })
+    return templates.TemplateResponse(request=request, name="public/login.html", context=ctx)
+
+@router.post("/login")
+async def login_submit(
+    request: Request,
+    identity: str = Form(...),
+    password: str = Form(...)
+):
+    ip_address = request.client.host if request.client else "127.0.0.1"
+    try:
+        user, token = users_auth_service.authenticate_user(identity.strip(), password, ip_address=ip_address)
+        response = RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+        response.set_cookie(
+            key="god4xe_user_token",
+            value=token,
+            max_age=30 * 24 * 3600,
+            httponly=True,
+            samesite="lax"
+        )
+        return response
+    except Exception as e:
+        error_msg = getattr(e, "detail", str(e))
+        ctx = get_common_context(request)
+        ctx.update({"error": error_msg})
+        return templates.TemplateResponse(request=request, name="public/login.html", context=ctx)
+
+@router.get("/register", response_class=HTMLResponse)
+async def register_page(request: Request, error: str = None):
+    ctx = get_common_context(request)
+    if ctx.get("current_user"):
+        return RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
+    ctx.update({"error": error})
+    return templates.TemplateResponse(request=request, name="public/register.html", context=ctx)
+
+@router.post("/register")
+async def register_submit(
+    request: Request,
+    username: str = Form(...),
+    phone: str = Form(...),
+    password: str = Form(...),
+    email: str = Form(None),
+    ff_uid: str = Form(None),
+    ff_ign: str = Form(None),
+    referral_code: str = Form(None)
+):
+    try:
+        reg_result = users_auth_service.register_user(
+            username=username.strip(),
+            phone=phone.strip(),
+            password=password,
+            email=email.strip() if email else None,
+            referral_code=referral_code.strip() if referral_code else None
+        )
+        user = reg_result["user"]
+        token = reg_result["token"]
+        if ff_uid or ff_ign:
+            try:
+                users_auth_service.update_user_freefire(user["id"], (ff_uid or "").strip(), (ff_ign or "").strip())
+            except Exception:
+                pass
+
+        response = RedirectResponse(url="/?welcome=1", status_code=status.HTTP_303_SEE_OTHER)
+        response.set_cookie(
+            key="god4xe_user_token",
+            value=token,
+            max_age=30 * 24 * 3600,
+            httponly=True,
+            samesite="lax"
+        )
+        return response
+    except Exception as e:
+        error_msg = getattr(e, "detail", str(e))
+        ctx = get_common_context(request)
+        ctx.update({"error": error_msg})
+        return templates.TemplateResponse(request=request, name="public/register.html", context=ctx)
+
+@router.get("/logout")
+async def logout_view():
+    response = RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
+    response.delete_cookie("god4xe_user_token")
+    return response
+
+@router.get("/tournaments", response_class=HTMLResponse)
+async def public_tournaments(request: Request, status: str = None):
+    ctx = get_common_context(request)
+    tournaments = tournament_service.list_tournaments(status_filter=status, limit=30, is_published_only=True)
+    ctx.update({
+        "tournaments": tournaments,
+        "current_filter": status or "ALL"
+    })
+    return templates.TemplateResponse(request=request, name="public/tournaments.html", context=ctx)
+
+@router.get("/tournaments/{tournament_id}", response_class=HTMLResponse)
+async def public_tournament_detail(tournament_id: int, request: Request):
+    ctx = get_common_context(request)
+    user_id = ctx["current_user"]["id"] if ctx.get("current_user") else None
+    tournament = tournament_service.get_tournament_by_id(tournament_id, user_id=user_id)
+    if not tournament or tournament.get("is_published", 1) == 0:
+        raise HTTPException(status_code=404, detail="Tournament not found")
+
+    participants = tournament_service.list_tournament_participants(tournament_id)
+    my_slot = None
+    if user_id:
+        my_slot = next((p for p in participants if p.get("user_id") == user_id), None)
+
+    ctx.update({
+        "tournament": tournament,
+        "participants": participants,
+        "my_slot": my_slot,
+        "is_joined": bool(my_slot)
+    })
+    return templates.TemplateResponse(request=request, name="public/tournament_detail.html", context=ctx)
+
+@router.post("/tournaments/{tournament_id}/join")
+async def public_tournament_join(
+    tournament_id: int,
+    request: Request,
+    ff_uid: str = Form(...),
+    ff_ign: str = Form(...),
+    team_name: str = Form(None),
+    teammates: str = Form(None)
+):
+    current_user = get_optional_current_user(request)
+    if not current_user:
+        return RedirectResponse(
+            url=f"/login?error=Please+login+to+join+the+tournament&return_to=/tournaments/{tournament_id}",
+            status_code=status.HTTP_303_SEE_OTHER
+        )
+
+    teammates_list = [t.strip() for t in teammates.split(",")] if teammates else []
+    try:
+        tournament_service.join_tournament(
+            tournament_id=tournament_id,
+            user_id=current_user["id"],
+            ff_uid=ff_uid.strip(),
+            ff_ign=ff_ign.strip(),
+            team_name=team_name.strip() if team_name else None,
+            teammates=teammates_list
+        )
+        return RedirectResponse(
+            url=f"/tournaments/{tournament_id}?joined=1",
+            status_code=status.HTTP_303_SEE_OTHER
+        )
+    except Exception as e:
+        error_msg = getattr(e, "detail", str(e))
+        import urllib.parse
+        return RedirectResponse(
+            url=f"/tournaments/{tournament_id}?error={urllib.parse.quote(str(error_msg))}",
+            status_code=status.HTTP_303_SEE_OTHER
+        )
+
+@router.get("/download-app")
+async def download_app_redirect():
+    apk_url = settings_service.get_setting("apk_download_url", "")
+    if apk_url and apk_url.startswith("http"):
+        return RedirectResponse(url=apk_url, status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+
+    local_apk = APP_DIR / "static" / "downloads" / "god4xe_esports.apk"
+    if local_apk.exists() and local_apk.stat().st_size > 0:
+        return FileResponse(
+            path=str(local_apk),
+            filename="god4xe_esports.apk",
+            media_type="application/vnd.android.package-archive"
+        )
+
+    tg_url = settings_service.get_setting("telegram_url", "")
+    if tg_url and tg_url.startswith("http"):
+        return RedirectResponse(url=tg_url, status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+
+    return RedirectResponse(url="/?msg=APK+update+in+progress.+Please+join+our+Telegram+community.", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+
 @router.post("/api/track/download/{post_id}")
 async def track_download_api(post_id: int):
     post_service.increment_post_download(post_id)
@@ -215,236 +400,50 @@ async def sitemap_xml_view():
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
     ]
 
-    # Homepage
     xml_lines.append(f'  <url><loc>{APP_URL}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>')
+    xml_lines.append(f'  <url><loc>{APP_URL}/esports</loc><changefreq>daily</changefreq><priority>0.9</priority></url>')
+    xml_lines.append(f'  <url><loc>{APP_URL}/announcements</loc><changefreq>daily</changefreq><priority>0.8</priority></url>')
+    xml_lines.append(f'  <url><loc>{APP_URL}/tournaments</loc><changefreq>daily</changefreq><priority>0.9</priority></url>')
 
-    # Sections
     for s in all_sections:
         xml_lines.append(f'  <url><loc>{APP_URL}/section/{s["slug"]}</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>')
 
-    # Posts
     for p in all_posts:
         pub_date = p.get("updated_at") or p.get("published_at")
         date_str = pub_date[:10] if pub_date else "2026-01-01"
         xml_lines.append(f'  <url><loc>{APP_URL}/post/{p["slug"]}</loc><lastmod>{date_str}</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>')
 
-    # Tags
     for t in all_tags:
         xml_lines.append(f'  <url><loc>{APP_URL}/tag/{t["slug"]}</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>')
 
     xml_lines.append('</urlset>')
     return Response(content="\n".join(xml_lines), media_type="application/xml")
 
-
-from app.services import tournaments as tournament_service
-
-
-@router.get("/login", response_class=HTMLResponse)
-async def web_login(request: Request):
-    if _get_web_user(request):
-        return RedirectResponse("/tournaments", status_code=303)
-    ctx = get_common_context(request)
-    ctx["error"] = request.query_params.get("error")
-    ctx["next_url"] = request.query_params.get("next", "/tournaments")
-    ctx["google_client_id"] = GOOGLE_CLIENT_ID
-    return templates.TemplateResponse(request=request, name="public/login.html", context=ctx)
-
-@router.post("/login")
-async def web_login_submit(
-    request: Request,
-    identity: str = Form(...),
-    password: str = Form(...),
-    next_url: str = Form("/tournaments")
-):
-    user, token_or_err = user_service.authenticate_user(identity, password, ip_address=request.client.host if request.client else "127.0.0.1")
-    if not user:
-        return RedirectResponse(f"/login?error={quote(str(token_or_err))}&next={quote(next_url)}", status_code=303)
-    response = RedirectResponse(next_url if next_url.startswith("/") else "/tournaments", status_code=303)
-    _set_web_auth_cookie(response, token_or_err)
-    return response
-
-@router.post("/login/google")
-async def web_google_login(
-    request: Request,
-    credential: str = Form(...),
-    next_url: str = Form("/tournaments")
-):
-    """Sign in to the web session with a verified Google ID token."""
+@router.get("/api/qr")
+@router.get("/qr-code")
+async def dynamic_qr_code(request: Request, url: str = None):
+    target_url = url or settings_service.get_setting("apk_download_url", "")
+    if not target_url or not target_url.startswith("http"):
+        base_url = str(request.base_url).rstrip('/')
+        target_url = f"{base_url}/download-app"
+    
     try:
-        if not GOOGLE_CLIENT_ID:
-            raise ValueError("Google login is not configured on the website")
+        from reportlab.graphics.barcode import qr
+        from reportlab.graphics.shapes import Drawing
+        from reportlab.graphics import renderSVG
 
-        # Prefer the official google-auth verifier when available.  Render
-        # deployments that have a stale dependency cache can otherwise fail
-        # with `No module named 'google'`; in that case Google's official
-        # tokeninfo endpoint performs the token validation server-side.
-        try:
-            from google.oauth2 import id_token
-            from google.auth.transport import requests as google_requests
-            verified = id_token.verify_oauth2_token(
-                credential, google_requests.Request(), GOOGLE_CLIENT_ID
-            )
-        except ModuleNotFoundError as mod_err:
-            if mod_err.name != "google":
-                raise
-            from urllib.parse import urlencode
-            from urllib.request import Request as URLRequest, urlopen
-            token_url = "https://oauth2.googleapis.com/tokeninfo?" + urlencode({"id_token": credential})
-            token_response = urlopen(URLRequest(token_url, method="GET"), timeout=10)
-            import json as _json
-            verified = _json.loads(token_response.read().decode("utf-8"))
-            if verified.get("aud") != GOOGLE_CLIENT_ID:
-                raise ValueError("Google token audience mismatch")
-
-        if verified.get("iss") not in ("accounts.google.com", "https://accounts.google.com"):
-            raise ValueError("Invalid Google token issuer")
-        if verified.get("aud") != GOOGLE_CLIENT_ID:
-            raise ValueError("Google token audience mismatch")
-        if not verified.get("sub") or not verified.get("email"):
-            raise ValueError("Google token is missing required account claims")
-
-        user, token = user_service.authenticate_google_user(credential)
-        if not user:
-            raise ValueError("Google authentication failed")
-        response = RedirectResponse(next_url if next_url.startswith("/") else "/tournaments", status_code=303)
-        _set_web_auth_cookie(response, token)
-        return response
-    except Exception as exc:
-        return RedirectResponse(f"/login?error={quote(str(exc))}&next={quote(next_url)}", status_code=303)
-
-@router.get("/register", response_class=HTMLResponse)
-async def web_register(request: Request):
-    if _get_web_user(request):
-        return RedirectResponse("/tournaments", status_code=303)
-    ctx = get_common_context(request)
-    ctx["error"] = request.query_params.get("error")
-    ctx["google_client_id"] = GOOGLE_CLIENT_ID
-    return templates.TemplateResponse(request=request, name="public/register.html", context=ctx)
-
-@router.post("/register")
-async def web_register_submit(
-    request: Request,
-    username: str = Form(...),
-    email: str = Form(...),
-    password: str = Form(...),
-    referral_code: str = Form("")
-):
-    try:
-        result = user_service.register_user(
-            username=username,
-            email=email,
-            password=password,
-            referral_code=referral_code or None
+        d = Drawing(160, 160)
+        w = qr.QrCodeWidget(target_url)
+        w.barWidth = 140
+        w.barHeight = 140
+        w.x = 10
+        w.y = 10
+        d.add(w)
+        svg_content = renderSVG.drawToString(d)
+        return Response(content=svg_content, media_type="image/svg+xml")
+    except Exception:
+        import urllib.parse
+        return RedirectResponse(
+            url=f"https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={urllib.parse.quote(target_url)}",
+            status_code=status.HTTP_307_TEMPORARY_REDIRECT
         )
-        response = RedirectResponse("/tournaments", status_code=303)
-        _set_web_auth_cookie(response, result["token"])
-        return response
-    except Exception as exc:
-        return RedirectResponse(f"/register?error={quote(str(exc))}", status_code=303)
-
-@router.get("/logout")
-async def web_logout():
-    response = RedirectResponse("/tournaments", status_code=303)
-    response.delete_cookie("god4xe_web_token", path="/")
-    return response
-
-@router.get("/esports", response_class=HTMLResponse)
-async def public_esports_landing(request: Request):
-    ctx = get_common_context(request)
-    ctx.update({
-        "web_user": _get_web_user(request),
-        "upcoming_tournaments": tournament_service.list_tournaments(status_filter="UPCOMING", limit=8, is_published_only=True),
-        "live_tournaments": tournament_service.list_tournaments(status_filter="LIVE", limit=8, is_published_only=True),
-        "completed_tournaments": tournament_service.list_tournaments(status_filter="COMPLETED", limit=6, is_published_only=True),
-        "announcements": content_features.list_announcements(only_active=True),
-        "updates": content_features.list_latest_updates(only_published=True),
-    })
-    return templates.TemplateResponse(request=request, name="public/esports.html", context=ctx)
-
-@router.get("/announcements", response_class=HTMLResponse)
-async def public_announcements(request: Request):
-    ctx = get_common_context(request)
-    ctx.update({
-        "announcements": content_features.list_announcements(only_active=True),
-        "updates": content_features.list_latest_updates(only_published=True),
-        "web_user": _get_web_user(request)
-    })
-    return templates.TemplateResponse(request=request, name="public/announcements.html", context=ctx)
-
-@router.get("/download/qr")
-async def download_qr():
-    import qrcode
-    apk_url = f"{APP_URL}/download/app"
-    img = qrcode.make(apk_url)
-    buf = io.BytesIO()
-    img.save(buf, format="PNG")
-    buf.seek(0)
-    return StreamingResponse(buf, media_type="image/png", headers={"Cache-Control": "no-store"})
-
-@router.get("/tournaments", response_class=HTMLResponse)
-async def public_tournaments(request: Request, status: str = None):
-    settings = settings_service.get_all_settings()
-    nav_sections = section_service.get_all_sections(only_nav=True)
-    ads = ad_service.get_ad_settings()
-    tournaments = tournament_service.list_tournaments(status_filter=status, limit=30, is_published_only=True)
-    web_user = _get_web_user(request)
-    updates = content_features.list_latest_updates(only_published=True)
-    announcements = content_features.list_announcements(only_active=True)
-
-    return templates.TemplateResponse(request=request, name="public/tournaments.html", context={
-        "request": request,
-        "app_url": APP_URL,
-        "settings": settings,
-        "nav_sections": nav_sections,
-        "ads": ads,
-        "tournaments": tournaments,
-        "current_filter": status or "ALL",
-        "web_user": web_user,
-        "updates": updates,
-        "announcements": announcements,
-        "apk_version": "1.0.4"
-    })
-
-@router.get("/tournaments/{tournament_id}", response_class=HTMLResponse)
-async def public_tournament_detail(tournament_id: int, request: Request):
-    settings = settings_service.get_all_settings()
-    nav_sections = section_service.get_all_sections(only_nav=True)
-    ads = ad_service.get_ad_settings()
-    web_user = _get_web_user(request)
-    user_id = web_user["id"] if web_user else None
-    tournament = tournament_service.get_tournament_by_id(tournament_id, user_id=user_id)
-    if not tournament or tournament.get("is_published", 1) == 0:
-        raise HTTPException(status_code=404, detail="Tournament not found")
-
-    return templates.TemplateResponse(request=request, name="public/tournament_detail.html", context={
-        "request": request,
-        "app_url": APP_URL,
-        "settings": settings,
-        "nav_sections": nav_sections,
-        "ads": ads,
-        "tournament": tournament,
-        "web_user": web_user,
-        "apk_version": "1.0.4"
-    })
-
-@router.post("/tournaments/{tournament_id}/join")
-async def public_tournament_join(
-    tournament_id: int,
-    request: Request,
-    ff_uid: str = Form(...),
-    ff_ign: str = Form(...),
-):
-    web_user = _get_web_user(request)
-    if not web_user:
-        return RedirectResponse(f"/login?next=/tournaments/{tournament_id}", status_code=303)
-    try:
-        tournament_service.join_tournament(
-            tournament_id=tournament_id,
-            user_id=web_user["id"],
-            ff_uid=ff_uid.strip(),
-            ff_ign=ff_ign.strip()
-        )
-        return RedirectResponse(f"/tournaments/{tournament_id}?joined=1", status_code=303)
-    except Exception as exc:
-        return RedirectResponse(f"/tournaments/{tournament_id}?error={quote(str(exc))}", status_code=303)
-

@@ -38,6 +38,9 @@ CREATE TABLE IF NOT EXISTS tournament_participants (
     ff_ign VARCHAR(100) NOT NULL,
     payment_status VARCHAR(50) DEFAULT 'PAID',
     diamonds_paid INTEGER DEFAULT 0,
+    team_name VARCHAR(100),
+    team_role VARCHAR(20) DEFAULT 'CAPTAIN',
+    teammates_json TEXT,
     joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(tournament_id, user_id),
     UNIQUE(tournament_id, slot_number)

@@ -47,3 +47,19 @@ ALL_ADMIN_ROLES = [
     ROLE_FINANCE_ADMIN,
     ROLE_SUPPORT_ADMIN
 ]
+
+# Cloud Storage Configuration (Optional Cloudinary persistence for Render deployments)
+CLOUDINARY_URL = os.getenv("CLOUDINARY_URL", "").strip()
+CLOUDINARY_CLOUD_NAME = os.getenv("CLOUDINARY_CLOUD_NAME", "").strip()
+CLOUDINARY_API_KEY = os.getenv("CLOUDINARY_API_KEY", "").strip()
+CLOUDINARY_API_SECRET = os.getenv("CLOUDINARY_API_SECRET", "").strip()
+
+if CLOUDINARY_URL and not CLOUDINARY_CLOUD_NAME:
+    try:
+        import urllib.parse
+        _p = urllib.parse.urlparse(CLOUDINARY_URL)
+        CLOUDINARY_API_KEY = _p.username or CLOUDINARY_API_KEY
+        CLOUDINARY_API_SECRET = _p.password or CLOUDINARY_API_SECRET
+        CLOUDINARY_CLOUD_NAME = _p.hostname or CLOUDINARY_CLOUD_NAME
+    except Exception:
+        pass

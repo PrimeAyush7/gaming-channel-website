@@ -4,7 +4,14 @@ import datetime
 from pathlib import Path
 from PIL import Image
 import io
-from app.config import UPLOAD_DIR, MAX_UPLOAD_SIZE, ALLOWED_EXTENSIONS
+from app.config import (
+    UPLOAD_DIR,
+    MAX_UPLOAD_SIZE,
+    ALLOWED_EXTENSIONS,
+    CLOUDINARY_CLOUD_NAME,
+    CLOUDINARY_API_KEY,
+    CLOUDINARY_API_SECRET
+)
 from app.database import get_db
 
 def dict_from_row(row):
@@ -32,6 +39,59 @@ def is_valid_image(content: bytes, ext: str) -> bool:
     except Exception:
         return False
 
+def upload_to_cloudinary(content: bytes, filename: str, folder: str = "god4xe") -> str:
+    """
+    Direct HTTPS multipart upload to Cloudinary using standard library.
+    Returns secure_url on success, or None on failure/not configured.
+    """
+    if not (CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET):
+        return None
+
+    try:
+        import hashlib
+        import time
+        import json
+        import urllib.request
+
+        ts = str(int(time.time()))
+        to_sign = f"folder={folder}&timestamp={ts}{CLOUDINARY_API_SECRET}"
+        signature = hashlib.sha1(to_sign.encode("utf-8")).hexdigest()
+
+        boundary = f"----WebKitFormBoundary{uuid.uuid4().hex}"
+        body = bytearray()
+
+        def add_field(name, value):
+            body.extend(f"--{boundary}\r\n".encode("utf-8"))
+            body.extend(f'Content-Disposition: form-data; name="{name}"\r\n\r\n'.encode("utf-8"))
+            body.extend(f"{value}\r\n".encode("utf-8"))
+
+        add_field("api_key", CLOUDINARY_API_KEY)
+        add_field("timestamp", ts)
+        add_field("folder", folder)
+        add_field("signature", signature)
+
+        body.extend(f"--{boundary}\r\n".encode("utf-8"))
+        body.extend(f'Content-Disposition: form-data; name="file"; filename="{filename}"\r\n'.encode("utf-8"))
+        body.extend(b"Content-Type: application/octet-stream\r\n\r\n")
+        body.extend(content)
+        body.extend(b"\r\n")
+        body.extend(f"--{boundary}--\r\n".encode("utf-8"))
+
+        url = f"https://api.cloudinary.com/v1_1/{CLOUDINARY_CLOUD_NAME}/image/upload"
+        req = urllib.request.Request(
+            url,
+            data=bytes(body),
+            headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
+            method="POST"
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            if resp.status == 200:
+                data = json.loads(resp.read().decode("utf-8"))
+                return data.get("secure_url") or data.get("url")
+    except Exception as e:
+        print(f"[CLOUDINARY FALLBACK] Upload failed ({e}), defaulting to local disk.")
+        return None
+
 def save_media_file(filename: str, content: bytes, mime_type: str) -> tuple[dict, str]:
     if len(content) > MAX_UPLOAD_SIZE:
         return None, f"File size exceeds limit of {MAX_UPLOAD_SIZE // (1024 * 1024)}MB."
@@ -43,14 +103,15 @@ def save_media_file(filename: str, content: bytes, mime_type: str) -> tuple[dict
     if not is_valid_image(content, raw_ext):
         return None, "File content is not a valid image or is corrupted."
 
-    # Generate safe random filename to prevent collisions and path traversal
     safe_name = f"{uuid.uuid4().hex}.{raw_ext}"
     target_path = UPLOAD_DIR / safe_name
 
     with open(target_path, "wb") as f:
         f.write(content)
 
-    public_url = f"/static/uploads/{safe_name}"
+    # Cloudinary persistence with automatic fallback to local disk
+    cloud_url = upload_to_cloudinary(content, safe_name, folder="god4xe_media")
+    public_url = cloud_url if cloud_url else f"/static/uploads/{safe_name}"
 
     with get_db() as conn:
         cursor = conn.cursor()

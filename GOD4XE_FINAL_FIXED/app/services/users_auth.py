@@ -613,12 +613,22 @@ def upload_user_avatar(user_id: int, file_bytes: bytes, filename: str, content_t
     with open(target_path, "wb") as f:
         f.write(file_bytes)
 
-    avatar_url = f"/static/uploads/{safe_filename}"
+    # Cloudinary persistence with automatic fallback to local disk
+    try:
+        from app.services.media import upload_to_cloudinary
+        cloud_url = upload_to_cloudinary(file_bytes, safe_filename, folder="god4xe_avatars")
+    except Exception:
+        cloud_url = None
+    avatar_url = cloud_url if cloud_url else f"/static/uploads/{safe_filename}"
     
-    # Admin permission is the only gate. Once uploads are enabled for the user,
-    # the avatar is published immediately; there is no moderation/approval queue.
     with get_db() as conn:
         cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO avatar_moderation_queue (user_id, avatar_url, status)
+            VALUES (%s, %s, 'APPROVED')
+            RETURNING id;
+        """, (user_id, avatar_url))
+
         cursor.execute("""
             UPDATE user_profiles
             SET avatar_url = %s, is_custom_avatar = 1, avatar_moderation_status = 'APPROVED',
@@ -639,6 +649,65 @@ def remove_user_avatar(user_id: int) -> dict:
             WHERE user_id = %s;
         """, (default_avatar, user_id))
     return get_user_by_id(user_id)
+
+def list_avatar_moderation_queue(status_filter: str = None, limit: int = 50, offset: int = 0) -> list[dict]:
+    with get_db() as conn:
+        cursor = conn.cursor()
+        where = "WHERE 1=1"
+        params = []
+        if status_filter and status_filter.upper() not in ("ALL", ""):
+            where += " AND q.status = %s"
+            params.append(status_filter.upper())
+        query = f"""
+            SELECT q.*, u.username, u.email, COALESCE(p.display_name, u.username) AS display_name
+            FROM avatar_moderation_queue q
+            JOIN app_users u ON q.user_id = u.id
+            LEFT JOIN user_profiles p ON u.id = p.user_id
+            {where}
+            ORDER BY q.id DESC LIMIT %s OFFSET %s;
+        """
+        cursor.execute(query, tuple(params + [limit, offset]))
+        return [dict(r) for r in cursor.fetchall()]
+
+def moderate_avatar(queue_id: int, admin_id: int, approve: bool, rejection_reason: str = None) -> bool:
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM avatar_moderation_queue WHERE id = %s;", (queue_id,))
+        item = cursor.fetchone()
+        if not item:
+            raise ValueError("Moderation entry not found")
+        i_dict = dict(item)
+        user_id = i_dict["user_id"]
+        status = "APPROVED" if approve else "REJECTED"
+
+        cursor.execute("""
+            UPDATE avatar_moderation_queue
+            SET status = %s, rejection_reason = %s, reviewed_by_admin_id = %s, reviewed_at = CURRENT_TIMESTAMP
+            WHERE id = %s;
+        """, (status, rejection_reason, admin_id, queue_id))
+
+        if not approve:
+            cursor.execute("""
+                UPDATE user_profiles
+                SET avatar_url = '/static/images/default-avatar.png',
+                    is_custom_avatar = 0,
+                    avatar_moderation_status = 'REJECTED',
+                    avatar_rejection_reason = %s,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE user_id = %s;
+            """, (rejection_reason or "Avatar rejected by administrator.", user_id))
+        else:
+            cursor.execute("""
+                UPDATE user_profiles
+                SET avatar_url = %s,
+                    is_custom_avatar = 1,
+                    avatar_moderation_status = 'APPROVED',
+                    avatar_rejection_reason = NULL,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE user_id = %s;
+            """, (i_dict["avatar_url"], user_id))
+
+    return True
 
 def toggle_user_avatar_permission(user_id: int, disabled: int) -> bool:
     with get_db() as conn:
@@ -872,22 +941,6 @@ def get_user_full_admin_details(user_id: int) -> dict:
             sessions.append(d)
         user["sessions"] = sessions
 
-    return user
-
-def delete_user_permanently(user_id: int) -> dict:
-    """Permanently delete an app user and all FK-cascaded player data.
-    Returns a small snapshot for admin audit logging.
-    """
-    with get_db() as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT id, username, email, phone FROM app_users WHERE id = %s FOR UPDATE;", (user_id,))
-        row = cursor.fetchone()
-        if not row:
-            raise ValueError("User not found")
-        user = dict(row)
-        cursor.execute("DELETE FROM app_users WHERE id = %s;", (user_id,))
-        if cursor.rowcount != 1:
-            raise ValueError("User could not be deleted")
     return user
 
 def toggle_user_status(user_id: int, is_active: int) -> bool:

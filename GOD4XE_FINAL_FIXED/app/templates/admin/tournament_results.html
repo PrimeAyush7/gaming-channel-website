@@ -18,7 +18,40 @@
       <input type="text" name="proof_url" class="form-control" placeholder="https://... or /static/uploads/proof_...">
     </div>
 
-    <h3 style="margin-top: 1.5rem;">Player Placements & Eliminations</h3>
+    <div style="background: rgba(168, 85, 247, 0.08); border: 1px dashed rgba(168, 85, 247, 0.4); border-radius: 8px; padding: 1rem; margin-top: 1rem;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+    <strong style="color: var(--neon-purple); font-size: 0.95rem;">⚡ Quick Auto-Fill Scoreboard</strong>
+    <span class="text-muted" style="font-size: 0.8rem;">Format: Slot, Kills, Prize (e.g. 1, 6, 250)</span>
+  </div>
+  <div style="display: flex; gap: 0.75rem;">
+    <input type="text" id="quick_paste_input" class="form-control" placeholder="Type or paste: 1, 5, 200" style="font-family: monospace; font-size: 0.85rem;">
+    <button type="button" class="btn btn-secondary btn-sm" onclick="autoFillResults()">Apply to Table</button>
+  </div>
+</div>
+
+<script>
+function autoFillResults() {
+  const raw = document.getElementById('quick_paste_input').value.trim();
+  if (!raw) return;
+  const lines = raw.split(/\n|;/);
+  lines.forEach(line => {
+    const parts = line.split(/,|\s+/).filter(Boolean);
+    if (parts.length >= 2) {
+      const slot = parseInt(parts[0]);
+      const kills = parseInt(parts[1]);
+      const prize = parts[2] ? parseInt(parts[2]) : 0;
+      
+      const killsInput = document.querySelector(`input[name="kills_${slot}"]`);
+      if (killsInput) killsInput.value = kills;
+      
+      const prizeInput = document.querySelector(`input[name="placement_prize_${slot}"]`);
+      if (prizeInput) prizeInput.value = prize;
+    }
+  });
+}
+</script>
+
+<h3 style="margin-top: 1.5rem;">Player Placements & Eliminations</h3>
     <div class="table-responsive" style="margin-top: 1rem;">
       <table class="table">
         <thead>

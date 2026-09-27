@@ -23,6 +23,15 @@
   <meta name="twitter:description" content="{% block twitter_description %}{{ settings.site_description }}{% endblock %}">
   <meta name="twitter:image" content="{% block twitter_image %}{{ settings.logo_url }}{% endblock %}">
 
+  <!-- Progressive Web App (PWA) -->
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#06030b">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="GOD4XE">
+  <link rel="apple-touch-icon" href="/static/images/god4xe-logo.png">
+
   <link rel="icon" type="image/svg+xml" href="{{ settings.favicon_url or '/static/images/favicon.svg' }}">
   <link rel="stylesheet" href="/static/css/style.css">
 
@@ -40,24 +49,22 @@
 
   <!-- Header -->
   <header class="site-header">
-    <!-- ROW 1: Logo on Left, Actions (Search + Hamburger) on Right -->
     <div class="container header-inner">
       <!-- Site Logo & Brand -->
       <a href="/" class="site-brand">
         {% if settings.logo_url and settings.logo_url != '/static/images/default-logo.svg' %}
-          <img src="{{ settings.logo_url }}" alt="GOD4XE Logo" class="brand-crest-img">
+          <img src="{{ settings.logo_url }}" alt="{{ settings.site_name }} Logo">
         {% else %}
           <img src="/static/images/1000074856.jpg.jpeg" alt="GOD4XE Logo" class="brand-crest-img">
+          <div class="site-brand-text">{{ settings.site_name }} <span>GAMING</span></div>
         {% endif %}
-        <div class="site-brand-text">GOD4XE</div>
       </a>
 
       <!-- Dynamic Sections Desktop Navigation (Desktop Only) -->
       <nav class="desktop-nav" aria-label="Main Navigation">
         <a href="/" class="nav-link {% if request.url.path == '/' %}active{% endif %}">HOME</a>
-        <a href="/esports" class="nav-link {% if request.url.path == '/esports' %}active{% endif %}" style="color: var(--neon-purple); font-weight: 700;">⚡ ESPORTS ARENA</a>
-        <a href="/tournaments" class="nav-link {% if request.url.path.startswith('/tournaments') %}active{% endif %}">🏆 TOURNAMENTS</a>
-        <a href="/announcements" class="nav-link {% if request.url.path.startswith('/announcements') %}active{% endif %}">📢 ANNOUNCEMENTS</a>
+        <a href="/esports" class="nav-link {% if request.url.path == '/esports' or request.url.path.startswith('/tournaments') %}active{% endif %}" style="color: var(--neon-purple); font-weight: 700;">🏆 ESPORTS</a>
+        <a href="/announcements" class="nav-link {% if request.url.path == '/announcements' %}active{% endif %}">📢 NOTICES</a>
         {% for sec in nav_sections %}
           <a href="/section/{{ sec.slug }}" class="nav-link {% if current_section and current_section.slug == sec.slug %}active{% endif %}">
             <span>{{ sec.icon }}</span> {{ sec.name }}
@@ -67,18 +74,12 @@
 
       <!-- Action Buttons -->
       <div class="header-actions">
-        {% if web_user %}
-        <a href="/logout" class="nav-link" style="color:#c084fc; text-decoration:none;">@{{ web_user.username }} · Logout</a>
-        {% else %}
-        <a href="/login" class="nav-link" style="color:#c084fc; text-decoration:none;">Login</a>
-        {% endif %}
-
-        <!-- Desktop Search Trigger Form (Desktop Only) -->
+        <!-- Desktop Search Form -->
         <form action="/search" method="GET" class="header-search-form">
-          <input type="text" name="q" placeholder="Search..." required class="form-control" style="padding: 0.4rem 0.75rem; font-size: 0.85rem; width: 140px; border-radius: 6px; background: rgba(168,85,247,0.1); border: 1px solid var(--border-subtle); color: #fff;">
+          <input type="text" name="q" placeholder="Search..." required class="form-control" style="padding: 0.4rem 0.75rem; font-size: 0.85rem; width: 130px; border-radius: 6px; background: rgba(168,85,247,0.1); border: 1px solid var(--border-subtle); color: #fff;">
         </form>
 
-        <!-- Desktop Configured Social Channels (Desktop Only) -->
+        <!-- Desktop Configured Social Channels -->
         <div class="desktop-social-links">
           {% if settings.instagram_url %}
           <a href="{{ settings.instagram_url }}" target="_blank" rel="noopener noreferrer" class="desktop-social-btn btn-instagram" aria-label="Instagram" title="Instagram">
@@ -105,24 +106,9 @@
             <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
           </a>
           {% endif %}
-          {% if settings.twitter_url or settings.x_url %}
-          <a href="{{ settings.twitter_url or settings.x_url }}" target="_blank" rel="noopener noreferrer" class="desktop-social-btn btn-twitter" aria-label="X (Twitter)" title="X (Twitter)">
-            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-          </a>
-          {% endif %}
-          {% if settings.twitch_url %}
-          <a href="{{ settings.twitch_url }}" target="_blank" rel="noopener noreferrer" class="desktop-social-btn btn-twitch" aria-label="Twitch" title="Twitch">
-            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/></svg>
-          </a>
-          {% endif %}
-          {% if settings.tiktok_url %}
-          <a href="{{ settings.tiktok_url }}" target="_blank" rel="noopener noreferrer" class="desktop-social-btn btn-tiktok" aria-label="TikTok" title="TikTok">
-            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.82 4.49 6.27 6.27 0 0 0 1.87-4.49V8.58a8.28 8.28 0 0 0 4.9 1.57V6.69z"/></svg>
-          </a>
-          {% endif %}
         </div>
 
-        <!-- Desktop YouTube Channel Button (Desktop Only) -->
+        <!-- Desktop YouTube Channel Button -->
         {% if settings.youtube_channel_url %}
         <a href="{{ settings.youtube_channel_url }}" target="_blank" rel="noopener noreferrer" class="yt-sub-btn" data-track-youtube="1">
           <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
@@ -130,20 +116,35 @@
         </a>
         {% endif %}
 
-        <!-- Mobile Search Button (Row 1 Mobile Only) -->
+        <!-- User Authentication Widget -->
+        {% if current_user %}
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span class="badge" style="background: rgba(168, 85, 247, 0.2); border: 1px solid #a855f7; color: #fff; font-size: 0.8rem; padding: 0.4rem 0.7rem;">
+            👤 {{ current_user.display_name or current_user.username }} • 💎 {{ current_user.diamond_balance }}
+          </span>
+          <a href="/logout" class="btn btn-secondary btn-sm" style="padding: 0.35rem 0.65rem; font-size: 0.8rem; text-decoration: none;" title="Logout">Logout</a>
+        </div>
+        {% else %}
+        <div style="display: flex; align-items: center; gap: 0.5rem;" class="desktop-auth-btns">
+          <a href="/login" class="btn btn-secondary btn-sm" style="padding: 0.4rem 0.8rem; font-size: 0.82rem; text-decoration: none; border: 1px solid var(--border-subtle);">Login</a>
+          <a href="/register" class="btn btn-primary btn-sm" style="padding: 0.4rem 0.8rem; font-size: 0.82rem; text-decoration: none;">Register</a>
+        </div>
+        {% endif %}
+
+        <!-- Mobile Search Button -->
         <a href="/search" class="search-btn mobile-search-btn" aria-label="Search" title="Search">
           <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
         </a>
 
-        <!-- Mobile Drawer Toggle (Row 1 Mobile Only) -->
+        <!-- Mobile Drawer Toggle -->
         <button id="mobile-nav-toggle" class="mobile-toggle-btn" aria-label="Open Navigation Menu" aria-expanded="false">
           <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
       </div>
     </div>
 
-    <!-- ROW 2: Mobile Social Channels (Dynamic, Mobile Screens <= 768px Only) -->
-    {% if settings.youtube_channel_url or settings.instagram_url or settings.whatsapp_url or settings.telegram_url or settings.discord_url or settings.facebook_url or settings.twitter_url or settings.x_url or settings.twitch_url or settings.tiktok_url %}
+    <!-- Mobile Social Bar -->
+    {% if settings.youtube_channel_url or settings.instagram_url or settings.whatsapp_url or settings.telegram_url or settings.discord_url or settings.facebook_url %}
     <div class="mobile-social-bar">
       <div class="container mobile-social-inner">
         {% if settings.youtube_channel_url %}
@@ -176,21 +177,6 @@
           <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
         </a>
         {% endif %}
-        {% if settings.twitter_url or settings.x_url %}
-        <a href="{{ settings.twitter_url or settings.x_url }}" target="_blank" rel="noopener noreferrer" class="mobile-social-btn btn-twitter" aria-label="X (Twitter)" title="X (Twitter)">
-          <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-        </a>
-        {% endif %}
-        {% if settings.twitch_url %}
-        <a href="{{ settings.twitch_url }}" target="_blank" rel="noopener noreferrer" class="mobile-social-btn btn-twitch" aria-label="Twitch" title="Twitch">
-          <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/></svg>
-        </a>
-        {% endif %}
-        {% if settings.tiktok_url %}
-        <a href="{{ settings.tiktok_url }}" target="_blank" rel="noopener noreferrer" class="mobile-social-btn btn-tiktok" aria-label="TikTok" title="TikTok">
-          <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.82 4.49 6.27 6.27 0 0 0 1.87-4.49V8.58a8.28 8.28 0 0 0 4.9 1.57V6.69z"/></svg>
-        </a>
-        {% endif %}
       </div>
     </div>
     {% endif %}
@@ -198,15 +184,31 @@
 
   <!-- Mobile Navigation Drawer -->
   <aside id="mobile-drawer" class="mobile-drawer">
-    <form action="/search" method="GET" style="display: flex; gap: 0.5rem;">
+    <form action="/search" method="GET" style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
       <input type="text" name="q" placeholder="Search guides, configs..." class="form-control" style="flex: 1;">
       <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.25rem;">Search</button>
     </form>
     <div class="mobile-nav-links">
       <a href="/" class="nav-link">🏠 HOME</a>
-      <a href="/esports" class="nav-link">⚡ GOD4XE ESPORTS ARENA</a>
-      <a href="/tournaments" class="nav-link">🏆 TOURNAMENTS</a>
+      <a href="/esports" class="nav-link" style="color: var(--neon-purple); font-weight: 700;">🏆 ESPORTS ARENA</a>
       <a href="/announcements" class="nav-link">📢 ANNOUNCEMENTS</a>
+      <a href="/download-app" class="nav-link" style="color: #10b981; font-weight: 600;">📱 DOWNLOAD ANDROID APP</a>
+      
+      {% if current_user %}
+      <div style="padding: 0.75rem; background: rgba(168,85,247,0.15); border-radius: 8px; margin: 0.5rem 0;">
+        <div style="font-weight: 700; color: #fff;">👤 {{ current_user.display_name or current_user.username }}</div>
+        <div style="color: #fbbf24; font-size: 0.85rem;">💎 {{ current_user.diamond_balance }} Diamonds</div>
+        <a href="/logout" style="color: #f87171; font-size: 0.85rem; display: inline-block; margin-top: 0.25rem;">Logout</a>
+      </div>
+      {% else %}
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin: 0.75rem 0;">
+        <a href="/login" class="btn btn-secondary" style="text-align: center; text-decoration: none; padding: 0.6rem;">Login</a>
+        <a href="/register" class="btn btn-primary" style="text-align: center; text-decoration: none; padding: 0.6rem;">Register</a>
+      </div>
+      {% endif %}
+
+      <hr style="border-color: rgba(255,255,255,0.1); margin: 1rem 0;">
+      
       {% for sec in nav_sections %}
         <a href="/section/{{ sec.slug }}" class="nav-link">
           <span>{{ sec.icon }}</span> {{ sec.name }}
@@ -253,10 +255,11 @@
           <h4>Navigation</h4>
           <ul class="footer-links">
             <li><a href="/">Home</a></li>
+            <li><a href="/esports">Esports Arena</a></li>
+            <li><a href="/tournaments">Tournaments Directory</a></li>
+            <li><a href="/announcements">Announcements</a></li>
             <li><a href="/search">Search All</a></li>
-            {% if settings.youtube_channel_url %}
-            <li><a href="{{ settings.youtube_channel_url }}" target="_blank" rel="noopener noreferrer">YouTube Channel</a></li>
-            {% endif %}
+            <li><a href="/download-app">Download Android APK</a></li>
           </ul>
         </div>
 
@@ -272,6 +275,8 @@
         <div class="footer-col">
           <h4>System</h4>
           <ul class="footer-links">
+            <li><a href="/login">Player Login</a></li>
+            <li><a href="/register">Create Account</a></li>
             <li><a href="/sitemap.xml">Sitemap</a></li>
             <li><a href="/robots.txt">Robots.txt</a></li>
             <li><a href="/ads.txt">ads.txt</a></li>
@@ -289,5 +294,12 @@
 
   <script src="/static/js/main.js"></script>
   {% block extra_scripts %}{% endblock %}
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/static/sw.js').catch(function() {});
+  });
+}
+</script>
 </body>
 </html>

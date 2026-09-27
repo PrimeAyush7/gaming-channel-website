@@ -3,6 +3,14 @@
 {% block content %}
 <div class="container">
   
+  <!-- Arena Notice Marquee Ticker -->
+  {% if arena_notice %}
+  <div style="background: rgba(168, 85, 247, 0.12); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 8px; padding: 0.6rem 1rem; margin-top: 1rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; box-shadow: 0 0 15px rgba(168, 85, 247, 0.15);">
+    <span class="badge" style="background: var(--neon-purple); color: #fff; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">NOTICE</span>
+    <marquee style="color: #f3e8ff; font-weight: 600; font-size: 0.9rem;" scrollamount="6">{{ arena_notice }}</marquee>
+  </div>
+  {% endif %}
+
   <!-- Hero Section -->
   <section class="hero-section">
     <div class="hero-grid">
@@ -11,11 +19,29 @@
           <span class="pulse-dot"></span> LIVE CONTENT UPDATE
         </div>
         <h1 class="hero-title">
-          DOMINATE THE LOBBY WITH <span class="gradient-text">PRO CONFIGS</span> & GUIDES
+          {{ settings.get('hero_headline', 'DOMINATE THE LOBBY WITH PRO CONFIGS & GUIDES') }}
         </h1>
         <p class="hero-desc">
-          Official gaming hub featuring battle-tested sensitivity configs, patch updates, mechanical guides, and tournament-ready downloads.
+          Official gaming hub featuring battle-tested sensitivity configs, patch updates, daily Free Fire tournaments, and official Android app downloads.
         </p>
+
+        <!-- Fast Action Buttons: Esports, Announcements, App & Login -->
+        <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.5rem;">
+          <a href="/esports" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.65rem 1.25rem; font-weight: 700; border-radius: 8px; text-decoration: none;">
+            <span>🏆</span> Esports Arena
+          </a>
+          <a href="/announcements" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.65rem 1.25rem; font-weight: 600; border-radius: 8px; text-decoration: none; border: 1px solid var(--border-subtle);">
+            <span>📢</span> Announcements
+          </a>
+          <a href="/download-app" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.65rem 1.25rem; font-weight: 600; border-radius: 8px; text-decoration: none; background: rgba(168, 85, 247, 0.15); border: 1px solid var(--neon-purple); color: #c084fc;">
+            <span>📱</span> Download APK
+          </a>
+          {% if not current_user %}
+          <a href="/login" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.65rem 1.25rem; font-weight: 600; border-radius: 8px; text-decoration: none;">
+            <span>🔑</span> Player Login
+          </a>
+          {% endif %}
+        </div>
 
         <!-- Search Form -->
         <form action="/search" method="GET" class="hero-search-box">
@@ -58,6 +84,81 @@
     </div>
   </section>
 
+  <!-- Esports Tournaments Section -->
+  {% if esports_tournaments %}
+  <section style="margin-bottom: 3.5rem;">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span class="title-bar"></span> 🏆 FREE FIRE ESPORTS ARENA
+      </h2>
+      <a href="/esports" class="btn btn-secondary btn-sm">View All Matches &rarr;</a>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem;">
+      {% for t in esports_tournaments %}
+      <div class="cyber-card" style="padding: 1.25rem; border-radius: 12px; background: rgba(15, 7, 28, 0.75); border: 1px solid rgba(168, 85, 247, 0.3); display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <span class="badge" style="{% if t.status == 'LIVE' %}background: #ef4444;{% elif t.status == 'UPCOMING' %}background: #10b981;{% else %}background: #6b7280;{% endif %} color: #fff; font-size: 0.75rem;">
+              {{ t.status }}
+            </span>
+            <span style="font-size: 0.8rem; color: #c084fc; font-weight: 600;">{{ t.mode }} • {{ t.map_name }}</span>
+          </div>
+          <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem;">{{ t.title }}</h3>
+          
+          <div style="display: flex; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 0.6rem 0.8rem; border-radius: 6px; margin-bottom: 0.75rem; font-size: 0.85rem;">
+            <div>
+              <span style="color: var(--text-muted); display: block; font-size: 0.7rem;">PRIZE POOL</span>
+              <strong style="color: #fbbf24;">💎 {{ t.prize_amount_diamonds }}</strong>
+            </div>
+            <div style="text-align: right;">
+              <span style="color: var(--text-muted); display: block; font-size: 0.7rem;">ENTRY</span>
+              <strong style="color: {% if t.entry_type == 'FREE' %}#10b981{% else %}#c084fc{% endif %};">
+                {% if t.entry_type == 'FREE' %}FREE{% else %}💎 {{ t.entry_fee_diamonds }}{% endif %}
+              </strong>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
+          <span style="font-size: 0.8rem; color: var(--text-muted);">Slots: {{ t.joined_players }}/{{ t.max_slots }}</span>
+          <a href="/tournaments/{{ t.id }}" class="btn btn-primary btn-sm" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Enter Match</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Announcements Spotlight Section -->
+  {% if announcements %}
+  <section style="margin-bottom: 3.5rem;">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span class="title-bar"></span> 📢 OFFICIAL ANNOUNCEMENTS & NEWS
+      </h2>
+      <a href="/announcements" class="btn btn-secondary btn-sm">All Broadcasts &rarr;</a>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem;">
+      {% for a in announcements %}
+      <div class="cyber-card" style="padding: 1.25rem; border-radius: 12px; background: rgba(15, 7, 28, 0.65); border: 1px solid rgba(168, 85, 247, 0.2);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <span class="badge" style="{% if a.type == 'EVENT' %}background: rgba(168,85,247,0.2); color: #c084fc;{% elif a.type == 'WARNING' %}background: rgba(245,158,11,0.2); color: #fcd34d;{% else %}background: rgba(59,130,246,0.2); color: #93c5fd;{% endif %} font-size: 0.75rem;">
+            {{ a.type }}
+          </span>
+          <span style="color: var(--text-muted); font-size: 0.75rem;">{{ a.created_at[:10] if a.created_at else '' }}</span>
+        </div>
+        <h3 style="font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 0.4rem;">{{ a.title }}</h3>
+        <p style="color: #d1d5db; font-size: 0.88rem; line-height: 1.5; margin: 0;">
+          {{ a.message[:130] if a.message else '' }}...
+        </p>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
   <!-- Dynamic Sections Rail -->
   <section class="sections-rail-wrapper">
     <div class="section-rail">
@@ -71,91 +172,7 @@
   </section>
 
   <!-- Safe Homepage Top Ad Placement -->
-  {% if ads and ads.is_enabled and ads.client_id and ads.slot_home_top %}
-  <div class="ad-slot-wrapper">
-    <span class="ad-label">Sponsored Advertisement</span>
-    <div class="ad-container-responsive">
-      <ins class="adsbygoogle"
-           style="display:block"
-           data-ad-client="{{ ads.client_id }}"
-           data-ad-slot="{{ ads.slot_home_top }}"
-           data-ad-format="auto"
-           data-full-width-responsive="true"></ins>
-      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-    </div>
-  </div>
-  {% endif %}
-
-  <!-- Official Tournament Announcement Row -->
-  <div class="esports-ticker-container" aria-label="GOD4XE tournament announcements">
-    <div class="esports-ticker-label">
-      <span class="ticker-fire-icon">🔥</span>
-      <span class="ticker-label-text">ANNOUNCEMENT</span>
-    </div>
-    <div class="esports-ticker-window">
-      <div class="esports-ticker-motion">
-        {% if announcements %}
-          {% for a in announcements %}
-          <div class="esports-ticker-loop">
-            <span class="ticker-highlight">📢 {{ a.title }}</span>
-            <span class="ticker-separator">•</span>
-            <span class="ticker-item">{{ a.message }}</span>
-            <span class="ticker-separator">•</span>
-          </div>
-          {% endfor %}
-        {% else %}
-          <div class="esports-ticker-loop">
-            <span class="ticker-highlight">⚡ OFFICIAL TOURNAMENT ORGANISING HERE</span>
-            <span class="ticker-separator">•</span>
-            <span class="ticker-item">🏆 DAILY FREE FIRE TOURNAMENTS</span>
-            <span class="ticker-separator">•</span>
-            <span class="ticker-highlight">🎮 GOD4XE ESPORTS</span>
-            <span class="ticker-separator">•</span>
-            <span class="ticker-item">🔥 COMPETE • CLIMB • WIN</span>
-            <span class="ticker-separator">•</span>
-          </div>
-          <div class="esports-ticker-loop" aria-hidden="true">
-            <span class="ticker-highlight">⚡ OFFICIAL TOURNAMENT ORGANISING HERE</span>
-            <span class="ticker-separator">•</span>
-            <span class="ticker-item">🏆 DAILY FREE FIRE TOURNAMENTS</span>
-            <span class="ticker-separator">•</span>
-            <span class="ticker-highlight">🎮 GOD4XE ESPORTS</span>
-            <span class="ticker-separator">•</span>
-            <span class="ticker-item">🔥 COMPETE • CLIMB • WIN</span>
-            <span class="ticker-separator">•</span>
-          </div>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-
-  <!-- Premium GOD4XE Arena CTA -->
-  <section class="esports-cta-showcase">
-    <div class="esports-showcase-card">
-      <div class="esports-card-ambient" aria-hidden="true"></div>
-      <div class="esports-card-body">
-        <div class="esports-card-meta">
-          <span class="esports-platform-badge"><span class="pulse-beacon"></span> ⚡ GOD4XE ESPORTS</span>
-          <span class="esports-game-badge">FREE FIRE BATTLE ROYALE</span>
-        </div>
-        <h2 class="esports-card-brand">JOIN GOD4XE <span class="brand-gradient">ARENA</span></h2>
-        <p class="esports-card-desc">
-          Enter the official GOD4XE competitive arena. Join daily Free Fire tournaments, compete with players, climb the leaderboards and access your match information from the website or Android app.
-        </p>
-        <div class="esports-features-grid">
-          <div class="esports-feature-box cyber-card"><span class="feature-icon">🏆</span><div class="feature-text"><strong>Daily Tournaments</strong><small>Solo, Duo &amp; Squad Cups</small></div></div>
-          <div class="esports-feature-box cyber-card"><span class="feature-icon">💎</span><div class="feature-text"><strong>Diamond Rewards</strong><small>Admin-controlled prize pools</small></div></div>
-          <div class="esports-feature-box cyber-card"><span class="feature-icon">🎮</span><div class="feature-text"><strong>Web + Android</strong><small>Join from either platform</small></div></div>
-          <div class="esports-feature-box cyber-card"><span class="feature-icon">📊</span><div class="feature-text"><strong>Live Rankings</strong><small>Track your competitive stats</small></div></div>
-        </div>
-        <div class="esports-card-buttons">
-          <a href="/esports" class="btn-enter-esports-primary"><span>ENTER GOD4XE ARENA</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-          <a href="/tournaments" class="btn-enter-esports-secondary"><span>🏆 VIEW TOURNAMENTS</span></a>
-          <a href="/download/app" class="btn-enter-esports-secondary"><span>📲 DOWNLOAD ANDROID APP</span></a>
-        </div>
-      </div>
-    </div>
-  </section>
+  {% if ads and ads.is_enabled and ads.client_id and ads.slot_home_top %}\n  <div class=\"ad-slot-wrapper\">\n    <span class=\"ad-label\">Sponsored Advertisement</span>\n    <div class=\"ad-container-responsive\">\n      <ins class=\"adsbygoogle\"\n           style=\"display:block\"\n           data-ad-client=\"{{ ads.client_id }}\"\n           data-ad-slot=\"{{ ads.slot_home_top }}\"\n           data-ad-format=\"auto\"\n           data-full-width-responsive=\"true\"></ins>\n      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>\n    </div>\n  </div>\n  {% endif %}
 
   <!-- Latest Posts Section -->
   <section style="margin-bottom: 3.5rem;">

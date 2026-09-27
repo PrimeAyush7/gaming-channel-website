@@ -1,39 +1,116 @@
 {% extends "public/base.html" %}
-{% block title %}Login - GOD4XE{% endblock %}
+
+{% block title %}Player Login - {{ settings.site_name }}{% endblock %}
+{% block meta_description %}Login to your GOD4XE account with Google, username, or mobile to participate in Free Fire tournaments and claim Diamonds.{% endblock %}
+
 {% block content %}
-<div style="max-width:520px;margin:3rem auto;padding:2rem;background:rgba(24,12,45,.85);border:1px solid rgba(168,85,247,.35);border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.35);">
-  <h1 style="color:#fff;margin-bottom:.5rem;">Login to GOD4XE</h1>
-  <p style="color:var(--text-muted);margin-bottom:1.5rem;">Login on the website to join Free Fire tournaments directly.</p>
-  {% if error %}<div style="background:#3b1020;color:#fecaca;border:1px solid #7f1d1d;padding:.8rem 1rem;border-radius:10px;margin-bottom:1rem;">{{ error }}</div>{% endif %}
-  {% if google_client_id %}
-  <form id="googleLoginForm" method="POST" action="/login/google" style="margin-bottom:1rem;">
-    <input type="hidden" name="credential" id="googleCredential">
-    <input type="hidden" name="next_url" value="{{ next_url }}">
-    <div id="googleLoginButton" style="display:flex;justify-content:center;"></div>
-  </form>
-  <div style="display:flex;align-items:center;gap:12px;color:#8f86a3;margin:1rem 0;"><span style="height:1px;background:#3b2856;flex:1"></span>OR<span style="height:1px;background:#3b2856;flex:1"></span></div>
-  {% endif %}
-  <form method="POST" action="/login">
-    <input type="hidden" name="next_url" value="{{ next_url }}">
-    <label style="color:#fff;display:block;margin-bottom:.4rem;">Email, Username, or Phone</label>
-    <input name="identity" required autocomplete="username" style="width:100%;box-sizing:border-box;padding:1rem;border-radius:10px;border:1px solid #4b2a68;background:#0f071c;color:#fff;margin-bottom:1rem;">
-    <label style="color:#fff;display:block;margin-bottom:.4rem;">Password</label>
-    <input name="password" type="password" required autocomplete="current-password" style="width:100%;box-sizing:border-box;padding:1rem;border-radius:10px;border:1px solid #4b2a68;background:#0f071c;color:#fff;margin-bottom:1rem;">
-    <button type="submit" style="width:100%;padding:1rem;border:0;border-radius:10px;background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff;font-weight:700;cursor:pointer;">Sign In</button>
-  </form>
-  <p style="text-align:center;color:var(--text-muted);margin-top:1.25rem;">Don't have an account? <a href="/register" style="color:#c084fc;">Register Now</a></p>
+<div class="container" style="padding-top: 3rem; padding-bottom: 4rem; max-width: 500px; margin: 0 auto;">
+  <div class="cyber-card" style="padding: 2.5rem; border-radius: 16px; background: rgba(15, 7, 28, 0.85); border: 1px solid var(--border-glow); box-shadow: 0 10px 30px rgba(168, 85, 247, 0.2);">
+    
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <div style="width: 64px; height: 64px; margin: 0 auto 1rem; background: linear-gradient(135deg, #a855f7, #6366f1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; box-shadow: 0 0 20px rgba(168, 85, 247, 0.5);">
+        🎮
+      </div>
+      <h1 style="font-size: 1.8rem; font-weight: 800; color: #fff; margin-bottom: 0.5rem;">PLAYER PORTAL</h1>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">Enter the arena to join tournaments & check rewards</p>
+    </div>
+
+    {% if error %}
+    <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; padding: 0.85rem 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;">
+      <span>⚠️</span> <span>{{ error }}</span>
+    </div>
+    {% endif %}
+
+    {% if success_msg %}
+    <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #6ee7b7; padding: 0.85rem 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;">
+      <span>✅</span> <span>{{ success_msg }}</span>
+    </div>
+    {% endif %}
+
+    <!-- Google One-Click Login Button -->
+    <div style="margin-bottom: 1.5rem;">
+      <button type="button" id="google-login-btn" onclick="initiateGoogleLogin()" class="btn" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px; background: #ffffff; color: #1f2937; border-radius: 8px; padding: 0.8rem 1rem; font-weight: 600; font-size: 0.95rem; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: transform 0.15s ease;">
+        <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+        <span>Continue with Google</span>
+      </button>
+    </div>
+
+    <!-- Divider -->
+    <div style="margin: 1.5rem 0; text-align: center; position: relative;">
+      <hr style="border-color: rgba(255, 255, 255, 0.12); margin: 0;">
+      <span style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #130924; padding: 0 12px; color: var(--text-muted); font-size: 0.8rem; font-weight: 600;">OR LOGIN WITH CREDENTIALS</span>
+    </div>
+
+    <form action="/login" method="POST">
+      <input type="hidden" name="return_to" value="{{ return_to or '' }}">
+      
+      <div style="margin-bottom: 1.25rem;">
+        <label for="identity" style="display: block; font-size: 0.85rem; font-weight: 600; color: #c084fc; margin-bottom: 0.4rem; text-transform: uppercase;">Username, Mobile or Email</label>
+        <input type="text" id="identity" name="identity" required placeholder="Enter username or mobile number" style="width: 100%; padding: 0.8rem 1rem; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 8px; color: #fff; font-size: 0.95rem; outline: none;">
+      </div>
+
+      <div style="margin-bottom: 1.75rem;">
+        <label for="password" style="display: block; font-size: 0.85rem; font-weight: 600; color: #c084fc; margin-bottom: 0.4rem; text-transform: uppercase;">Password</label>
+        <input type="password" id="password" name="password" required placeholder="••••••••" style="width: 100%; padding: 0.8rem 1rem; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 8px; color: #fff; font-size: 0.95rem; outline: none;">
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.9rem; font-size: 1rem; font-weight: 700; border-radius: 8px; cursor: pointer; background: linear-gradient(135deg, #a855f7, #7c3aed); border: none; color: #fff; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);">
+        Authenticate & Enter Arena
+      </button>
+    </form>
+
+    <div style="text-align: center; margin-top: 1.75rem; padding-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.1); font-size: 0.9rem; color: var(--text-muted);">
+      New warrior? <a href="/register{% if return_to %}?return_to={{ return_to }}{% endif %}" style="color: #c084fc; font-weight: 600; text-decoration: none;">Create an Account</a>
+    </div>
+
+    <div style="text-align: center; margin-top: 1rem;">
+      <a href="/download-app" style="color: var(--text-muted); font-size: 0.85rem; text-decoration: underline;">📱 Download Official Android App</a>
+    </div>
+
+  </div>
 </div>
-{% if google_client_id %}
+
+<!-- Google One-Tap & SDK Scripts -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
-window.addEventListener('load', function(){
-  if (!window.google) return;
-  google.accounts.id.initialize({client_id: {{ google_client_id|tojson }}, callback: function(resp){
-    document.getElementById('googleCredential').value = resp.credential;
-    document.getElementById('googleLoginForm').submit();
-  }});
-  google.accounts.id.renderButton(document.getElementById('googleLoginButton'), {theme:'outline', size:'large', width:360, text:'continue_with', shape:'rectangular'});
-});
+function handleGoogleCredential(response) {
+  if (!response || !response.credential) return;
+  fetch('/api/v1/auth/google', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id_token: response.credential })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.token) {
+      document.cookie = "god4xe_user_token=" + data.token + "; path=/; max-age=" + (30*86400) + "; SameSite=Lax";
+      window.location.href = "{{ return_to or '/' }}";
+    } else {
+      alert(data.detail || "Google Login failed. Please try again.");
+    }
+  })
+  .catch(err => {
+    alert("Connection error during Google authentication. Please try with Username/Password.");
+  });
+}
+
+function initiateGoogleLogin() {
+  const clientId = "{{ settings.get('google_client_id', '') }}";
+  if (clientId && window.google) {
+    google.accounts.id.initialize({
+      client_id: clientId,
+      callback: handleGoogleCredential
+    });
+    google.accounts.id.prompt();
+  } else {
+    // Graceful interactive fallback
+    const idToken = prompt("Enter Google ID Token (or sign in via Android App):");
+    if (idToken) {
+      handleGoogleCredential({ credential: idToken });
+    } else {
+      alert("Google Sign-In ready. If not configured, please log in with your Username/Password or install the Android App.");
+    }
+  }
+}
 </script>
-{% endif %}
 {% endblock %}

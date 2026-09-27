@@ -57,9 +57,15 @@ class UpdateFreeFireRequest(BaseModel):
 class UpdateAvatarRequest(BaseModel):
     avatar_url: str
 
+class TeammateDto(BaseModel):
+    ff_uid: str
+    ff_ign: str
+
 class JoinTournamentRequest(BaseModel):
     ff_uid: str
     ff_ign: str
+    team_name: Optional[str] = None
+    teammates: Optional[List[TeammateDto]] = None
 
 class ParticipantCredentialsRequest(BaseModel):
     ff_uid: str
@@ -301,11 +307,16 @@ async def api_join_tournament(
     user: dict = Depends(get_auth_user)
 ):
     try:
+        tm_list = None
+        if req.teammates:
+            tm_list = [t.dict() if hasattr(t, "dict") else t.model_dump() for t in req.teammates]
         res = tournament_service.join_tournament(
             tournament_id=tournament_id,
             user_id=user["id"],
             ff_uid=req.ff_uid,
-            ff_ign=req.ff_ign
+            ff_ign=req.ff_ign,
+            team_name=req.team_name,
+            teammates=tm_list
         )
         return res
     except ValueError as e:
@@ -327,6 +338,38 @@ async def api_update_participant_credentials(
         return res
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+@router.get("/tournaments/{tournament_id}/live-slots")
+async def api_tournament_live_slots(tournament_id: int):
+    t = tournament_service.get_tournament_by_id(tournament_id)
+    if not t:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tournament not found")
+    return {
+        "success": True,
+        "tournament_id": tournament_id,
+        "status": t["status"],
+        "joined_players": t["joined_players"],
+        "max_slots": t["max_slots"],
+        "is_registration_open": t["is_registration_open"]
+    }
+
+@router.get("/tournaments/{tournament_id}/live-stream")
+async def api_tournament_live_stream(tournament_id: int):
+    from fastapi.responses import StreamingResponse
+    import json
+    async def event_generator():
+        t = tournament_service.get_tournament_by_id(tournament_id)
+        if not t:
+            yield f"event: error\ndata: {json.dumps({'error': 'Tournament not found'})}\n\n"
+            return
+        payload = {
+            "tournament_id": tournament_id,
+            "status": t["status"],
+            "joined_players": t["joined_players"],
+            "max_slots": t["max_slots"]
+        }
+        yield f"data: {json.dumps(payload)}\n\n"
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 @router.get("/tournaments/{tournament_id}/participants")
 async def api_tournament_participants(tournament_id: int):

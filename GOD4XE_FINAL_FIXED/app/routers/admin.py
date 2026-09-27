@@ -575,7 +575,14 @@ async def update_settings_submit(
     facebook_url: str = Form(""),
     seo_keywords: str = Form(""),
     footer_text: str = Form(""),
-    robots_txt: str = Form("")
+    robots_txt: str = Form(""),
+    discord_webhook_url: str = Form(""),
+    discord_activity_webhook: str = Form(""),
+    telegram_bot_token: str = Form(""),
+    telegram_chat_id: str = Form(""),
+    notify_discord_enabled: str = Form("false"),
+    notify_telegram_enabled: str = Form("false"),
+    apk_download_url: str = Form("")
 ):
     admin = check_admin(request)
     if not admin:
@@ -596,7 +603,14 @@ async def update_settings_submit(
         "facebook_url": facebook_url,
         "seo_keywords": seo_keywords,
         "footer_text": footer_text,
-        "robots_txt": robots_txt
+        "robots_txt": robots_txt,
+        "discord_webhook_url": discord_webhook_url,
+        "discord_activity_webhook": discord_activity_webhook,
+        "telegram_bot_token": telegram_bot_token,
+        "telegram_chat_id": telegram_chat_id,
+        "notify_discord_enabled": notify_discord_enabled,
+        "notify_telegram_enabled": notify_telegram_enabled,
+        "apk_download_url": apk_download_url
     })
     return RedirectResponse(url="/admin/settings?msg=Settings+saved+successfully", status_code=status.HTTP_302_FOUND)
 
@@ -690,6 +704,12 @@ async def admin_tournament_create(
             user_agent=request.headers.get("User-Agent"),
             after_state={"title": title, "entry_type": entry_type, "entry_fee": entry_fee_diamonds}
         )
+        if is_published:
+            try:
+                from app.services import content_features as bot_notifications
+                bot_notifications.notify_tournament_created(t["id"])
+            except Exception:
+                pass
         return RedirectResponse(url="/admin/tournaments?msg=Tournament+created+successfully", status_code=302)
     except ValueError as e:
         return templates.TemplateResponse(request=request, name="admin/tournament_form.html", context={
@@ -728,6 +748,23 @@ async def admin_update_room(
         after_state={"room_id": room_id}
     )
     return RedirectResponse(url=f"/admin/tournaments?msg=Room+credentials+updated", status_code=302)
+
+@router.post("/tournaments/{tournament_id}/broadcast")
+async def admin_broadcast_tournament(
+    tournament_id: int,
+    request: Request,
+    csrf_token: str = Form(...)
+):
+    admin = check_admin(request)
+    if not admin:
+        return RedirectResponse(url="/admin/login", status_code=302)
+    check_csrf(request, csrf_token, admin)
+    try:
+        from app.services import content_features as bot_notifications
+        bot_notifications.notify_tournament_created(tournament_id)
+        return RedirectResponse(url="/admin/tournaments?msg=Tournament+broadcast+sent+to+Discord+and+Telegram+successfully", status_code=status.HTTP_303_SEE_OTHER)
+    except Exception as e:
+        return RedirectResponse(url=f"/admin/tournaments?error=Broadcast+failed:+{str(e)}", status_code=status.HTTP_303_SEE_OTHER)
 
 @router.post("/tournaments/{tournament_id}/status")
 async def admin_update_tournament_status(
@@ -1140,7 +1177,7 @@ async def admin_tournament_results_submit(tournament_id: int, request: Request, 
 
 
 # --------------------------------------------------------------------------
-# USERS & AVATAR CONTROLS
+# USERS & AVATAR MODERATION
 # --------------------------------------------------------------------------
 @router.get("/users", response_class=HTMLResponse)
 async def admin_users(
@@ -1177,31 +1214,6 @@ async def admin_user_detail(user_id: int, request: Request, msg: str = None, err
         "error": error,
         "csrf_token": admin["csrf_token"]
     })
-
-@router.post("/users/{user_id}/delete")
-async def admin_user_delete(user_id: int, request: Request, csrf_token: str = Form(...), admin: dict = Depends(get_current_admin)):
-    verify_csrf(admin, csrf_token)
-    if admin.get("role") != ROLE_SUPER_ADMIN:
-        raise HTTPException(status_code=403, detail="Only Super Admin can permanently delete users.")
-    try:
-        deleted = user_service.delete_user_permanently(user_id)
-        auth_service.log_admin_action(
-            admin_id=admin.get("id"),
-            admin_username=admin.get("username", "admin"),
-            role=admin.get("role", ROLE_SUPER_ADMIN),
-            action="DELETE_USER",
-            resource="app_users",
-            resource_id=str(user_id),
-            ip_address=get_client_ip(request),
-            user_agent=request.headers.get("User-Agent"),
-            before_state=deleted,
-            after_state=None
-        )
-        return RedirectResponse(url="/admin/users?msg=User+deleted+successfully", status_code=status.HTTP_303_SEE_OTHER)
-    except ValueError as e:
-        return RedirectResponse(url=f"/admin/users/{user_id}?error={urllib.parse.quote_plus(str(e))}", status_code=status.HTTP_303_SEE_OTHER)
-    except Exception as e:
-        return RedirectResponse(url=f"/admin/users/{user_id}?error=Delete+failed:+{urllib.parse.quote_plus(str(e))}", status_code=status.HTTP_303_SEE_OTHER)
 
 @router.post("/users/{user_id}/status")
 async def admin_user_toggle_status(user_id: int, is_active: int = Form(...), csrf_token: str = Form(...), admin: dict = Depends(get_current_admin)):
@@ -1338,6 +1350,25 @@ async def admin_user_remove_diamonds(
         csrf_token=csrf_token,
         admin=admin
     )
+
+@router.get("/avatars", response_class=HTMLResponse)
+async def admin_avatars_view(request: Request, status: str = None, admin: dict = Depends(get_current_admin)):
+    items = user_service.list_avatar_moderation_queue(status_filter=status, limit=100)
+    return templates.TemplateResponse("admin/avatars.html", {
+        "request": request,
+        "admin": admin,
+        "active_nav": "avatars",
+        "items": items,
+        "status_filter": status,
+        "csrf_token": admin["csrf_token"]
+    })
+
+@router.post("/avatars/{queue_id}/review")
+async def admin_avatar_review(queue_id: int, approve: int = Form(...), reason: str = Form(None), csrf_token: str = Form(...), admin: dict = Depends(get_current_admin)):
+    verify_csrf(admin, csrf_token)
+    user_service.moderate_avatar(queue_id, admin["id"], bool(approve), reason)
+    return RedirectResponse(url="/admin/avatars", status_code=status.HTTP_303_SEE_OTHER)
+
 
 # --------------------------------------------------------------------------
 # WITHDRAWALS

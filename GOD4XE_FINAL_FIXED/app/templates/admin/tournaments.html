@@ -46,7 +46,13 @@
           </span>
         </td>
         <td style="padding: 1rem;">
-          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+            <form action="/admin/tournaments/{{ t.id }}/broadcast" method="POST" style="margin: 0;" onsubmit="return confirm('Broadcast announcement to Discord and Telegram?');">
+              <input type="hidden" name="csrf_token" value="{{ admin.csrf_token }}">
+              <button type="submit" class="btn btn-sm" style="background: #5865F2; color: #fff; padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: none;" title="Broadcast to Discord & Telegram">
+                📢 Broadcast
+              </button>
+            </form>
             <!-- Status Update Form -->
             <form action="/admin/tournaments/{{ t.id }}/status" method="POST" style="margin: 0;">
               <input type="hidden" name="csrf_token" value="{{ admin.csrf_token }}">

@@ -409,7 +409,7 @@ def mark_tournament_completed_early(tournament_id: int, admin_id: int = None) ->
 # --------------------------------------------------------------------------
 # JOIN & PARTICIPANT CREDENTIAL EDITING
 # --------------------------------------------------------------------------
-def join_tournament(tournament_id: int, user_id: int, ff_uid: str, ff_ign: str) -> dict:
+def join_tournament(tournament_id: int, user_id: int, ff_uid: str, ff_ign: str, team_name: str = None, teammates: list = None) -> dict:
     from app.services import wallet as wallet_service
     ff_uid = ff_uid.strip() if ff_uid else ""
     ff_ign = ff_ign.strip() if ff_ign else ""
@@ -447,12 +447,24 @@ def join_tournament(tournament_id: int, user_id: int, ff_uid: str, ff_ign: str) 
             )
 
         slot = t_dict["joined_players"] + 1
+        import json
+        clean_team = team_name.strip() if team_name else None
+        clean_teammates = None
+        if teammates and isinstance(teammates, list):
+            valid_tms = []
+            for tm in teammates:
+                if isinstance(tm, dict) and tm.get("ff_uid") and tm.get("ff_ign"):
+                    valid_tms.append({"ff_uid": str(tm["ff_uid"]).strip(), "ff_ign": str(tm["ff_ign"]).strip()})
+            if valid_tms:
+                clean_teammates = json.dumps(valid_tms)
+
         cursor.execute("""
             INSERT INTO tournament_participants (
-                tournament_id, user_id, slot_number, ff_uid, ff_ign, payment_status, diamonds_paid
-            ) VALUES (%s, %s, %s, %s, %s, 'PAID', %s)
+                tournament_id, user_id, slot_number, ff_uid, ff_ign, payment_status, diamonds_paid,
+                team_name, team_role, teammates_json
+            ) VALUES (%s, %s, %s, %s, %s, 'PAID', %s, %s, 'CAPTAIN', %s)
             RETURNING id, slot_number, joined_at;
-        """, (tournament_id, user_id, slot, ff_uid, ff_ign, fee))
+        """, (tournament_id, user_id, slot, ff_uid, ff_ign, fee, clean_team, clean_teammates))
         part = dict(cursor.fetchone())
 
         cursor.execute("""
@@ -477,6 +489,18 @@ def join_tournament(tournament_id: int, user_id: int, ff_uid: str, ff_ign: str) 
             notif_type="TOURNAMENT_JOINED",
             action_url=f"/tournaments/{tournament_id}"
         )
+
+        # Dispatch Discord / Telegram live activity alerts
+        try:
+            from app.services import content_features as bot_notifications
+            bot_notifications.notify_player_joined(
+                tournament_id=tournament_id,
+                user_id=user_id,
+                slot_number=slot,
+                team_name=clean_team
+            )
+        except Exception:
+            pass
 
     return {"success": True, "message": f"Joined successfully! Your slot is #{slot}.", "slot_number": slot}
 
@@ -530,11 +554,13 @@ def update_participant_credentials(tournament_id: int, user_id: int, ff_uid: str
     return {"success": True, "message": "Credentials updated successfully!", "participant": dict(row)}
 
 def list_tournament_participants(tournament_id: int) -> list[dict]:
+    import json
     with get_db() as conn:
         cursor = conn.cursor()
         cursor.execute("""
             SELECT p.id, p.tournament_id, p.user_id, p.slot_number, p.ff_uid, p.ff_ign,
                    p.payment_status, p.diamonds_paid, p.joined_at,
+                   p.team_name, p.team_role, p.teammates_json,
                    u.username, COALESCE(pr.display_name, u.username) AS display_name,
                    COALESCE(pr.avatar_url, '/static/images/default-avatar.png') AS avatar_url,
                    COALESCE(pr.rank_tier, 'Bronze') AS rank_tier,
@@ -545,7 +571,19 @@ def list_tournament_participants(tournament_id: int) -> list[dict]:
             WHERE p.tournament_id = %s
             ORDER BY p.slot_number ASC;
         """, (tournament_id,))
-        return [_format_tournament_row(r) for r in cursor.fetchall()]
+        res = []
+        for r in cursor.fetchall():
+            row = dict(r)
+            raw_tms = row.get("teammates_json")
+            if raw_tms:
+                try:
+                    row["teammates"] = json.loads(raw_tms)
+                except Exception:
+                    row["teammates"] = []
+            else:
+                row["teammates"] = []
+            res.append(_format_tournament_row(row))
+        return res
 
 # --------------------------------------------------------------------------
 # RESULTS ENTRY & PRIZE CREDIT
@@ -734,6 +772,23 @@ def get_tournament_room_credentials(tournament_id: int, user_id: int) -> dict:
         d = dict(row)
         if not d.get("room_id") or not d.get("room_password"):
             raise ValueError("Room credentials have not been released by the admin yet.")
+
+        # 15-Minute Timed Release Security Rule
+        from app.config import ENVIRONMENT
+        if ENVIRONMENT == "production" and d.get("status") == "UPCOMING":
+            now = datetime.datetime.utcnow()
+            st = d.get("start_time")
+            if isinstance(st, str):
+                try:
+                    st = datetime.datetime.fromisoformat(st.replace('Z', '+00:00')).replace(tzinfo=None)
+                except Exception:
+                    st = None
+            if st:
+                release_time = st - datetime.timedelta(minutes=15)
+                if now < release_time:
+                    mins = max(1, int((release_time - now).total_seconds() // 60))
+                    raise ValueError(f"Room credentials are timed-locked for security and will be unlocked exactly 15 minutes before match start (in ~{mins} mins).")
+
         return d
 
 def update_tournament_room_credentials(tournament_id: int, room_id: str, room_password: str, room_instructions: str = None) -> dict:
