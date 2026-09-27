@@ -82,7 +82,15 @@
       <input type="text" id="seo_keywords" name="seo_keywords" value="{{ settings.seo_keywords }}" class="form-control">
     </div>
 
-    <div class="form-group" style="background: rgba(168, 85, 247, 0.06); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 8px; padding: 1rem;">
+        <div class="form-group" style="background: rgba(66, 133, 244, 0.08); border: 1px solid rgba(66, 133, 244, 0.35); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;">
+      <label class="form-label" for="google_client_id" style="color: #60a5fa; font-weight: 700;">🔑 Google OAuth Client ID (Web & App 1-Click Sign-in)</label>
+      <input type="text" id="google_client_id" name="google_client_id" value="{{ settings.get('google_client_id', '') }}" class="form-control" placeholder="e.g. 123456789-xxxxxxxx.apps.googleusercontent.com">
+      <small class="text-muted" style="display: block; margin-top: 0.35rem;">
+        Get this from Google Cloud Console &gt; APIs &amp; Services &gt; Credentials (OAuth 2.0 Client ID for Web Application). When filled, users can sign in with 1-click Google popup on the website!
+      </small>
+    </div>
+
+<div class="form-group" style="background: rgba(168, 85, 247, 0.06); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 8px; padding: 1rem;">
       <label class="form-label" for="apk_download_url" style="color: var(--neon-purple); font-weight: 700;">📱 Official Android APK Download URL</label>
       <input type="text" id="apk_download_url" name="apk_download_url" value="{{ settings.get('apk_download_url', '') }}" class="form-control" placeholder="https://drive.google.com/... or https://t.me/... or /static/downloads/god4xe_esports.apk">
       <small class="text-muted" style="display: block; margin-top: 0.35rem;">

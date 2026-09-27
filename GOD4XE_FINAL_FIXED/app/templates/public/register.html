@@ -21,6 +21,9 @@
     </div>
     {% endif %}
 
+    <!-- In-page dynamic notice container (for config warnings) -->
+    <div id="google-status-msg" style="display: none; background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; color: #fde68a; padding: 0.85rem 1rem; border-radius: 8px; margin-bottom: 1.25rem; font-size: 0.88rem; line-height: 1.5;"></div>
+
     <!-- Google One-Click Registration Button -->
     <div style="margin-bottom: 1.5rem;">
       <button type="button" id="google-register-btn" onclick="initiateGoogleLogin()" class="btn" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px; background: #ffffff; color: #1f2937; border-radius: 8px; padding: 0.8rem 1rem; font-weight: 600; font-size: 0.95rem; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: transform 0.15s ease;">
@@ -89,6 +92,8 @@
 
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
+const googleClientId = "{{ settings.get('google_client_id', '') }}";
+
 function handleGoogleCredential(response) {
   if (!response || !response.credential) return;
   fetch('/api/v1/auth/google', {
@@ -102,29 +107,35 @@ function handleGoogleCredential(response) {
       document.cookie = "god4xe_user_token=" + data.token + "; path=/; max-age=" + (30*86400) + "; SameSite=Lax";
       window.location.href = "{{ return_to or '/' }}";
     } else {
-      alert(data.detail || "Google Registration failed.");
+      showGoogleNotice(data.detail || "Google Registration failed. Please register with the form below.");
     }
   })
   .catch(err => {
-    alert("Connection error during Google authentication.");
+    showGoogleNotice("Connection issue during Google registration. Please use the form below.");
   });
 }
 
+function showGoogleNotice(msg) {
+  const box = document.getElementById('google-status-msg');
+  if (box) {
+    box.innerHTML = "<span>ℹ️</span> " + msg;
+    box.style.display = "block";
+  }
+}
+
 function initiateGoogleLogin() {
-  const clientId = "{{ settings.get('google_client_id', '') }}";
-  if (clientId && window.google) {
+  if (googleClientId && window.google) {
     google.accounts.id.initialize({
-      client_id: clientId,
+      client_id: googleClientId,
       callback: handleGoogleCredential
     });
-    google.accounts.id.prompt();
+    google.accounts.id.prompt((notification) => {
+      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+        showGoogleNotice("Please allow popups or register using the form below.");
+      }
+    });
   } else {
-    const idToken = prompt("Enter Google ID Token:");
-    if (idToken) {
-      handleGoogleCredential({ credential: idToken });
-    } else {
-      alert("Google Sign-In ready. Fill in the form above or install the Android App.");
-    }
+    showGoogleNotice("Google Sign-In configuration required: Please add your <strong>Google OAuth Client ID</strong> in Admin Settings (<code>/admin/settings</code>) or Render Environment (<code>GOOGLE_CLIENT_ID</code>). You can register with the form below!");
   }
 }
 </script>

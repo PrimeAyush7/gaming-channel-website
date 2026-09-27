@@ -582,7 +582,8 @@ async def update_settings_submit(
     telegram_chat_id: str = Form(""),
     notify_discord_enabled: str = Form("false"),
     notify_telegram_enabled: str = Form("false"),
-    apk_download_url: str = Form("")
+    apk_download_url: str = Form(""),
+    google_client_id: str = Form("")
 ):
     admin = check_admin(request)
     if not admin:
@@ -610,7 +611,8 @@ async def update_settings_submit(
         "telegram_chat_id": telegram_chat_id,
         "notify_discord_enabled": notify_discord_enabled,
         "notify_telegram_enabled": notify_telegram_enabled,
-        "apk_download_url": apk_download_url
+        "apk_download_url": apk_download_url,
+        "google_client_id": google_client_id
     })
     return RedirectResponse(url="/admin/settings?msg=Settings+saved+successfully", status_code=status.HTTP_302_FOUND)
 
