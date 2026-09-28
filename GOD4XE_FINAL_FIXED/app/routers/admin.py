@@ -43,6 +43,23 @@ def get_client_ip(request: Request) -> str:
         return forwarded.split(",")[0].strip()
     return request.client.host if request.client else "127.0.0.1"
 
+def _safe_opt_int(val):
+    if val is None or str(val).strip() == '':
+        return None
+    try:
+        return int(str(val).strip())
+    except (ValueError, TypeError):
+        return None
+
+def _safe_int(val, default=0):
+    if val is None or str(val).strip() == '':
+        return default
+    try:
+        return int(float(str(val).strip()))
+    except (ValueError, TypeError):
+        return default
+
+
 def check_admin(request: Request):
     admin = auth_service.get_current_admin(request)
     if not admin:
@@ -641,23 +658,6 @@ async def admin_tournaments(request: Request, status: str = None, msg: str = Non
     })
 
 @router.get("/tournaments/new", response_class=HTMLResponse)
-
-def _safe_opt_int(val):
-    if val is None or str(val).strip() == '':
-        return None
-    try:
-        return int(str(val).strip())
-    except (ValueError, TypeError):
-        return None
-
-def _safe_int(val, default=0):
-    if val is None or str(val).strip() == '':
-        return default
-    try:
-        return int(float(str(val).strip()))
-    except (ValueError, TypeError):
-        return default
-
 async def admin_tournament_new_form(request: Request):
     admin = check_admin(request)
     if not admin:
