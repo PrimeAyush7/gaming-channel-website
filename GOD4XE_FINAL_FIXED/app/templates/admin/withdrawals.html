@@ -8,8 +8,20 @@
   </div>
 </div>
 
+{% if request.query_params.get('msg') %}
+<div class="alert alert-success" style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #6ee7b7; padding: 0.85rem 1rem; border-radius: 8px; margin-top: 1rem;">
+  ✓ {{ request.query_params.get('msg') }}
+</div>
+{% endif %}
+
+{% if request.query_params.get('error') %}
+<div class="alert alert-danger" style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; padding: 0.85rem 1rem; border-radius: 8px; margin-top: 1rem;">
+  ⚠️ {{ request.query_params.get('error') }}
+</div>
+{% endif %}
+
 <div class="admin-card" style="margin-top: 1.5rem;">
-  <div style="display: flex; gap: 1rem; border-bottom: 1px solid var(--admin-border); padding-bottom: 0.75rem;">
+  <div style="display: flex; gap: 1rem; border-bottom: 1px solid var(--admin-border); padding-bottom: 0.75rem; flex-wrap: wrap;">
     <a href="/admin/withdrawals?status=PENDING" class="btn btn-sm {% if status_filter == 'PENDING' %}btn-primary{% else %}btn-secondary{% endif %}">Pending Payouts</a>
     <a href="/admin/withdrawals?status=APPROVED" class="btn btn-sm {% if status_filter == 'APPROVED' %}btn-primary{% else %}btn-secondary{% endif %}">Paid / Approved</a>
     <a href="/admin/withdrawals?status=REJECTED" class="btn btn-sm {% if status_filter == 'REJECTED' %}btn-primary{% else %}btn-secondary{% endif %}">Rejected</a>
@@ -51,19 +63,21 @@
           </td>
           <td>
             {% if w.status == 'PENDING' %}
-            <button type="button" class="btn btn-sm btn-success" onclick="var p = prompt('Enter Bank/UPI Payout UTR reference:'); if (p) { document.getElementById('pay-form-{{ w.id }}').payout_ref.value = p; document.getElementById('pay-form-{{ w.id }}').submit(); }">Approve Payout</button>
-            <form id="pay-form-{{ w.id }}" method="POST" action="/admin/withdrawals/{{ w.id }}/review" style="display: none;">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-              <input type="hidden" name="approve" value="1">
-              <input type="hidden" name="payout_ref" value="">
-            </form>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <form method="POST" action="/admin/withdrawals/{{ w.id }}/review" style="margin: 0;" onsubmit="return confirm('Confirm payout of ₹{{ (w.amount * 0.8)|int }} to {{ w.upi_id }}?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <input type="hidden" name="approve" value="1">
+                <input type="hidden" name="payout_ref" value="UPI-PAID">
+                <button type="submit" class="btn btn-sm btn-success" style="cursor: pointer;">Approve Payout</button>
+              </form>
 
-            <button type="button" class="btn btn-sm btn-danger" onclick="var r = prompt('Rejection reason (diamonds will be refunded):'); if (r) { document.getElementById('rej-form-{{ w.id }}').reason.value = r; document.getElementById('rej-form-{{ w.id }}').submit(); }">Reject & Refund</button>
-            <form id="rej-form-{{ w.id }}" method="POST" action="/admin/withdrawals/{{ w.id }}/review" style="display: none;">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-              <input type="hidden" name="approve" value="0">
-              <input type="hidden" name="reason" value="">
-            </form>
+              <form method="POST" action="/admin/withdrawals/{{ w.id }}/review" style="margin: 0;" onsubmit="return confirm('Reject this withdrawal and refund 💎 {{ w.amount }} Diamonds?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <input type="hidden" name="approve" value="0">
+                <input type="hidden" name="reason" value="Payment details could not be verified">
+                <button type="submit" class="btn btn-sm btn-danger" style="cursor: pointer;">Reject & Refund</button>
+              </form>
+            </div>
             {% else %}
             <span class="text-muted">Reviewed</span>
             {% endif %}

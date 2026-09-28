@@ -8,8 +8,20 @@
   </div>
 </div>
 
+{% if request.query_params.get('msg') %}
+<div class="alert alert-success" style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #6ee7b7; padding: 0.85rem 1rem; border-radius: 8px; margin-top: 1rem;">
+  ✓ {{ request.query_params.get('msg') }}
+</div>
+{% endif %}
+
+{% if request.query_params.get('error') %}
+<div class="alert alert-danger" style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; padding: 0.85rem 1rem; border-radius: 8px; margin-top: 1rem;">
+  ⚠️ {{ request.query_params.get('error') }}
+</div>
+{% endif %}
+
 <div class="admin-card" style="margin-top: 1.5rem;">
-  <div style="display: flex; gap: 1rem; border-bottom: 1px solid var(--admin-border); padding-bottom: 0.75rem;">
+  <div style="display: flex; gap: 1rem; border-bottom: 1px solid var(--admin-border); padding-bottom: 0.75rem; flex-wrap: wrap;">
     <a href="/admin/avatars?status=PENDING" class="btn btn-sm {% if status_filter == 'PENDING' %}btn-primary{% else %}btn-secondary{% endif %}">Pending Queue</a>
     <a href="/admin/avatars?status=APPROVED" class="btn btn-sm {% if status_filter == 'APPROVED' %}btn-primary{% else %}btn-secondary{% endif %}">Approved</a>
     <a href="/admin/avatars?status=REJECTED" class="btn btn-sm {% if status_filter == 'REJECTED' %}btn-primary{% else %}btn-secondary{% endif %}">Rejected</a>
@@ -32,7 +44,7 @@
         <tr>
           <td>
             <a href="{{ item.avatar_url }}" target="_blank">
-              <img src="{{ item.avatar_url }}" style="width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 1px solid var(--admin-border);">
+              <img src="{{ item.avatar_url }}" style="width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 1px solid var(--admin-border);" onerror="this.src='/static/images/default-avatar.png';">
             </a>
           </td>
           <td>
@@ -50,21 +62,25 @@
             {% endif %}
           </td>
           <td>
-            {% if item.status == 'PENDING' or item.status == 'REJECTED' %}
-            <form method="POST" action="/admin/avatars/{{ item.id }}/review" style="display: inline;">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-              <input type="hidden" name="approve" value="1">
-              <button type="submit" class="btn btn-sm btn-success">Approve</button>
-            </form>
-            {% endif %}
-            {% if item.status == 'PENDING' or item.status == 'APPROVED' %}
-            <button type="button" class="btn btn-sm btn-danger" onclick="var r = prompt('Rejection reason:'); if (r) { document.getElementById('reject-form-{{ item.id }}').reason.value = r; document.getElementById('reject-form-{{ item.id }}').submit(); }">Reject</button>
-            <form id="reject-form-{{ item.id }}" method="POST" action="/admin/avatars/{{ item.id }}/review" style="display: none;">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-              <input type="hidden" name="approve" value="0">
-              <input type="hidden" name="reason" value="">
-            </form>
-            {% endif %}
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              {% if item.status == 'PENDING' or item.status == 'REJECTED' %}
+              <form method="POST" action="/admin/avatars/{{ item.id }}/review" style="margin: 0;" onsubmit="return confirm('Approve this player avatar?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <input type="hidden" name="approve" value="1">
+                <input type="hidden" name="reason" value="Approved by administrator">
+                <button type="submit" class="btn btn-sm btn-success" style="cursor: pointer;">Approve</button>
+              </form>
+              {% endif %}
+
+              {% if item.status == 'PENDING' or item.status == 'APPROVED' %}
+              <form method="POST" action="/admin/avatars/{{ item.id }}/review" style="margin: 0;" onsubmit="return confirm('Reject this player avatar? The avatar will be reset to default.');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <input type="hidden" name="approve" value="0">
+                <input type="hidden" name="reason" value="Violates avatar community guidelines">
+                <button type="submit" class="btn btn-sm btn-danger" style="cursor: pointer;">Reject</button>
+              </form>
+              {% endif %}
+            </div>
           </td>
         </tr>
         {% else %}

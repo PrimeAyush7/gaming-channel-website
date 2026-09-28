@@ -8,6 +8,18 @@
   <p style="color: var(--text-muted); font-size: 0.9rem;">Review external UPI transactions, verify UTR reference numbers, and safely credit Diamonds to player ledgers.</p>
 </div>
 
+{% if request.query_params.get('msg') %}
+<div class="alert alert-success" style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #6ee7b7; padding: 0.85rem 1rem; border-radius: 8px; margin-bottom: 1.25rem;">
+  ✓ {{ request.query_params.get('msg') }}
+</div>
+{% endif %}
+
+{% if request.query_params.get('error') %}
+<div class="alert alert-danger" style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; padding: 0.85rem 1rem; border-radius: 8px; margin-bottom: 1.25rem;">
+  ⚠️ {{ request.query_params.get('error') }}
+</div>
+{% endif %}
+
 <div class="card" style="background: rgba(18, 8, 35, 0.6); border: 1px solid rgba(168,85,247,0.2); border-radius: 12px; overflow-x: auto;">
   <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
     <thead>
@@ -40,15 +52,15 @@
         <td style="padding: 1rem;">
           {% if d.status == 'PENDING' %}
           <div style="display: flex; gap: 0.5rem;">
-            <form action="/admin/deposits/{{ d.id }}/review" method="POST" style="margin: 0;">
-              <input type="hidden" name="csrf_token" value="{{ admin.csrf_token }}">
+            <form action="/admin/deposits/{{ d.id }}/review" method="POST" style="margin: 0;" onsubmit="return confirm('Approve deposit and credit 💎 {{ d.amount }} Diamonds to @{{ d.username }}?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token or admin.csrf_token }}">
               <input type="hidden" name="decision" value="APPROVE">
               <button type="submit" class="btn-sm btn-edit" style="background: #10b981; border: none; color: #fff; padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer;">
                 ✓ Approve
               </button>
             </form>
-            <form action="/admin/deposits/{{ d.id }}/review" method="POST" style="margin: 0;">
-              <input type="hidden" name="csrf_token" value="{{ admin.csrf_token }}">
+            <form action="/admin/deposits/{{ d.id }}/review" method="POST" style="margin: 0;" onsubmit="return confirm('Reject deposit request for @{{ d.username }}?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token or admin.csrf_token }}">
               <input type="hidden" name="decision" value="REJECT">
               <input type="hidden" name="rejection_reason" value="Invalid UTR or payment not received">
               <button type="submit" class="btn-sm btn-delete" style="background: #ef4444; border: none; color: #fff; padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer;">

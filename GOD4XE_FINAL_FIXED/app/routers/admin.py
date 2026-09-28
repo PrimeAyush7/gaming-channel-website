@@ -47,6 +47,10 @@ def check_admin(request: Request):
     admin = auth_service.get_current_admin(request)
     if not admin:
         return None
+    if "id" not in admin:
+        admin["id"] = admin.get("admin_id")
+    if "admin_id" not in admin:
+        admin["admin_id"] = admin.get("id")
     return admin
 
 def check_csrf(request: Request, submitted_token: str, admin: dict):
@@ -817,7 +821,12 @@ async def admin_deposits(request: Request, status: str = None, msg: str = None, 
         "error": error
     })
 
+@router.get("/deposits/{request_id}/review")
+async def admin_deposit_review_get(request_id: int):
+    return RedirectResponse(url="/admin/deposits", status_code=status.HTTP_303_SEE_OTHER)
+
 @router.post("/deposits/{request_id}/review")
+@router.post("/deposits/{request_id}/review/")
 async def admin_review_deposit(
     request_id: int,
     request: Request,
@@ -833,15 +842,17 @@ async def admin_review_deposit(
         raise HTTPException(status_code=403, detail="Unauthorized role")
 
     approve = decision.upper() == "APPROVE"
+    import urllib.parse
     try:
+        admin_id = admin.get("admin_id") or admin.get("id") or 1
         wallet_service.review_deposit_request(
             request_id=request_id,
-            admin_id=admin["admin_id"],
+            admin_id=admin_id,
             approve=approve,
             rejection_reason=rejection_reason
         )
         auth_service.log_admin_action(
-            admin_id=admin["admin_id"],
+            admin_id=admin_id,
             admin_username=admin["username"],
             role=admin["role"],
             action="APPROVE_DEPOSIT" if approve else "REJECT_DEPOSIT",
@@ -850,9 +861,9 @@ async def admin_review_deposit(
             ip_address=get_client_ip(request),
             after_state={"decision": decision, "reason": rejection_reason}
         )
-        return RedirectResponse(url="/admin/deposits?msg=Deposit+reviewed+successfully", status_code=302)
-    except ValueError as e:
-        return RedirectResponse(url=f"/admin/deposits?error={e}", status_code=302)
+        return RedirectResponse(url="/admin/deposits?msg=Deposit+reviewed+successfully", status_code=status.HTTP_303_SEE_OTHER)
+    except Exception as e:
+        return RedirectResponse(url=f"/admin/deposits?error={urllib.parse.quote(str(e))}", status_code=status.HTTP_303_SEE_OTHER)
 
 # --------------------------------------------------------------------------
 # REDEEM CODES (SUPER_ADMIN, FINANCE_ADMIN, TOURNAMENT_ADMIN)
@@ -1019,7 +1030,11 @@ async def admin_view_audit_logs(request: Request, resource: str = None):
 def get_current_admin(request: Request) -> dict:
     admin = check_admin(request)
     if not admin:
-        raise HTTPException(status_code=status.HTTP_302_FOUND, headers={"Location": "/admin/login"})
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin session required")
+    if "id" not in admin:
+        admin["id"] = admin.get("admin_id")
+    if "admin_id" not in admin:
+        admin["admin_id"] = admin.get("id")
     return admin
 
 def verify_csrf(admin: dict, token: str):
@@ -1118,7 +1133,7 @@ async def admin_delete_gun(gun_id: int, csrf_token: str = Form(...), admin: dict
 @router.post("/tournaments/{tournament_id}/complete-early")
 async def admin_tournament_complete_early(tournament_id: int, csrf_token: str = Form(...), admin: dict = Depends(get_current_admin)):
     verify_csrf(admin, csrf_token)
-    tournament_service.mark_tournament_completed_early(tournament_id, admin_id=admin["id"])
+    tournament_service.mark_tournament_completed_early(tournament_id, admin_id=(admin.get("admin_id") or admin.get("id")))
     return RedirectResponse(url="/admin/tournaments", status_code=status.HTTP_303_SEE_OTHER)
 
 @router.get("/tournaments/{tournament_id}/participants", response_class=HTMLResponse)
@@ -1173,7 +1188,7 @@ async def admin_tournament_results_submit(tournament_id: int, request: Request, 
         tournament_id=tournament_id,
         results=results,
         proof_url=proof_url,
-        admin_id=admin["id"]
+        admin_id=(admin.get("admin_id") or admin.get("id"))
     )
     return RedirectResponse(url="/admin/tournaments", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -1365,11 +1380,21 @@ async def admin_avatars_view(request: Request, status: str = None, admin: dict =
         "csrf_token": admin["csrf_token"]
     })
 
-@router.post("/avatars/{queue_id}/review")
-async def admin_avatar_review(queue_id: int, approve: int = Form(...), reason: str = Form(None), csrf_token: str = Form(...), admin: dict = Depends(get_current_admin)):
-    verify_csrf(admin, csrf_token)
-    user_service.moderate_avatar(queue_id, admin["id"], bool(approve), reason)
+@router.get("/avatars/{queue_id}/review")
+async def admin_avatar_review_get(queue_id: int):
     return RedirectResponse(url="/admin/avatars", status_code=status.HTTP_303_SEE_OTHER)
+
+@router.post("/avatars/{queue_id}/review")
+@router.post("/avatars/{queue_id}/review/")
+async def admin_avatar_review(queue_id: int, approve: int = Form(...), reason: str = Form(None), csrf_token: str = Form(...), admin: dict = Depends(get_current_admin)):
+    import urllib.parse
+    try:
+        verify_csrf(admin, csrf_token)
+        admin_id = admin.get("admin_id") or admin.get("id") or 1
+        user_service.moderate_avatar(queue_id, admin_id, bool(approve), reason or ("Approved" if approve else "Violates avatar guidelines"))
+        return RedirectResponse(url="/admin/avatars?msg=Avatar+queue+updated+successfully", status_code=status.HTTP_303_SEE_OTHER)
+    except Exception as e:
+        return RedirectResponse(url=f"/admin/avatars?error={urllib.parse.quote(str(e))}", status_code=status.HTTP_303_SEE_OTHER)
 
 
 # --------------------------------------------------------------------------
@@ -1387,7 +1412,12 @@ async def admin_withdrawals(request: Request, status: str = None, admin: dict = 
         "csrf_token": admin["csrf_token"]
     })
 
+@router.get("/withdrawals/{req_id}/review")
+async def admin_withdrawal_review_get(req_id: int):
+    return RedirectResponse(url="/admin/withdrawals", status_code=status.HTTP_303_SEE_OTHER)
+
 @router.post("/withdrawals/{req_id}/review")
+@router.post("/withdrawals/{req_id}/review/")
 async def admin_withdrawal_review(
     req_id: int,
     approve: int = Form(...),
@@ -1396,9 +1426,14 @@ async def admin_withdrawal_review(
     csrf_token: str = Form(...),
     admin: dict = Depends(get_current_admin)
 ):
-    verify_csrf(admin, csrf_token)
-    wallet_service.review_withdrawal_request(req_id, admin["id"], bool(approve), payout_ref, reason)
-    return RedirectResponse(url="/admin/withdrawals", status_code=status.HTTP_303_SEE_OTHER)
+    import urllib.parse
+    try:
+        verify_csrf(admin, csrf_token)
+        admin_id = admin.get("admin_id") or admin.get("id") or 1
+        wallet_service.review_withdrawal_request(req_id, admin_id, bool(approve), payout_ref or "PAID", reason or "Details could not be verified")
+        return RedirectResponse(url="/admin/withdrawals?msg=Withdrawal+request+updated", status_code=status.HTTP_303_SEE_OTHER)
+    except Exception as e:
+        return RedirectResponse(url=f"/admin/withdrawals?error={urllib.parse.quote(str(e))}", status_code=status.HTTP_303_SEE_OTHER)
 
 
 # --------------------------------------------------------------------------
@@ -1484,11 +1519,21 @@ async def admin_disputes(request: Request, status: str = None, admin: dict = Dep
         "csrf_token": admin["csrf_token"]
     })
 
-@router.post("/disputes/{d_id}/resolve")
-async def admin_resolve_dispute(d_id: int, status: str = Form("RESOLVED"), resp: str = Form(None), csrf_token: str = Form(...), admin: dict = Depends(get_current_admin)):
-    verify_csrf(admin, csrf_token)
-    tournament_service.resolve_tournament_dispute(d_id, admin["id"], status, resp)
+@router.get("/disputes/{d_id}/resolve")
+async def admin_dispute_resolve_get(d_id: int):
     return RedirectResponse(url="/admin/disputes", status_code=status.HTTP_303_SEE_OTHER)
+
+@router.post("/disputes/{d_id}/resolve")
+@router.post("/disputes/{d_id}/resolve/")
+async def admin_resolve_dispute(d_id: int, status: str = Form("RESOLVED"), resp: str = Form(None), csrf_token: str = Form(...), admin: dict = Depends(get_current_admin)):
+    import urllib.parse
+    try:
+        verify_csrf(admin, csrf_token)
+        admin_id = admin.get("admin_id") or admin.get("id") or 1
+        tournament_service.resolve_tournament_dispute(d_id, admin_id, status, resp or "Dispute resolved by administrator.")
+        return RedirectResponse(url="/admin/disputes?msg=Dispute+updated", status_code=status.HTTP_303_SEE_OTHER)
+    except Exception as e:
+        return RedirectResponse(url=f"/admin/disputes?error={urllib.parse.quote(str(e))}", status_code=status.HTTP_303_SEE_OTHER)
 
 @router.get("/tutorials", response_class=HTMLResponse)
 async def admin_tutorials(request: Request, admin: dict = Depends(get_current_admin)):

@@ -235,6 +235,7 @@ def get_current_admin(request: Request):
         admin_dict = dict(row)
         if admin_dict.get("is_active", 1) == 0:
             return None
+        admin_dict["id"] = admin_dict.get("admin_id")
 
         try:
             expires_at = row["expires_at"]

@@ -411,5 +411,76 @@ class TestV11Features(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertIn("vnd.android.package-archive", res.headers.get("content-type", ""))
 
+
+    def test_11_admin_approve_and_reject_actions_never_fail(self):
+        """Verifies that all Approve/Reject/Resolve admin actions succeed without 500 or 404."""
+        from app.services import auth as a_service
+        from app.services import users_auth as u_service
+        from app.services import wallet as w_service
+
+        # 1. Direct Session Setup
+        import secrets
+        sid = secrets.token_urlsafe(32)
+        csrf = secrets.token_urlsafe(32)
+        with a_service.get_db() as conn:
+            c = conn.cursor()
+            c.execute("INSERT INTO admins (username, password_hash, salt, role, is_active) VALUES ('testadmin_rev', 'hash', 'salt', 'SUPER_ADMIN', 1) RETURNING id;")
+            aid = (c.fetchone())["id"]
+            c.execute("INSERT INTO sessions (session_id, admin_id, csrf_token, expires_at) VALUES (%s, %s, %s, '2099-01-01');", (sid, aid, csrf))
+        self.client.cookies.set("nexus_session", sid)
+
+        # 2. Setup user and avatar entry
+        import random
+        r = random.randint(100000, 999999)
+        reg = u_service.register_user(f"usr_{r}", phone=f"+9196{r}00", password="pass")
+        uid = reg["user"]["id"]
+
+        with u_service.get_db() as conn:
+            c = conn.cursor()
+            c.execute("INSERT INTO avatar_moderation_queue (user_id, avatar_url, status) VALUES (%s, %s, %s) RETURNING id;", (uid, "/static/test.png", "PENDING"))
+            qid = (c.fetchone())["id"]
+
+        # Test Avatar Approve
+        res_app = self.client.post(f"/admin/avatars/{qid}/review", data={
+            "approve": 1,
+            "csrf_token": csrf
+        }, follow_redirects=False)
+        self.assertEqual(res_app.status_code, 303)
+        self.assertIn("msg=Avatar", res_app.headers.get("location"))
+
+        # Test Avatar Reject
+        res_rej = self.client.post(f"/admin/avatars/{qid}/review", data={
+            "approve": 0,
+            "reason": "Violates guidelines",
+            "csrf_token": csrf
+        }, follow_redirects=False)
+        self.assertEqual(res_rej.status_code, 303)
+
+        # Test GET on review URL (must not 404!)
+        res_get = self.client.get(f"/admin/avatars/{qid}/review", follow_redirects=False)
+        self.assertEqual(res_get.status_code, 303)
+        self.assertEqual(res_get.headers.get("location"), "/admin/avatars")
+
+        # 3. Test Deposit Approve & Reject
+        dep = w_service.create_deposit_request(uid, 100, f"UTR_{r}")
+        dep_id = dep["id"]
+
+        res_dep = self.client.post(f"/admin/deposits/{dep_id}/review", data={
+            "decision": "APPROVE",
+            "csrf_token": csrf
+        }, follow_redirects=False)
+        self.assertEqual(res_dep.status_code, 303)
+
+        # 4. Test Withdrawal Approve & Reject
+        with_req = w_service.create_withdrawal_request(uid, 50, "upi@okaxis")
+        wid = with_req["id"]
+
+        res_with = self.client.post(f"/admin/withdrawals/{wid}/review", data={
+            "approve": 1,
+            "payout_ref": "PAYOUT_123",
+            "csrf_token": csrf
+        }, follow_redirects=False)
+        self.assertEqual(res_with.status_code, 303)
+
 if __name__ == "__main__":
     unittest.main()

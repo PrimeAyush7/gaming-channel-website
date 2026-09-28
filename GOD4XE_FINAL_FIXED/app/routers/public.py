@@ -40,13 +40,15 @@ def get_optional_current_user(request: Request) -> dict | None:
     return None
 
 def get_common_context(request: Request):
+    all_s = settings_service.get_all_settings()
     return {
         "request": request,
         "app_url": APP_URL,
-        "settings": settings_service.get_all_settings(),
+        "settings": all_s,
         "nav_sections": section_service.get_all_sections(only_nav=True),
         "ads": ad_service.get_ad_settings(),
-        "current_user": get_optional_current_user(request)
+        "current_user": get_optional_current_user(request),
+        "google_client_id": all_s.get("google_client_id", "")
     }
 
 @router.get("/", response_class=HTMLResponse)
