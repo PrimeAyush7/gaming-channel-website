@@ -24,6 +24,12 @@
       <textarea id="site_description" name="site_description" class="form-control" style="min-height: 80px;">{{ settings.site_description }}</textarea>
     </div>
 
+    <div class="form-group">
+      <label class="form-label" for="app_url">Public Website Domain / Base URL</label>
+      <input type="url" id="app_url" name="app_url" value="{{ settings.app_url or 'https://god4xe.onrender.com' }}" class="form-control" placeholder="https://god4xe.onrender.com">
+      <small class="text-muted">Used to generate valid clickable buttons for Telegram match registrations and Discord alerts.</small>
+    </div>
+
     <div class="form-row">
       <div class="form-group">
         <label class="form-label" for="logo_url">Custom Logo URL</label>

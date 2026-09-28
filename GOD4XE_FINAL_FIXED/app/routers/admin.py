@@ -604,7 +604,8 @@ async def update_settings_submit(
     notify_discord_enabled: str = Form("false"),
     notify_telegram_enabled: str = Form("false"),
     apk_download_url: str = Form(""),
-    google_client_id: str = Form("")
+    google_client_id: str = Form(""),
+    app_url: str = Form("https://god4xe.onrender.com")
 ):
     admin = check_admin(request)
     if not admin:
@@ -633,7 +634,8 @@ async def update_settings_submit(
         "notify_discord_enabled": notify_discord_enabled,
         "notify_telegram_enabled": notify_telegram_enabled,
         "apk_download_url": apk_download_url,
-        "google_client_id": google_client_id
+        "google_client_id": google_client_id,
+        "app_url": (app_url or "https://god4xe.onrender.com").rstrip("/")
     })
     return RedirectResponse(url="/admin/settings?msg=Settings+saved+successfully", status_code=status.HTTP_302_FOUND)
 
@@ -764,7 +766,7 @@ async def admin_tournament_create(
         if is_published:
             try:
                 from app.services import content_features as bot_notifications
-                bot_notifications.notify_tournament_created(t["id"])
+                bot_notifications.notify_tournament_created(t["id"], request=request)
             except Exception:
                 pass
         return RedirectResponse(url="/admin/tournaments?msg=Tournament+created+successfully", status_code=302)
@@ -817,7 +819,7 @@ async def admin_broadcast_tournament(
     try:
         from app.services import bot_notifications
         import urllib.parse
-        res = bot_notifications.notify_tournament_created(tournament_id)
+        res = bot_notifications.notify_tournament_created(tournament_id, request=request)
         tg_res = res.get("telegram", "Unknown")
         dc_res = res.get("discord", "Unknown")
         msg = f"Broadcast Status: Telegram -> {tg_res} | Discord -> {dc_res}"

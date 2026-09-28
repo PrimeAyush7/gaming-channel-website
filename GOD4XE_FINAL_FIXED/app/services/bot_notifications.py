@@ -1,4 +1,5 @@
 import json
+import os
 import urllib.request
 import urllib.error
 import logging
@@ -15,6 +16,32 @@ def clean_telegram_chat_id(chat_id: str) -> str:
     if not cid.startswith("@") and not cid.startswith("-") and not cid.isdigit():
         cid = "@" + cid
     return cid
+
+def resolve_app_url(base_candidate: str = None, request = None) -> str:
+    """Guarantees a 100% valid absolute URL with hostname for Telegram/Discord buttons."""
+    # 1. Candidate from settings
+    if base_candidate and (str(base_candidate).startswith("http://") or str(base_candidate).startswith("https://")):
+        return str(base_candidate).rstrip("/")
+    # 2. Active request headers (e.g. from Render https reverse proxy)
+    if request:
+        try:
+            proto = request.headers.get("x-forwarded-proto", "https")
+            host = request.headers.get("host")
+            if host:
+                return f"{proto}://{host}".rstrip("/")
+            if hasattr(request, "base_url") and str(request.base_url).startswith("http"):
+                return str(request.base_url).rstrip("/")
+        except Exception:
+            pass
+    # 3. Environment APP_URL
+    try:
+        from app.config import APP_URL
+        if APP_URL and (str(APP_URL).startswith("http://") or str(APP_URL).startswith("https://")):
+            return str(APP_URL).rstrip("/")
+    except Exception:
+        pass
+    # 4. Standard Render production domain fallback
+    return "https://god4xe.onrender.com"
 
 def get_notification_settings() -> dict:
     """Fetches Discord & Telegram configuration from site_settings table."""
@@ -77,9 +104,11 @@ def send_telegram_message(bot_token: str, chat_id: str, text: str, button_text: 
             "disable_web_page_preview": False
         }
         if button_text and button_url:
+            # Must be absolute URL
+            clean_btn_url = button_url if button_url.startswith("http") else f"https://god4xe.onrender.com{button_url}"
             payload["reply_markup"] = {
                 "inline_keyboard": [
-                    [{"text": button_text, "url": button_url}]
+                    [{"text": button_text, "url": clean_btn_url}]
                 ]
             }
 
@@ -106,18 +135,17 @@ def send_telegram_message(bot_token: str, chat_id: str, text: str, button_text: 
         logger.warning(f"[TELEGRAM MESSAGE FAILED] {e}")
         return False, str(e)
 
-def notify_tournament_created(tournament_id: int) -> dict:
+def notify_tournament_created(tournament_id: int, request = None) -> dict:
     """Broadcasts a newly created/published tournament to Discord and Telegram."""
     from app.services import tournaments as tournament_service
-    from app.config import APP_URL
 
     t = tournament_service.get_tournament_by_id(tournament_id)
     if not t:
         return {"status": "error", "detail": "Tournament not found"}
 
     cfg = get_notification_settings()
-    app_base = cfg.get("app_url") or APP_URL
-    tourn_url = f"{app_base.rstrip('/')}/tournaments/{t['id']}"
+    app_base = resolve_app_url(cfg.get("app_url"), request)
+    tourn_url = f"{app_base}/tournaments/{t['id']}"
 
     entry_fee_str = "FREE ENTRY" if t.get("entry_type") == "FREE" else f"💎 {t.get('entry_fee_diamonds', 0)} Diamonds"
     prize_str = f"💎 {t.get('prize_amount_diamonds', 0)} Diamonds"
@@ -148,8 +176,12 @@ def notify_tournament_created(tournament_id: int) -> dict:
                 "text": "GOD4XE ESPORTS • Dominate The Lobby"
             }
         }
-        if t.get("banner_url") and str(t.get("banner_url")).startswith("http"):
-            embed["image"] = {"url": t.get("banner_url")}
+        raw_banner = t.get("banner_url") or ""
+        if raw_banner:
+            if raw_banner.startswith("/"):
+                raw_banner = f"{app_base}{raw_banner}"
+            if raw_banner.startswith("http://") or raw_banner.startswith("https://"):
+                embed["image"] = {"url": raw_banner}
 
         payload = {
             "content": f"📢 @everyone **New Free Fire Tournament Announced!** Register your slot now: {tourn_url}",
@@ -190,11 +222,10 @@ def notify_tournament_created(tournament_id: int) -> dict:
 
     return results
 
-def notify_player_joined(tournament_id: int, user_id: int, slot_number: int, team_name: str = None):
+def notify_player_joined(tournament_id: int, user_id: int, slot_number: int, team_name: str = None, request = None):
     """Dispatches a live player activity alert to Discord and/or Telegram."""
     from app.services import tournaments as tournament_service
     from app.services import users_auth as user_service
-    from app.config import APP_URL
 
     cfg = get_notification_settings()
     discord_enabled = str(cfg.get("notify_discord_enabled", "")).lower() in ("true", "1", "on", "yes")
@@ -208,8 +239,8 @@ def notify_player_joined(tournament_id: int, user_id: int, slot_number: int, tea
     if not t or not u:
         return
 
-    app_base = cfg.get("app_url") or APP_URL
-    tourn_url = f"{app_base.rstrip('/')}/tournaments/{t['id']}"
+    app_base = resolve_app_url(cfg.get("app_url"), request)
+    tourn_url = f"{app_base}/tournaments/{t['id']}"
 
     player_name = u.get("display_name") or u.get("username")
     team_str = f" (Team: **{team_name}**)" if team_name else ""
