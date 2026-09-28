@@ -41,22 +41,47 @@
         <td style="padding: 1rem; color: #fbbf24; font-weight: 700;">💎 {{ t.prize_amount_diamonds }}</td>
         <td style="padding: 1rem;">{{ t.joined_players }} / {{ t.max_slots }}</td>
         <td style="padding: 1rem;">
-          <span class="badge" style="{% if t.status == 'LIVE' %}background: #ef4444;{% elif t.status == 'UPCOMING' %}background: #10b981;{% else %}background: #6b7280;{% endif %} color: #fff;">
-            {{ t.status }}
-          </span>
+          <div style="display: flex; flex-direction: column; gap: 0.3rem;">
+            <span class="badge" style="{% if t.status == 'LIVE' %}background: #ef4444;{% elif t.status == 'UPCOMING' %}background: #10b981;{% else %}background: #6b7280;{% endif %} color: #fff;">
+              {{ t.status }}
+            </span>
+            {% if t.is_published == 1 %}
+            <span style="font-size: 0.72rem; color: #10b981; font-weight: 600;">● Live</span>
+            {% else %}
+            <span style="font-size: 0.72rem; color: #f87171; font-weight: 600;">○ Hidden</span>
+            {% endif %}
+          </div>
         </td>
         <td style="padding: 1rem;">
-          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
-            <form action="/admin/tournaments/{{ t.id }}/broadcast" method="POST" style="margin: 0;" onsubmit="return confirm('Broadcast announcement to Discord and Telegram?');">
+          <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center;">
+            <!-- Broadcast Button -->
+            <form action="/admin/tournaments/{{ t.id }}/broadcast" method="POST" style="margin: 0;" onsubmit="return confirm('Broadcast match details to Discord and Telegram?');">
               <input type="hidden" name="csrf_token" value="{{ admin.csrf_token }}">
-              <button type="submit" class="btn btn-sm" style="background: #5865F2; color: #fff; padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: none;" title="Broadcast to Discord & Telegram">
+              <button type="submit" class="btn btn-sm" style="background: #5865F2; color: #fff; padding: 0.35rem 0.65rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: none;" title="Broadcast to Discord & Telegram">
                 📢 Broadcast
               </button>
             </form>
+
+            <!-- Hide / Unhide Toggle Form -->
+            <form action="/admin/tournaments/{{ t.id }}/toggle-visibility" method="POST" style="margin: 0;">
+              <input type="hidden" name="csrf_token" value="{{ admin.csrf_token }}">
+              <button type="submit" class="btn btn-sm" style="background: {% if t.is_published == 1 %}rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; color: #fbbf24;{% else %}rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #34d399;{% endif %} padding: 0.35rem 0.65rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer;" title="Toggle Live Visibility">
+                {% if t.is_published == 1 %}👁️ Hide{% else %}👁️ Unhide{% endif %}
+              </button>
+            </form>
+
+            <!-- Delete Form -->
+            <form action="/admin/tournaments/{{ t.id }}/delete" method="POST" style="margin: 0;" onsubmit="return confirm('⚠️ WARNING: Pakka is tournament ko permanently delete karna hai?');">
+              <input type="hidden" name="csrf_token" value="{{ admin.csrf_token }}">
+              <button type="submit" class="btn btn-sm" style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #f87171; padding: 0.35rem 0.65rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer;" title="Permanently Delete Tournament">
+                🗑️ Delete
+              </button>
+            </form>
+
             <!-- Status Update Form -->
             <form action="/admin/tournaments/{{ t.id }}/status" method="POST" style="margin: 0;">
               <input type="hidden" name="csrf_token" value="{{ admin.csrf_token }}">
-              <select name="status" onchange="this.form.submit()" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 0.3rem 0.5rem; border-radius: 6px; font-size: 0.8rem;">
+              <select name="status" onchange="this.form.submit()" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 0.35rem 0.5rem; border-radius: 6px; font-size: 0.8rem; cursor: pointer;">
                 <option value="UPCOMING" {% if t.status == 'UPCOMING' %}selected{% endif %}>Upcoming</option>
                 <option value="LIVE" {% if t.status == 'LIVE' %}selected{% endif %}>Live</option>
                 <option value="COMPLETED" {% if t.status == 'COMPLETED' %}selected{% endif %}>Completed</option>

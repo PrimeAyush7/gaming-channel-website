@@ -819,3 +819,22 @@ def update_tournament_room_credentials(tournament_id: int, room_id: str, room_pa
             except Exception:
                 pass
         return dict(row)
+
+
+# --------------------------------------------------------------------------
+# TOURNAMENT VISIBILITY & DELETION
+# --------------------------------------------------------------------------
+def delete_tournament(tournament_id: int) -> bool:
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM tournament_participants WHERE tournament_id = %s;", (tournament_id,))
+        cursor.execute("DELETE FROM tournament_disputes WHERE tournament_id = %s;", (tournament_id,))
+        cursor.execute("DELETE FROM tournaments WHERE id = %s;", (tournament_id,))
+        return True
+
+def toggle_tournament_visibility(tournament_id: int) -> int:
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE tournaments SET is_published = 1 - COALESCE(is_published, 1), updated_at = CURRENT_TIMESTAMP WHERE id = %s RETURNING is_published;", (tournament_id,))
+        row = cursor.fetchone()
+        return row["is_published"] if row else 0

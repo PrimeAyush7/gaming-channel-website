@@ -128,7 +128,7 @@
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
             <strong style="color: #7289da; font-size: 1rem;">🎮 Discord Integration</strong>
             <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; cursor: pointer;">
-              <input type="checkbox" name="notify_discord_enabled" value="true" {% if settings.get('notify_discord_enabled', '') == 'true' %}checked{% endif %}>
+              <input type="checkbox" name="notify_discord_enabled" value="true" {% if settings.get('notify_discord_enabled', '') in ('true', '1', 'on', 'yes') %}checked{% endif %}>
               <span style="color: #fff;">Enable Alerts</span>
             </label>
           </div>
@@ -151,7 +151,7 @@
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
             <strong style="color: #29b6f6; font-size: 1rem;">✈️ Telegram Integration</strong>
             <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; cursor: pointer;">
-              <input type="checkbox" name="notify_telegram_enabled" value="true" {% if settings.get('notify_telegram_enabled', '') == 'true' %}checked{% endif %}>
+              <input type="checkbox" name="notify_telegram_enabled" value="true" {% if settings.get('notify_telegram_enabled', '') in ('true', '1', 'on', 'yes') %}checked{% endif %}>
               <span style="color: #fff;">Enable Alerts</span>
             </label>
           </div>

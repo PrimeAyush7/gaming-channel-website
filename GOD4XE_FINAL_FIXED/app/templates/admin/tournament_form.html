@@ -60,9 +60,20 @@
       <div>
         <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Mode</label>
         <select name="mode" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">
-          <option value="SOLO">Solo</option>
-          <option value="DUO">Duo</option>
-          <option value="SQUAD">Squad</option>
+          <optgroup label="Clash Squad (CS) Modes" style="background: #120726; color: #c084fc;">
+            <option value="CS_RANK_4V4">CS Ranked (4v4 Squad Clash)</option>
+            <option value="CS_GUNS_ONLY">CS Guns Only (No Grenades/Custom)</option>
+            <option value="CS_DUO_2V2">CS 2v2 Duo Clash</option>
+          </optgroup>
+          <optgroup label="Lone Wolf Modes" style="background: #120726; color: #fbbf24;">
+            <option value="LONE_WOLF_1V1">Lone Wolf 1v1 (Duel)</option>
+            <option value="LONE_WOLF_2V2">Lone Wolf 2v2</option>
+          </optgroup>
+          <optgroup label="Battle Royale (Full Map)" style="background: #120726; color: #10b981;">
+            <option value="SOLO">Full Map Solo</option>
+            <option value="DUO">Full Map Duo</option>
+            <option value="SQUAD" selected>Full Map Squad</option>
+          </optgroup>
         </select>
       </div>
 

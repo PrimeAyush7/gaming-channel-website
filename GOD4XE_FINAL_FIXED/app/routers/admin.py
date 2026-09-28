@@ -648,10 +648,21 @@ async def admin_tournament_new_form(request: Request):
     if not auth_service.has_role_permission(admin["role"], [ROLE_SUPER_ADMIN, ROLE_TOURNAMENT_ADMIN]):
         raise HTTPException(status_code=403, detail="Unauthorized role for tournament management")
 
+    cats = tournament_service.list_categories()
+    if not cats:
+        cats = [
+            {"id": 1, "name": "Clash Squad Ranked (CS)"},
+            {"id": 2, "name": "Lone Wolf (1v1 / 2v2)"},
+            {"id": 3, "name": "Battle Royale (Full Map)"},
+            {"id": 4, "name": "Guns Only Custom"}
+        ]
     return templates.TemplateResponse(request=request, name="admin/tournament_form.html", context={
         "request": request,
         "admin": admin,
         "tournament": None,
+        "categories": cats,
+        "subcategories": [],
+        "guns": [],
         "active_nav": "tournaments"
     })
 
@@ -664,6 +675,10 @@ async def admin_tournament_create(
     banner_url: str = Form(""),
     game: str = Form("FREE_FIRE"),
     mode: str = Form("SOLO"),
+    category_id: int = Form(None),
+    subcategory_id: int = Form(None),
+    allowed_gun_id: int = Form(None),
+    per_kill_diamonds: int = Form(0),
     entry_type: str = Form("FREE"),
     entry_fee_diamonds: int = Form(0),
     prize_amount_diamonds: int = Form(0),
@@ -688,6 +703,10 @@ async def admin_tournament_create(
             description=description,
             game=game,
             mode=mode,
+            category_id=category_id,
+            subcategory_id=subcategory_id,
+            allowed_gun_id=allowed_gun_id,
+            per_kill_diamonds=per_kill_diamonds,
             entry_type=entry_type,
             entry_fee_diamonds=entry_fee_diamonds,
             prize_type="DIAMONDS",
@@ -757,20 +776,23 @@ async def admin_update_room(
 
 @router.post("/tournaments/{tournament_id}/broadcast")
 async def admin_broadcast_tournament(
-    tournament_id: int,
-    request: Request,
-    csrf_token: str = Form(...)
+    tournament_id: int, request: Request, csrf_token: str = Form(...)
 ):
     admin = check_admin(request)
     if not admin:
         return RedirectResponse(url="/admin/login", status_code=302)
     check_csrf(request, csrf_token, admin)
     try:
-        from app.services import content_features as bot_notifications
-        bot_notifications.notify_tournament_created(tournament_id)
-        return RedirectResponse(url="/admin/tournaments?msg=Tournament+broadcast+sent+to+Discord+and+Telegram+successfully", status_code=status.HTTP_303_SEE_OTHER)
+        from app.services import bot_notifications
+        import urllib.parse
+        res = bot_notifications.notify_tournament_created(tournament_id)
+        tg_res = res.get("telegram", "Unknown")
+        dc_res = res.get("discord", "Unknown")
+        msg = f"Broadcast Status: Telegram -> {tg_res} | Discord -> {dc_res}"
+        return RedirectResponse(url=f"/admin/tournaments?msg={urllib.parse.quote(msg)}", status_code=status.HTTP_303_SEE_OTHER)
     except Exception as e:
-        return RedirectResponse(url=f"/admin/tournaments?error=Broadcast+failed:+{str(e)}", status_code=status.HTTP_303_SEE_OTHER)
+        import urllib.parse
+        return RedirectResponse(url=f"/admin/tournaments?error=Broadcast+failed:+{urllib.parse.quote(str(e))}", status_code=status.HTTP_303_SEE_OTHER)
 
 @router.post("/tournaments/{tournament_id}/status")
 async def admin_update_tournament_status(
@@ -1594,3 +1616,31 @@ async def admin_edit_community(
     verify_csrf(admin, csrf_token)
     content_features.update_community(c_id, platform=platform, name=name, url=url, display_order=display_order, is_active=is_active)
     return RedirectResponse(url="/admin/communities", status_code=status.HTTP_303_SEE_OTHER)
+
+
+@router.post("/tournaments/{tournament_id}/delete")
+async def admin_delete_tournament(
+    tournament_id: int, request: Request, csrf_token: str = Form(...)
+):
+    admin = check_admin(request)
+    if not admin:
+        return RedirectResponse(url="/admin/login", status_code=302)
+    check_csrf(request, csrf_token, admin)
+    if not auth_service.has_role_permission(admin["role"], [ROLE_SUPER_ADMIN, ROLE_TOURNAMENT_ADMIN]):
+        raise HTTPException(status_code=403, detail="Unauthorized role")
+    tournament_service.delete_tournament(tournament_id)
+    return RedirectResponse(url="/admin/tournaments?msg=Tournament+deleted+successfully", status_code=status.HTTP_303_SEE_OTHER)
+
+@router.post("/tournaments/{tournament_id}/toggle-visibility")
+async def admin_toggle_tournament_visibility(
+    tournament_id: int, request: Request, csrf_token: str = Form(...)
+):
+    admin = check_admin(request)
+    if not admin:
+        return RedirectResponse(url="/admin/login", status_code=302)
+    check_csrf(request, csrf_token, admin)
+    if not auth_service.has_role_permission(admin["role"], [ROLE_SUPER_ADMIN, ROLE_TOURNAMENT_ADMIN]):
+        raise HTTPException(status_code=403, detail="Unauthorized role")
+    new_state = tournament_service.toggle_tournament_visibility(tournament_id)
+    state_str = "Live+(Published)" if new_state == 1 else "Hidden+(Unpublished)"
+    return RedirectResponse(url=f"/admin/tournaments?msg=Tournament+is+now+{state_str}", status_code=status.HTTP_303_SEE_OTHER)
