@@ -33,10 +33,14 @@
         <select name="subcategory_id" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">
           <option value="">None (Default)</option>
           {% for s in subcategories %}
-          <option value="{{ s.id }}" {% if tournament and tournament.subcategory_id == s.id %}selected{% endif %}>{{ s.name }}</option>
+          <option value="{{ s.id }}" {% if tournament and tournament.subcategory_id == s.id %}selected{% endif %}>
+            {% if s.category_name %}[{{ s.category_name }}] {% endif %}{{ s.name }}
+          </option>
           {% endfor %}
         </select>
       </div>
+    <div style="margin-top: -0.75rem; margin-bottom: 1rem;">
+      <small style="color: #a855f7;">💡 Manage or add new Categories & Subcategories: <a href="/admin/categories" target="_blank" style="color: #c084fc; text-decoration: underline; font-weight: 600;">Open Categories Manager →</a></small>
     </div>
 
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
@@ -58,12 +62,14 @@
 
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
       <div>
-        <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Mode</label>
+        <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Mode / Format</label>
         <select name="mode" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">
           <optgroup label="Clash Squad (CS) Modes" style="background: #120726; color: #c084fc;">
-            <option value="CS_RANK_4V4">CS Ranked (4v4 Squad Clash)</option>
+            <option value="CS_RANK_4V4" selected>CS Ranked (4v4 Squad Clash)</option>
             <option value="CS_GUNS_ONLY">CS Guns Only (No Grenades/Custom)</option>
             <option value="CS_DUO_2V2">CS 2v2 Duo Clash</option>
+            <option value="CS_1V1">CS 1v1 Duel</option>
+            <option value="CS_6V6">CS 6v6 Custom</option>
           </optgroup>
           <optgroup label="Lone Wolf Modes" style="background: #120726; color: #fbbf24;">
             <option value="LONE_WOLF_1V1">Lone Wolf 1v1 (Duel)</option>
@@ -72,11 +78,18 @@
           <optgroup label="Battle Royale (Full Map)" style="background: #120726; color: #10b981;">
             <option value="SOLO">Full Map Solo</option>
             <option value="DUO">Full Map Duo</option>
-            <option value="SQUAD" selected>Full Map Squad</option>
+            <option value="SQUAD">Full Map Squad</option>
           </optgroup>
         </select>
       </div>
 
+      <div>
+        <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Custom Mode Name (Optional)</label>
+        <input type="text" name="custom_mode" placeholder="e.g. 1v1 Sniper Only, Rush Hour" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr; margin-bottom: 1.25rem;">
       <div>
         <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Map</label>
         <select name="map_name" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">

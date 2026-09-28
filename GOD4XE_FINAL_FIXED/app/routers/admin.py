@@ -641,6 +641,23 @@ async def admin_tournaments(request: Request, status: str = None, msg: str = Non
     })
 
 @router.get("/tournaments/new", response_class=HTMLResponse)
+
+def _safe_opt_int(val):
+    if val is None or str(val).strip() == '':
+        return None
+    try:
+        return int(str(val).strip())
+    except (ValueError, TypeError):
+        return None
+
+def _safe_int(val, default=0):
+    if val is None or str(val).strip() == '':
+        return default
+    try:
+        return int(float(str(val).strip()))
+    except (ValueError, TypeError):
+        return default
+
 async def admin_tournament_new_form(request: Request):
     admin = check_admin(request)
     if not admin:
@@ -656,13 +673,16 @@ async def admin_tournament_new_form(request: Request):
             {"id": 3, "name": "Battle Royale (Full Map)"},
             {"id": 4, "name": "Guns Only Custom"}
         ]
+    subs = tournament_service.list_subcategories()
+    guns = tournament_service.list_guns()
+
     return templates.TemplateResponse(request=request, name="admin/tournament_form.html", context={
         "request": request,
         "admin": admin,
         "tournament": None,
         "categories": cats,
-        "subcategories": [],
-        "guns": [],
+        "subcategories": subs,
+        "guns": guns,
         "active_nav": "tournaments"
     })
 
@@ -674,20 +694,21 @@ async def admin_tournament_create(
     description: str = Form(""),
     banner_url: str = Form(""),
     game: str = Form("FREE_FIRE"),
-    mode: str = Form("SOLO"),
-    category_id: int = Form(None),
-    subcategory_id: int = Form(None),
-    allowed_gun_id: int = Form(None),
-    per_kill_diamonds: int = Form(0),
+    mode: str = Form("SQUAD"),
+    custom_mode: str = Form(""),
+    category_id: str = Form(""),
+    subcategory_id: str = Form(""),
+    allowed_gun_id: str = Form(""),
+    per_kill_diamonds: str = Form("0"),
     entry_type: str = Form("FREE"),
-    entry_fee_diamonds: int = Form(0),
-    prize_amount_diamonds: int = Form(0),
-    max_slots: int = Form(48),
+    entry_fee_diamonds: str = Form("0"),
+    prize_amount_diamonds: str = Form("0"),
+    max_slots: str = Form("48"),
     map_name: str = Form("BERMUDA"),
     start_time: str = Form(...),
     rules: str = Form(""),
-    is_featured: int = Form(0),
-    is_published: int = Form(1)
+    is_featured: str = Form("0"),
+    is_published: str = Form("1")
 ):
     admin = check_admin(request)
     if not admin:
@@ -696,27 +717,38 @@ async def admin_tournament_create(
     if not auth_service.has_role_permission(admin["role"], [ROLE_SUPER_ADMIN, ROLE_TOURNAMENT_ADMIN]):
         raise HTTPException(status_code=403, detail="Unauthorized role")
 
+    clean_mode = custom_mode.strip() if custom_mode and custom_mode.strip() else mode.strip()
+    clean_category_id = _safe_opt_int(category_id)
+    clean_subcategory_id = _safe_opt_int(subcategory_id)
+    clean_allowed_gun_id = _safe_opt_int(allowed_gun_id)
+    clean_per_kill = _safe_int(per_kill_diamonds, 0)
+    clean_entry_fee = _safe_int(entry_fee_diamonds, 0)
+    clean_prize = _safe_int(prize_amount_diamonds, 0)
+    clean_max_slots = _safe_int(max_slots, 48)
+    clean_featured = _safe_int(is_featured, 0)
+    clean_published = _safe_int(is_published, 1)
+
     try:
         t = tournament_service.create_tournament(
             title=title,
             banner_url=banner_url,
             description=description,
             game=game,
-            mode=mode,
-            category_id=category_id,
-            subcategory_id=subcategory_id,
-            allowed_gun_id=allowed_gun_id,
-            per_kill_diamonds=per_kill_diamonds,
+            mode=clean_mode,
+            category_id=clean_category_id,
+            subcategory_id=clean_subcategory_id,
+            allowed_gun_id=clean_allowed_gun_id,
+            per_kill_diamonds=clean_per_kill,
             entry_type=entry_type,
-            entry_fee_diamonds=entry_fee_diamonds,
+            entry_fee_diamonds=clean_entry_fee,
             prize_type="DIAMONDS",
-            prize_amount_diamonds=prize_amount_diamonds,
-            max_slots=max_slots,
+            prize_amount_diamonds=clean_prize,
+            max_slots=clean_max_slots,
             rules=rules,
             map_name=map_name,
             start_time=start_time,
-            is_featured=is_featured,
-            is_published=is_published
+            is_featured=clean_featured,
+            is_published=clean_published
         )
         auth_service.log_admin_action(
             admin_id=admin["admin_id"],

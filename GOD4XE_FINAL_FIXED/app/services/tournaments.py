@@ -838,3 +838,24 @@ def toggle_tournament_visibility(tournament_id: int) -> int:
         cursor.execute("UPDATE tournaments SET is_published = 1 - COALESCE(is_published, 1), updated_at = CURRENT_TIMESTAMP WHERE id = %s RETURNING is_published;", (tournament_id,))
         row = cursor.fetchone()
         return row["is_published"] if row else 0
+
+def list_subcategories(category_id: int = None, only_active: bool = True) -> list[dict]:
+    with get_db() as conn:
+        cursor = conn.cursor()
+        where = ["1=1"]
+        params = []
+        if only_active:
+            where.append("s.is_active = 1")
+        if category_id:
+            where.append("s.category_id = %s")
+            params.append(category_id)
+        where_clause = " AND ".join(where)
+        cursor.execute(f"""
+            SELECT s.id, s.category_id, s.name, s.slug, s.description, s.image_url, s.display_order, s.is_active,
+                   c.name as category_name
+            FROM tournament_subcategories s
+            LEFT JOIN tournament_categories c ON s.category_id = c.id
+            WHERE {where_clause}
+            ORDER BY c.display_order ASC, s.display_order ASC, s.id ASC;
+        """, tuple(params))
+        return [dict(r) for r in cursor.fetchall()]
