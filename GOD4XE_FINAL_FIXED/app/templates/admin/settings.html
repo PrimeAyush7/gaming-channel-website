@@ -30,6 +30,32 @@
       <small class="text-muted">Used to generate valid clickable buttons for Telegram match registrations and Discord alerts.</small>
     </div>
 
+    <!-- Custom Description Links (Up to 6 Links) -->
+    <div style="margin: 1.5rem 0; padding: 1.25rem; background: rgba(168, 85, 247, 0.08); border: 1px solid var(--admin-border); border-radius: 8px;">
+      <h3 style="font-size: 1rem; color: #fff; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.5rem;">
+        <span>🔗</span> Website Description Custom Links (Up to 6 Links)
+      </h3>
+      <p style="color: var(--text-dim); font-size: 0.85rem; margin-bottom: 1rem;">
+        Yeh 5-6 links website description ke theek niche (Homepage Hero aur Footer me) button format me show honge. Har link ka Title aur URL yahan set karein:
+      </p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+        {% for i in range(1, 7) %}
+        <div style="background: rgba(0,0,0,0.3); padding: 0.85rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+          <strong style="color: var(--neon-purple); font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">Link #{{ i }}</strong>
+          <div style="margin-bottom: 0.5rem;">
+            <label style="font-size: 0.75rem; color: #ccc;">Link Title / Button Name</label>
+            <input type="text" name="desc_link_{{ i }}_title" value="{{ settings.get('desc_link_' ~ i ~ '_title', '') }}" class="form-control" placeholder="e.g. Join WhatsApp Community">
+          </div>
+          <div>
+            <label style="font-size: 0.75rem; color: #ccc;">Destination URL</label>
+            <input type="url" name="desc_link_{{ i }}_url" value="{{ settings.get('desc_link_' ~ i ~ '_url', '') }}" class="form-control" placeholder="https://chat.whatsapp.com/...">
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
     <div class="form-row">
       <div class="form-group">
         <label class="form-label" for="logo_url">Custom Logo URL</label>
@@ -172,6 +198,23 @@
             <label style="font-size: 0.8rem;">Telegram Channel / Group Chat ID</label>
             <input type="text" name="telegram_chat_id" value="{{ settings.get('telegram_chat_id', '') }}" class="form-control" placeholder="@god4xe_channel or -100xxxxxxxxxx">
             <small class="text-muted">Bot must be added as Admin to the channel/group.</small>
+          </div>
+        </div>
+
+        <!-- WhatsApp Integration -->
+        <div style="background: rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 1rem; border: 1px solid rgba(255,255,255,0.06);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+            <strong style="color: #25d366; font-size: 1rem;">💬 WhatsApp Integration</strong>
+            <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; cursor: pointer;">
+              <input type="checkbox" name="notify_whatsapp_enabled" value="true" {% if settings.get('notify_whatsapp_enabled', '') in ('true', '1', 'on', 'yes') %}checked{% endif %}>
+              <span style="color: #fff;">Enable Alerts</span>
+            </label>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.75rem;">
+            <label style="font-size: 0.8rem;">WhatsApp Webhook / Forwarder URL</label>
+            <input type="url" name="whatsapp_webhook_url" value="{{ settings.get('whatsapp_webhook_url', '') }}" class="form-control" placeholder="https://hook.eu1.make.com/... or UltraMsg/Zapier/n8n webhook">
+            <small class="text-muted">Automatically forwards new Posts and Tournament alerts to your WhatsApp Channel/Group.</small>
           </div>
         </div>
       </div>

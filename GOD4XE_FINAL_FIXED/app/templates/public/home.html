@@ -22,8 +22,27 @@
           {{ settings.get('hero_headline', 'DOMINATE THE LOBBY WITH PRO CONFIGS & GUIDES') }}
         </h1>
         <p class="hero-desc">
-          Official gaming hub featuring battle-tested sensitivity configs, patch updates, daily Free Fire tournaments, and official Android app downloads.
+          {{ settings.get('site_description') or 'Official gaming hub featuring battle-tested sensitivity configs, patch updates, daily Free Fire tournaments, and official Android app downloads.' }}
         </p>
+
+        <!-- Custom Description Links (Configured in Admin Settings) -->
+        {% set custom_desc_links = [
+          (settings.get('desc_link_1_title', ''), settings.get('desc_link_1_url', '')),
+          (settings.get('desc_link_2_title', ''), settings.get('desc_link_2_url', '')),
+          (settings.get('desc_link_3_title', ''), settings.get('desc_link_3_url', '')),
+          (settings.get('desc_link_4_title', ''), settings.get('desc_link_4_url', '')),
+          (settings.get('desc_link_5_title', ''), settings.get('desc_link_5_url', '')),
+          (settings.get('desc_link_6_title', ''), settings.get('desc_link_6_url', ''))
+        ] %}
+        <div class="hero-custom-links" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.6rem; margin-bottom: 1.25rem;">
+          {% for title, url in custom_desc_links %}
+            {% if title and url %}
+            <a href="{{ url }}" target="_blank" rel="noopener noreferrer" style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #e9d5ff; padding: 0.35rem 0.8rem; border-radius: 6px; text-decoration: none; font-size: 0.82rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.35rem; transition: all 0.2s;">
+              <span>🔗</span> {{ title }}
+            </a>
+            {% endif %}
+          {% endfor %}
+        </div>
 
         <!-- Fast Action Buttons: Esports, Announcements, App & Login -->
         <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.5rem;">

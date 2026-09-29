@@ -222,7 +222,21 @@ async def create_post_submit(
             "active_nav": "posts"
         }, status_code=400)
 
-    return RedirectResponse(url="/admin/posts?msg=Post+created+successfully", status_code=status.HTTP_302_FOUND)
+    # Auto Broadcast to Telegram, Discord, WhatsApp
+    broadcast_notice = ""
+    if data.get("is_published"):
+        try:
+            from app.services import bot_notifications
+            import urllib.parse
+            res = bot_notifications.notify_post_created(post_id, request=request)
+            tg = res.get("telegram", "Skipped")
+            dc = res.get("discord", "Skipped")
+            wa = res.get("whatsapp", "Skipped")
+            broadcast_notice = f"+|+Broadcast:+Telegram:{tg}+|+Discord:{dc}+|+WhatsApp:{wa}"
+        except Exception:
+            pass
+
+    return RedirectResponse(url=f"/admin/posts?msg=Post+created+successfully{broadcast_notice}", status_code=status.HTTP_302_FOUND)
 
 @router.get("/posts/edit/{post_id}", response_class=HTMLResponse)
 async def edit_post_page(request: Request, post_id: int):
@@ -298,6 +312,27 @@ async def update_post_submit(
         }, status_code=400)
 
     return RedirectResponse(url="/admin/posts?msg=Post+updated+successfully", status_code=status.HTTP_302_FOUND)
+
+@router.post("/posts/{post_id}/broadcast")
+async def admin_broadcast_post(
+    post_id: int, request: Request, csrf_token: str = Form(...)
+):
+    admin = check_admin(request)
+    if not admin:
+        return RedirectResponse(url="/admin/login", status_code=302)
+    check_csrf(request, csrf_token, admin)
+    try:
+        from app.services import bot_notifications
+        import urllib.parse
+        res = bot_notifications.notify_post_created(post_id, request=request)
+        tg_res = res.get("telegram", "Unknown")
+        dc_res = res.get("discord", "Unknown")
+        wa_res = res.get("whatsapp", "Unknown")
+        msg = f"Broadcast Status: Telegram -> {tg_res} | Discord -> {dc_res} | WhatsApp -> {wa_res}"
+        return RedirectResponse(url=f"/admin/posts?msg={urllib.parse.quote(msg)}", status_code=status.HTTP_303_SEE_OTHER)
+    except Exception as e:
+        import urllib.parse
+        return RedirectResponse(url=f"/admin/posts?error=Broadcast+failed:+{urllib.parse.quote(str(e))}", status_code=status.HTTP_303_SEE_OTHER)
 
 @router.post("/posts/delete/{post_id}")
 async def delete_post_action(request: Request, post_id: int, csrf_token: str = Form(...)):
@@ -603,9 +638,23 @@ async def update_settings_submit(
     telegram_chat_id: str = Form(""),
     notify_discord_enabled: str = Form("false"),
     notify_telegram_enabled: str = Form("false"),
+    notify_whatsapp_enabled: str = Form("false"),
+    whatsapp_webhook_url: str = Form(""),
     apk_download_url: str = Form(""),
     google_client_id: str = Form(""),
-    app_url: str = Form("https://god4xe.onrender.com")
+    app_url: str = Form("https://god4xe.onrender.com"),
+    desc_link_1_title: str = Form(""),
+    desc_link_1_url: str = Form(""),
+    desc_link_2_title: str = Form(""),
+    desc_link_2_url: str = Form(""),
+    desc_link_3_title: str = Form(""),
+    desc_link_3_url: str = Form(""),
+    desc_link_4_title: str = Form(""),
+    desc_link_4_url: str = Form(""),
+    desc_link_5_title: str = Form(""),
+    desc_link_5_url: str = Form(""),
+    desc_link_6_title: str = Form(""),
+    desc_link_6_url: str = Form("")
 ):
     admin = check_admin(request)
     if not admin:
@@ -635,7 +684,21 @@ async def update_settings_submit(
         "notify_telegram_enabled": notify_telegram_enabled,
         "apk_download_url": apk_download_url,
         "google_client_id": google_client_id,
-        "app_url": (app_url or "https://god4xe.onrender.com").rstrip("/")
+        "app_url": (app_url or "https://god4xe.onrender.com").rstrip("/"),
+        "notify_whatsapp_enabled": notify_whatsapp_enabled,
+        "whatsapp_webhook_url": whatsapp_webhook_url,
+        "desc_link_1_title": desc_link_1_title,
+        "desc_link_1_url": desc_link_1_url,
+        "desc_link_2_title": desc_link_2_title,
+        "desc_link_2_url": desc_link_2_url,
+        "desc_link_3_title": desc_link_3_title,
+        "desc_link_3_url": desc_link_3_url,
+        "desc_link_4_title": desc_link_4_title,
+        "desc_link_4_url": desc_link_4_url,
+        "desc_link_5_title": desc_link_5_title,
+        "desc_link_5_url": desc_link_5_url,
+        "desc_link_6_title": desc_link_6_title,
+        "desc_link_6_url": desc_link_6_url
     })
     return RedirectResponse(url="/admin/settings?msg=Settings+saved+successfully", status_code=status.HTTP_302_FOUND)
 

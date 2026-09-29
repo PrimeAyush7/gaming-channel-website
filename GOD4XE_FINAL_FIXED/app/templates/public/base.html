@@ -229,6 +229,21 @@
         <div class="footer-brand">
           <div class="site-brand-text">{{ settings.site_name }} <span>HUB</span></div>
           <p>{{ settings.site_description }}</p>
+          {% set custom_footer_links = [
+            (settings.get('desc_link_1_title', ''), settings.get('desc_link_1_url', '')),
+            (settings.get('desc_link_2_title', ''), settings.get('desc_link_2_url', '')),
+            (settings.get('desc_link_3_title', ''), settings.get('desc_link_3_url', '')),
+            (settings.get('desc_link_4_title', ''), settings.get('desc_link_4_url', '')),
+            (settings.get('desc_link_5_title', ''), settings.get('desc_link_5_url', '')),
+            (settings.get('desc_link_6_title', ''), settings.get('desc_link_6_url', ''))
+          ] %}
+          <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.6rem;">
+            {% for title, url in custom_footer_links %}
+              {% if title and url %}
+              <a href="{{ url }}" target="_blank" rel="noopener noreferrer" style="color: #c084fc; font-size: 0.8rem; text-decoration: underline; margin-right: 0.4rem;">🔗 {{ title }}</a>
+              {% endif %}
+            {% endfor %}
+          </div>
           <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem;">
             {% if settings.youtube_channel_url %}
             <a href="{{ settings.youtube_channel_url }}" target="_blank" rel="noopener noreferrer" class="btn-sm btn-edit" title="YouTube">▶ YouTube</a>
