@@ -1679,14 +1679,32 @@ body {
 
 /* ==========================================================================
    3D DUAL DEVICE SHOWCASE: MACBOOK PRO & SMARTPHONE (IPHONE PRO)
+   Placed in dedicated showcase section below the hero
    ========================================================================== */
+.device-showcase-section {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  overflow: visible;
+}
+
+.devices-stage-container {
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem 0 2rem;
+  position: relative;
+}
+
 .hero-devices-showcase {
   position: relative;
   width: 100%;
-  max-width: 580px;
-  height: 380px;
+  max-width: 860px;
+  height: 440px;
   margin: 0 auto;
-  perspective: 1200px;
+  perspective: 1400px;
   perspective-origin: 50% 50%;
   transform-style: preserve-3d;
   display: flex;
@@ -1697,13 +1715,13 @@ body {
 /* Ambient Pulsing Ground Glow */
 .devices-ambient-glow {
   position: absolute;
-  bottom: 0px;
+  bottom: -20px;
   left: 50%;
   transform: translateX(-50%);
-  width: 500px;
-  height: 120px;
+  width: 720px;
+  height: 160px;
   background: radial-gradient(ellipse at center, rgba(168, 85, 247, 0.45) 0%, rgba(217, 70, 239, 0.22) 45%, transparent 75%);
-  filter: blur(32px);
+  filter: blur(36px);
   pointer-events: none;
   animation: pulse-ambient-glow 4.5s ease-in-out infinite alternate;
   z-index: 0;
@@ -1725,23 +1743,23 @@ body {
    -------------------------------------------------------------------------- */
 .macbook-device {
   position: absolute;
-  width: 470px;
-  height: 295px;
-  left: 15px;
+  width: 580px;
+  height: 360px;
+  left: 30px;
   top: 25px;
   z-index: 1;
   transform-style: preserve-3d;
-  transform: rotateY(-8deg) rotateX(6deg);
+  transform: rotateY(-7deg) rotateX(5deg);
   animation: float-macbook 6s ease-in-out infinite alternate;
   transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 @keyframes float-macbook {
   0% {
-    transform: rotateY(-8deg) rotateX(6deg) translateY(0px);
+    transform: rotateY(-7deg) rotateX(5deg) translateY(0px);
   }
   100% {
-    transform: rotateY(-5deg) rotateX(8deg) translateY(-14px);
+    transform: rotateY(-4deg) rotateX(7deg) translateY(-16px);
   }
 }
 
@@ -1751,8 +1769,8 @@ body {
   border-radius: 14px 14px 2px 2px;
   padding: 10px 10px 14px;
   box-shadow: 
-    0 20px 50px rgba(0, 0, 0, 0.9),
-    0 0 35px rgba(168, 85, 247, 0.25),
+    0 25px 60px rgba(0, 0, 0, 0.9),
+    0 0 40px rgba(168, 85, 247, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
   position: relative;
   overflow: hidden;
@@ -1763,8 +1781,8 @@ body {
   top: 10px;
   left: 50%;
   transform: translateX(-50%);
-  width: 68px;
-  height: 11px;
+  width: 76px;
+  height: 12px;
   background: #000;
   border-bottom-left-radius: 6px;
   border-bottom-right-radius: 6px;
@@ -1784,7 +1802,7 @@ body {
 
 .macbook-screen {
   width: 100%;
-  height: 245px;
+  height: 305px;
   background: #070312;
   border-radius: 8px;
   overflow: hidden;
@@ -1801,18 +1819,6 @@ body {
   flex-direction: column;
 }
 
-.macbook-video-wrap {
-  width: 100%;
-  height: 100%;
-  position: relative;
-}
-
-.macbook-video-wrap iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
-}
-
 /* MacBook Terminal Interface */
 .macbook-terminal {
   width: 100%;
@@ -1823,25 +1829,25 @@ body {
 }
 
 .terminal-bar {
-  height: 28px;
+  height: 30px;
   background: rgba(18, 9, 36, 0.95);
   border-bottom: 1px solid rgba(168, 85, 247, 0.25);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 10px;
-  font-size: 0.72rem;
+  padding: 0 12px;
+  font-size: 0.75rem;
   font-family: monospace;
 }
 
 .terminal-dots {
   display: flex;
-  gap: 5px;
+  gap: 6px;
 }
 
 .t-dot {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   display: inline-block;
 }
@@ -1859,14 +1865,14 @@ body {
 .t-status {
   color: #10b981;
   font-weight: 700;
-  font-size: 0.68rem;
+  font-size: 0.7rem;
 }
 
 .terminal-body {
-  padding: 12px 14px;
+  padding: 16px 18px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
   flex-grow: 1;
   justify-content: space-between;
 }
@@ -1874,71 +1880,71 @@ body {
 .terminal-hero-banner {
   background: rgba(168, 85, 247, 0.12);
   border: 1px solid rgba(168, 85, 247, 0.3);
-  border-radius: 6px;
-  padding: 10px 12px;
+  border-radius: 8px;
+  padding: 14px 16px;
 }
 
 .t-tag {
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 800;
   color: #ff4d4d;
   letter-spacing: 1px;
-  margin-bottom: 4px;
+  margin-bottom: 5px;
 }
 
 .t-head {
-  font-size: 0.95rem;
+  font-size: 1.15rem;
   font-weight: 900;
   color: #fff;
   letter-spacing: 0.5px;
-  line-height: 1.25;
+  line-height: 1.3;
 }
 
 .t-meta {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--neon-violet);
   font-family: monospace;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .terminal-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  gap: 10px;
 }
 
 .t-stat-box {
   background: rgba(10, 5, 20, 0.7);
   border: 1px solid rgba(168, 85, 247, 0.2);
-  border-radius: 6px;
-  padding: 8px 6px;
+  border-radius: 8px;
+  padding: 10px 8px;
   text-align: center;
 }
 
 .t-stat-label {
-  font-size: 0.58rem;
+  font-size: 0.65rem;
   color: var(--admin-muted);
   font-weight: 700;
   text-transform: uppercase;
 }
 
 .t-stat-val {
-  font-size: 0.95rem;
+  font-size: 1.15rem;
   font-weight: 900;
   color: #fff;
-  margin-top: 2px;
+  margin-top: 3px;
 }
 
 /* MacBook Keyboard Deck / Base */
 .macbook-base {
-  height: 13px;
+  height: 14px;
   background: linear-gradient(180deg, #1f113a 0%, #0d061c 100%);
   border: 1.5px solid rgba(168, 85, 247, 0.4);
   border-top: none;
-  border-radius: 0 0 16px 16px;
-  margin: 0 -22px;
+  border-radius: 0 0 18px 18px;
+  margin: 0 -24px;
   position: relative;
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.95);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.95);
 }
 
 .macbook-indent {
@@ -1946,10 +1952,10 @@ body {
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 72px;
-  height: 4.5px;
+  width: 80px;
+  height: 5px;
   background: rgba(168, 85, 247, 0.35);
-  border-radius: 0 0 4px 4px;
+  border-radius: 0 0 5px 5px;
 }
 
 /* --------------------------------------------------------------------------
@@ -1957,23 +1963,23 @@ body {
    -------------------------------------------------------------------------- */
 .iphone-device {
   position: absolute;
-  width: 180px;
-  height: 345px;
-  right: 15px;
-  bottom: 8px;
+  width: 200px;
+  height: 385px;
+  right: 40px;
+  bottom: 12px;
   z-index: 3;
   transform-style: preserve-3d;
-  transform: rotateY(-18deg) rotateX(8deg) translateZ(40px);
+  transform: rotateY(-14deg) rotateX(6deg) translateZ(48px);
   animation: float-iphone 5s ease-in-out infinite alternate;
   transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 @keyframes float-iphone {
   0% {
-    transform: rotateY(-18deg) rotateX(8deg) translateZ(40px) translateY(0px);
+    transform: rotateY(-14deg) rotateX(6deg) translateZ(48px) translateY(0px);
   }
   100% {
-    transform: rotateY(-14deg) rotateX(12deg) translateZ(45px) translateY(-18px);
+    transform: rotateY(-11deg) rotateX(9deg) translateZ(52px) translateY(-20px);
   }
 }
 
@@ -1981,12 +1987,12 @@ body {
   width: 100%;
   height: 100%;
   background: #090314;
-  border: 3.5px solid rgba(192, 132, 252, 0.6);
-  border-radius: 36px;
+  border: 3.5px solid rgba(192, 132, 252, 0.65);
+  border-radius: 38px;
   padding: 8px;
   box-shadow: 
-    0 25px 55px rgba(0, 0, 0, 0.95),
-    0 0 35px rgba(217, 70, 239, 0.35),
+    0 25px 60px rgba(0, 0, 0, 0.95),
+    0 0 40px rgba(217, 70, 239, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
   position: relative;
   overflow: hidden;
@@ -1994,48 +2000,48 @@ body {
 
 .iphone-island-wrap {
   position: absolute;
-  top: 12px;
+  top: 14px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 8;
 }
 
 .iphone-island {
-  width: 52px;
-  height: 12px;
+  width: 56px;
+  height: 13px;
   background: #000;
   border-radius: 20px;
-  border: 0.5px solid rgba(255, 255, 255, 0.08);
+  border: 0.5px solid rgba(255, 255, 255, 0.1);
 }
 
 .iphone-screen {
   width: 100%;
   height: 100%;
   background: linear-gradient(165deg, #110626 0%, #06020c 100%);
-  border-radius: 28px;
+  border-radius: 30px;
   overflow: hidden;
   position: relative;
   display: flex;
   flex-direction: column;
   border: 1px solid rgba(168, 85, 247, 0.2);
-  padding: 24px 10px 10px;
+  padding: 26px 12px 12px;
 }
 
 .iphone-status-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 4px 6px;
-  font-size: 0.65rem;
+  padding: 0 4px 8px;
+  font-size: 0.7rem;
   font-weight: 700;
   color: #fff;
   border-bottom: 1px solid rgba(168, 85, 247, 0.15);
 }
 
 .status-pill {
-  font-size: 0.55rem;
+  font-size: 0.6rem;
   background: rgba(168, 85, 247, 0.2);
-  padding: 1px 4px;
+  padding: 1px 5px;
   border-radius: 4px;
   color: var(--neon-violet);
 }
@@ -2043,8 +2049,8 @@ body {
 .iphone-app-content {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding-top: 8px;
+  gap: 12px;
+  padding-top: 10px;
   flex-grow: 1;
 }
 
@@ -2055,18 +2061,18 @@ body {
 }
 
 .iphone-app-title {
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   font-weight: 900;
   letter-spacing: 1px;
   color: #fff;
 }
 
 .iphone-vip-badge {
-  font-size: 0.55rem;
+  font-size: 0.6rem;
   font-weight: 800;
   background: #ff4d4d;
   color: #fff;
-  padding: 1px 5px;
+  padding: 2px 6px;
   border-radius: 4px;
   letter-spacing: 0.5px;
 }
@@ -2075,26 +2081,33 @@ body {
   background: rgba(168, 85, 247, 0.1);
   border: 1px solid rgba(168, 85, 247, 0.25);
   border-radius: 8px;
-  padding: 8px;
+  padding: 9px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .radar-circle {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: rgba(168, 85, 247, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.8rem;
-  box-shadow: 0 0 10px var(--neon-purple);
+  font-size: 0.85rem;
+  box-shadow: 0 0 12px var(--neon-purple);
+  animation: radar-pulse 2s infinite;
+}
+
+@keyframes radar-pulse {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
 }
 
 .radar-text {
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   color: #fff;
   font-weight: 700;
 }
@@ -2102,23 +2115,23 @@ body {
 .iphone-sliders {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   background: rgba(8, 4, 18, 0.85);
   border: 1px solid rgba(168, 85, 247, 0.18);
   border-radius: 8px;
-  padding: 8px;
+  padding: 10px;
 }
 
 .iphone-slider-item {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
 }
 
 .slider-info {
   display: flex;
   justify-content: space-between;
-  font-size: 0.6rem;
+  font-size: 0.65rem;
   color: var(--admin-muted);
   font-weight: 600;
 }
@@ -2130,25 +2143,25 @@ body {
 
 .slider-track {
   width: 100%;
-  height: 4px;
+  height: 5px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
+  border-radius: 3px;
   overflow: hidden;
 }
 
 .slider-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--neon-purple), var(--neon-violet));
-  border-radius: 2px;
+  border-radius: 3px;
 }
 
 .iphone-quick-btn {
   background: linear-gradient(135deg, #a855f7, #d946ef);
   color: #fff;
-  border-radius: 6px;
-  padding: 6px 0;
+  border-radius: 8px;
+  padding: 8px 0;
   text-align: center;
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.5px;
   box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
@@ -2161,11 +2174,11 @@ body {
 }
 
 .iphone-home-indicator {
-  width: 44px;
-  height: 3px;
+  width: 48px;
+  height: 3.5px;
   background: rgba(255, 255, 255, 0.5);
   border-radius: 2px;
-  margin: 4px auto 0;
+  margin: 6px auto 0;
 }
 
 /* Glass Sheen Glare Reflection Sweep */
@@ -2193,22 +2206,26 @@ body {
 /* Media Query Adaptations for 3D Devices */
 @media (max-width: 1024px) {
   .hero-devices-showcase {
-    max-width: 490px;
-    height: 320px;
+    max-width: 680px;
+    height: 380px;
+  }
+  .devices-ambient-glow {
+    width: 580px;
+    height: 120px;
   }
   .macbook-device {
-    width: 390px;
-    height: 250px;
-    left: 10px;
+    width: 470px;
+    height: 300px;
+    left: 20px;
     top: 20px;
   }
   .macbook-screen {
-    height: 205px;
+    height: 250px;
   }
   .iphone-device {
-    width: 155px;
-    height: 295px;
-    right: 10px;
+    width: 170px;
+    height: 330px;
+    right: 25px;
   }
 }
 
@@ -2217,7 +2234,7 @@ body {
     width: 100%;
     max-width: 360px;
     height: 260px;
-    margin: 1.5rem auto 0;
+    margin: 1rem auto 0;
     perspective: 800px;
   }
   .devices-ambient-glow {
