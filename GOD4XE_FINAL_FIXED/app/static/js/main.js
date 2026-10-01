@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initMobileNav();
   initCardLighting();
   initAnalyticsTracking();
+  initDeviceShowcaseParallax();
 });
 
 /* --------------------------------------------------------------------------
@@ -151,5 +152,37 @@ function initAnalyticsTracking() {
       const postId = trigger.getAttribute('data-post-id') || 0;
       navigator.sendBeacon(`/api/track/youtube/${postId}`, new FormData());
     });
+  });
+}
+
+
+/* --------------------------------------------------------------------------
+   3D DUAL DEVICE SHOWCASE PARALLAX INTERACTION
+   -------------------------------------------------------------------------- */
+function initDeviceShowcaseParallax() {
+  const stage = document.getElementById('hero-devices-stage');
+  if (!stage) return;
+
+  const isTouch = window.matchMedia('(pointer: coarse)').matches;
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (isTouch || prefersReduced) return;
+
+  const macbook = stage.querySelector('.macbook-device');
+  const iphone = stage.querySelector('.iphone-device');
+  if (!macbook || !iphone) return;
+
+  stage.addEventListener('mousemove', (e) => {
+    const rect = stage.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+
+    // Smooth interactive tilt
+    macbook.style.transform = `rotateY(${x * 14 - 8}deg) rotateX(${-y * 12 + 6}deg) translateY(-8px)`;
+    iphone.style.transform = `rotateY(${x * 18 - 18}deg) rotateX(${-y * 16 + 8}deg) translateZ(42px) translateY(-10px)`;
+  });
+
+  stage.addEventListener('mouseleave', () => {
+    macbook.style.transform = '';
+    iphone.style.transform = '';
   });
 }

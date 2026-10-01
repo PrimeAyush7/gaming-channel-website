@@ -69,34 +69,129 @@
         </form>
       </div>
 
-      <!-- Featured YouTube Video or Post Highlight -->
+      <!-- 3D Dual Device Showcase: MacBook Pro + Smartphone (iPhone Pro) -->
       <div class="hero-media-col">
-        {% if featured_video %}
-        <div class="featured-video-card cyber-card">
-          <div class="video-responsive-wrapper">
-            <iframe 
-              src="https://www.youtube-nocookie.com/embed/{{ featured_video.youtube_id }}" 
-              title="{{ featured_video.title }}" 
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-              allowfullscreen>
-            </iframe>
+        <div class="hero-devices-showcase" id="hero-devices-stage">
+          
+          <!-- Ambient Ground Neon Glow -->
+          <div class="devices-ambient-glow"></div>
+
+          <!-- MacBook Pro Device -->
+          <div class="macbook-device">
+            <div class="macbook-lid">
+              <div class="macbook-notch">
+                <span class="macbook-camera"></span>
+              </div>
+              <div class="macbook-screen">
+                <div class="macbook-screen-content">
+                  {% if featured_video %}
+                  <div class="macbook-video-wrap">
+                    <iframe 
+                      src="https://www.youtube-nocookie.com/embed/{{ featured_video.youtube_id }}" 
+                      title="{{ featured_video.title }}" 
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                      allowfullscreen>
+                    </iframe>
+                  </div>
+                  {% else %}
+                  <div class="macbook-terminal">
+                    <div class="terminal-bar">
+                      <div class="terminal-dots">
+                        <span class="t-dot dot-red"></span>
+                        <span class="t-dot dot-yellow"></span>
+                        <span class="t-dot dot-green"></span>
+                      </div>
+                      <span class="t-title">GOD4XE_HUB // v2.5_PRO</span>
+                      <span class="t-status">● LIVE</span>
+                    </div>
+                    <div class="terminal-body">
+                      <div class="terminal-hero-banner">
+                        <div class="t-tag">VIP ESPORTS ENGINE</div>
+                        <div class="t-head">HEADSHOT SENSITIVITY OB50</div>
+                        <div class="t-meta">FPS: 120 | RECOIL: 0% | DPI: 800</div>
+                      </div>
+                      <div class="terminal-grid">
+                        <div class="t-stat-box">
+                          <div class="t-stat-label">HEADSHOT RATE</div>
+                          <div class="t-stat-val">96.4%</div>
+                        </div>
+                        <div class="t-stat-box">
+                          <div class="t-stat-label">TOURNAMENTS</div>
+                          <div class="t-stat-val">52 WON</div>
+                        </div>
+                        <div class="t-stat-box">
+                          <div class="t-stat-label">ACTIVE PLAYERS</div>
+                          <div class="t-stat-val">250K+</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {% endif %}
+                </div>
+                <div class="screen-glare"></div>
+              </div>
+            </div>
+            <!-- MacBook Aluminum Base Deck -->
+            <div class="macbook-base">
+              <div class="macbook-indent"></div>
+            </div>
           </div>
-          <div class="video-card-footer">
-            <div class="video-card-title">{{ featured_video.title }}</div>
-            {% if settings.youtube_channel_url %}
-            <a href="{{ settings.youtube_channel_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" data-track-youtube="1">Watch More</a>
-            {% endif %}
+
+          <!-- Smartphone / iPhone Pro Device -->
+          <div class="iphone-device">
+            <div class="iphone-bezel">
+              <!-- Dynamic Island -->
+              <div class="iphone-island-wrap">
+                <div class="iphone-island"></div>
+              </div>
+              <div class="iphone-screen">
+                <div class="iphone-status-bar">
+                  <span>9:41</span>
+                  <span class="status-pill">5G</span>
+                </div>
+                <div class="iphone-app-content">
+                  <div class="iphone-app-header">
+                    <div class="iphone-app-title">GOD4XE</div>
+                    <span class="iphone-vip-badge">VIP</span>
+                  </div>
+                  <div class="iphone-radar-box">
+                    <div class="radar-circle">
+                      <span class="radar-icon">🎯</span>
+                    </div>
+                    <div class="radar-text">Auto Aim Radar Active</div>
+                  </div>
+                  <div class="iphone-sliders">
+                    <div class="iphone-slider-item">
+                      <div class="slider-info"><span>General</span><span>98%</span></div>
+                      <div class="slider-track"><div class="slider-fill" style="width: 98%;"></div></div>
+                    </div>
+                    <div class="iphone-slider-item">
+                      <div class="slider-info"><span>Red Dot</span><span>95%</span></div>
+                      <div class="slider-track"><div class="slider-fill" style="width: 95%;"></div></div>
+                    </div>
+                    <div class="iphone-slider-item">
+                      <div class="slider-info"><span>2x Scope</span><span>92%</span></div>
+                      <div class="slider-track"><div class="slider-fill" style="width: 92%;"></div></div>
+                    </div>
+                  </div>
+                  <div class="iphone-quick-btn">
+                    <span>⚡ SYNC CONFIG</span>
+                  </div>
+                </div>
+                <div class="iphone-home-indicator"></div>
+                <div class="screen-glare"></div>
+              </div>
+            </div>
           </div>
+
         </div>
-        {% elif featured_post and featured_post.thumbnail_url %}
-        <div class="featured-video-card cyber-card">
-          <a href="/post/{{ featured_post.slug }}" class="video-responsive-wrapper" style="display: block;">
-            <img src="{{ featured_post.thumbnail_url }}" alt="{{ featured_post.title }}" style="width: 100%; height: 100%; object-fit: cover;">
-          </a>
-          <div class="video-card-footer">
-            <div class="video-card-title">{{ featured_post.title }}</div>
-            <a href="/post/{{ featured_post.slug }}" class="btn btn-primary btn-sm">Read Now</a>
-          </div>
+
+        {% if featured_video %}
+        <div class="featured-video-meta cyber-card" style="margin-top: 1.25rem; padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: space-between; border-radius: var(--radius-md);">
+          <div style="font-weight: 700; color: #fff; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 65%;">{{ featured_video.title }}</div>
+          {% if settings.youtube_channel_url %}
+          <a href="{{ settings.youtube_channel_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" data-track-youtube="1">Watch Channel</a>
+          {% endif %}
         </div>
         {% endif %}
       </div>

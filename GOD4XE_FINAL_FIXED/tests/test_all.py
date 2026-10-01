@@ -986,6 +986,51 @@ class TestNexusGamingPortal(unittest.TestCase):
         self.assertIn("admin-menu-toggle", admin_js)
         self.assertIn("admin-sidebar", admin_js)
 
+    def test_32_device_showcase_macbook_and_phone(self):
+        """Verifies 3D floating MacBook Pro and iPhone mockup showcase in hero section."""
+        from bs4 import BeautifulSoup
+        res = self.client.get("/")
+        self.assertEqual(res.status_code, 200)
+        soup = BeautifulSoup(res.text, "html.parser")
+
+        # 1. Device stage
+        stage = soup.find(id="hero-devices-stage")
+        self.assertIsNotNone(stage)
+
+        # 2. MacBook Pro elements
+        macbook = stage.find("div", class_="macbook-device")
+        self.assertIsNotNone(macbook)
+        self.assertIsNotNone(macbook.find("div", class_="macbook-notch"))
+        self.assertIsNotNone(macbook.find("div", class_="macbook-screen"))
+        self.assertIsNotNone(macbook.find("div", class_="macbook-base"))
+
+        # 3. iPhone Pro elements
+        iphone = stage.find("div", class_="iphone-device")
+        self.assertIsNotNone(iphone)
+        self.assertIsNotNone(iphone.find("div", class_="iphone-island-wrap"))
+        self.assertIsNotNone(iphone.find("div", class_="iphone-screen"))
+        self.assertIsNotNone(iphone.find("div", class_="iphone-sliders"))
+
+        # 4. Ambient glow & glare
+        self.assertIsNotNone(stage.find("div", class_="devices-ambient-glow"))
+
+        # 5. CSS animation keyframes
+        css_file = os.path.join(os.path.dirname(__file__), "..", "app", "static", "css", "style.css")
+        with open(css_file, "r") as f:
+            css = f.read()
+        self.assertIn("float-macbook", css)
+        self.assertIn("float-iphone", css)
+        self.assertIn("pulse-ambient-glow", css)
+        self.assertIn("sweep-glare", css)
+        self.assertIn("@media (max-width: 768px)", css)
+        self.assertIn("@media (max-width: 400px)", css)
+
+        # 6. JS Parallax
+        js_file = os.path.join(os.path.dirname(__file__), "..", "app", "static", "js", "main.js")
+        with open(js_file, "r") as f:
+            js = f.read()
+        self.assertIn("initDeviceShowcaseParallax", js)
+
 
 
 class TestEsportsFullSuite(unittest.TestCase):

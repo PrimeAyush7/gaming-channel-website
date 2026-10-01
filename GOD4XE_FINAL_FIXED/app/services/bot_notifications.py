@@ -52,9 +52,10 @@ def get_notification_settings() -> dict:
         "notify_whatsapp_enabled",
         "app_url"
     )
+    placeholders = ','.join(['%s'] * len(keys))
     with get_db() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT key, value FROM site_settings WHERE key IN %s;", (keys,))
+        cursor.execute(f"SELECT key, value FROM site_settings WHERE key IN ({placeholders});", keys)
         settings = {r["key"]: r["value"] for r in cursor.fetchall()}
     return settings
 
