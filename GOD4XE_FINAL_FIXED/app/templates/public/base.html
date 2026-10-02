@@ -33,7 +33,7 @@
   <link rel="apple-touch-icon" href="/static/images/god4xe-logo.png">
 
   <link rel="icon" type="image/svg+xml" href="{{ settings.favicon_url or '/static/images/favicon.svg' }}">
-  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/style.css?v=2.6.0">
 
   {% if ads and ads.is_enabled and ads.client_id %}
   <!-- Google AdSense Official Loader (Active when client_id is set) -->
@@ -307,7 +307,7 @@
     </div>
   </footer>
 
-  <script src="/static/js/main.js"></script>
+  <script src="/static/js/main.js?v=2.6.0"></script>
   {% block extra_scripts %}{% endblock %}
 <script>
 if ('serviceWorker' in navigator) {
