@@ -1,3 +1,8 @@
+from app.config import UPLOAD_DIR, APP_DIR, BASE_DIR
+from PIL import Image
+from pathlib import Path
+import io
+import html
 import uuid
 import os
 import datetime
@@ -256,27 +261,87 @@ def send_discord_webhook(webhook_url: str, payload: dict) -> bool:
         logger.warning(f"[DISCORD WEBHOOK FAILED] {e}")
         return False
 
-def _resolve_local_image_path_cf(photo_url: str) -> str:
-    if not photo_url:
-        return None
-    url_or_path = str(photo_url).strip()
-    if "/static/uploads/" in url_or_path:
-        filename = url_or_path.split("/static/uploads/")[-1].split("?")[0]
-        local_path = os.path.join("app", "static", "uploads", filename)
-        if os.path.isfile(local_path):
-            return local_path
-    clean = url_or_path.lstrip("/")
+def prepare_telegram_caption_cf(text: str, max_len: int = 1000) -> str:
+    if not text:
+        return ""
+    if len(text) <= max_len:
+        return text
+    truncated = text[:max_len]
+    last_open = truncated.rfind('<')
+    last_close = truncated.rfind('>')
+    if last_open > last_close:
+        truncated = truncated[:last_open]
+    truncated = truncated.rstrip() + "..."
+    tags = re.findall(r'<(/?[a-zA-Z0-9]+)[^>]*>', truncated)
+    open_tags = []
+    for t in tags:
+        if t.startswith('/'):
+            tag_name = t[1:].lower()
+            if open_tags and open_tags[-1] == tag_name:
+                open_tags.pop()
+        else:
+            open_tags.append(t.lower())
+    for t in reversed(open_tags):
+        truncated += f"</{t}>"
+    return truncated
+
+def strip_html_tags_cf(text: str) -> str:
+    return re.sub(r'<[^>]+>', '', text)
+
+def _fetch_and_convert_to_jpeg_cf(photo_source: str) -> tuple:
+    if not photo_source:
+        return None, "Empty source"
+    src = str(photo_source).strip()
+    raw_bytes = None
+    clean_url = src.split("?")[0].rstrip("/")
+    filename = clean_url.split("/")[-1] if "/" in clean_url else clean_url
+    filename = urllib.parse.unquote(filename)
+
     candidates = [
-        clean,
-        os.path.join("app", clean),
-        os.path.join("app", "static", "uploads", os.path.basename(clean))
+        UPLOAD_DIR / filename,
+        BASE_DIR / src.lstrip("/"),
+        APP_DIR / src.lstrip("/"),
+        Path(src)
     ]
     for c in candidates:
-        if os.path.isfile(c):
-            return c
-    return None
+        if c.is_file():
+            try:
+                with open(c, "rb") as f:
+                    raw_bytes = f.read()
+                break
+            except Exception:
+                pass
 
-def _send_telegram_photo_multipart_cf(bot_token: str, chat_id: str, file_path: str, caption: str = None, reply_markup: dict = None) -> bool:
+    if not raw_bytes and (src.startswith("http://") or src.startswith("https://")):
+        try:
+            req = urllib.request.Request(
+                src,
+                headers={
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+                    "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8"
+                }
+            )
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                raw_bytes = resp.read()
+        except Exception as e:
+            logger.warning(f"[PHOTO DOWNLOAD FAILED CF] {src}: {e}")
+
+    if not raw_bytes:
+        return None, "Not found"
+
+    try:
+        img = Image.open(io.BytesIO(raw_bytes))
+        if img.mode != "RGB":
+            img = img.convert("RGB")
+        if max(img.size) > 2560:
+            img.thumbnail((2560, 2560), Image.Resampling.LANCZOS)
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG", quality=88, optimize=True)
+        return buf.getvalue(), None
+    except Exception as e:
+        return None, str(e)
+
+def _send_telegram_photo_multipart_cf(bot_token: str, chat_id: str, jpeg_bytes: bytes, caption: str = None, reply_markup: dict = None, parse_mode: str = "HTML") -> bool:
     boundary = f"----WebKitFormBoundary{uuid.uuid4().hex}"
     parts = []
     def add_field(name, val):
@@ -284,24 +349,16 @@ def _send_telegram_photo_multipart_cf(bot_token: str, chat_id: str, file_path: s
         parts.append(hdr)
     add_field("chat_id", chat_id)
     if caption:
-        safe_caption = caption if len(caption) <= 1024 else caption[:1020] + "..."
+        safe_caption = prepare_telegram_caption_cf(caption, max_len=1020) if parse_mode else caption[:1020]
         add_field("caption", safe_caption)
-        add_field("parse_mode", "HTML")
+        if parse_mode:
+            add_field("parse_mode", parse_mode)
     if reply_markup:
         add_field("reply_markup", json.dumps(reply_markup))
-    filename = os.path.basename(file_path)
-    ext = os.path.splitext(filename)[1].lower()
-    mime = "image/png"
-    if ext in (".jpg", ".jpeg"):
-        mime = "image/jpeg"
-    elif ext == ".webp":
-        mime = "image/webp"
-    elif ext == ".gif":
-        mime = "image/gif"
-    file_header = ("--" + boundary + "\r\nContent-Disposition: form-data; name=\"photo\"; filename=\"" + filename + "\"\r\nContent-Type: " + mime + "\r\n\r\n").encode("utf-8")
-    with open(file_path, "rb") as f:
-        file_bytes = f.read()
-    body = b"".join(parts) + file_header + file_bytes + ("\r\n--" + boundary + "--\r\n").encode("utf-8")
+    file_header = ("--" + boundary + "\r\nContent-Disposition: form-data; name=\"photo\"; filename=\"banner.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n").encode("utf-8")
+    with open("/dev/null", "rb") as f:
+        pass
+    body = b"".join(parts) + file_header + jpeg_bytes + ("\r\n--" + boundary + "--\r\n").encode("utf-8")
     url = f"https://api.telegram.org/bot{bot_token.strip()}/sendPhoto"
     req = urllib.request.Request(
         url,
@@ -309,8 +366,16 @@ def _send_telegram_photo_multipart_cf(bot_token: str, chat_id: str, file_path: s
         headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
         method="POST"
     )
-    with urllib.request.urlopen(req, timeout=10) as resp:
-        return resp.status == 200
+    try:
+        with urllib.request.urlopen(req, timeout=12) as resp:
+            return resp.status == 200
+    except urllib.error.HTTPError as e:
+        if parse_mode and e.code == 400:
+            plain_caption = strip_html_tags_cf(caption)
+            return _send_telegram_photo_multipart_cf(bot_token, chat_id, jpeg_bytes, plain_caption, reply_markup, parse_mode=None)
+        return False
+    except Exception:
+        return False
 
 def send_telegram_message(bot_token: str, chat_id: str, text: str, button_text: str = None, button_url: str = None, photo_url: str = None) -> bool:
     """Dispatches an HTML formatted message (with photo if available) to Telegram Bot API."""
@@ -325,20 +390,19 @@ def send_telegram_message(bot_token: str, chat_id: str, text: str, button_text: 
             ]
         }
 
-    # Try photo if provided
+    # 1. Attempt sendPhoto using JPEG bytes upload
     if photo_url and str(photo_url).strip():
         clean_photo = str(photo_url).strip()
-        local_file = _resolve_local_image_path_cf(clean_photo)
-        if local_file:
-            try:
-                if _send_telegram_photo_multipart_cf(bot_token, chat_id, local_file, caption=text, reply_markup=reply_markup):
-                    return True
-            except Exception as e:
-                logger.warning(f"[TELEGRAM PHOTO MULTIPART FAILED, FALLING BACK] {e}")
+        jpeg_bytes, err = _fetch_and_convert_to_jpeg_cf(clean_photo)
+        if jpeg_bytes:
+            if _send_telegram_photo_multipart_cf(bot_token, chat_id, jpeg_bytes, caption=text, reply_markup=reply_markup, parse_mode="HTML"):
+                return True
+
+        # Fallback for remote URLs: try sending photo URL directly if bytes failed
         elif clean_photo.startswith("http://") or clean_photo.startswith("https://"):
             try:
                 url = f"https://api.telegram.org/bot{bot_token.strip()}/sendPhoto"
-                safe_caption = text if len(text) <= 1024 else text[:1020] + "..."
+                safe_caption = prepare_telegram_caption_cf(text, max_len=1020)
                 payload = {
                     "chat_id": chat_id,
                     "photo": clean_photo,
@@ -354,11 +418,11 @@ def send_telegram_message(bot_token: str, chat_id: str, text: str, button_text: 
                     headers={"Content-Type": "application/json"},
                     method="POST"
                 )
-                with urllib.request.urlopen(req, timeout=10) as resp:
+                with urllib.request.urlopen(req, timeout=12) as resp:
                     if resp.status == 200:
                         return True
-            except Exception as e:
-                logger.warning(f"[TELEGRAM PHOTO URL FAILED, FALLING BACK] {e}")
+            except Exception:
+                pass
 
     try:
         url = f"https://api.telegram.org/bot{bot_token.strip()}/sendMessage"
@@ -380,8 +444,7 @@ def send_telegram_message(bot_token: str, chat_id: str, text: str, button_text: 
         )
         with urllib.request.urlopen(req, timeout=8) as resp:
             return resp.status == 200
-    except Exception as e:
-        logger.warning(f"[TELEGRAM MESSAGE FAILED] {e}")
+    except Exception:
         return False
 
 def notify_tournament_created(tournament_id: int):

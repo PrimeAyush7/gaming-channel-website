@@ -275,7 +275,8 @@ async def update_post_submit(
     seo_title: str = Form(""),
     seo_description: str = Form(""),
     is_published: int = Form(0),
-    is_featured: int = Form(0)
+    is_featured: int = Form(0),
+    broadcast_now: int = Form(0)
 ):
     admin = check_admin(request)
     if not admin:
@@ -311,7 +312,19 @@ async def update_post_submit(
             "active_nav": "posts"
         }, status_code=400)
 
-    return RedirectResponse(url="/admin/posts?msg=Post+updated+successfully", status_code=status.HTTP_302_FOUND)
+    broadcast_notice = ""
+    if broadcast_now:
+        try:
+            from app.services import bot_notifications
+            res = bot_notifications.notify_post_created(post_id, request=request)
+            tg = res.get("telegram", "Skipped")
+            dc = res.get("discord", "Skipped")
+            wa = res.get("whatsapp", "Skipped")
+            broadcast_notice = f"+|+Broadcast:+Telegram:{tg}+|+Discord:{dc}+|+WhatsApp:{wa}"
+        except Exception:
+            pass
+
+    return RedirectResponse(url=f"/admin/posts?msg=Post+updated+successfully{broadcast_notice}", status_code=status.HTTP_302_FOUND)
 
 @router.post("/posts/{post_id}/broadcast")
 async def admin_broadcast_post(

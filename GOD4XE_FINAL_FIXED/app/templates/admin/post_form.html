@@ -114,6 +114,11 @@
         <input type="checkbox" name="is_featured" value="1" {% if post and post.is_featured %}checked{% endif %}>
         <span>⭐ <strong>Featured Post</strong> (Highlighted on homepage)</span>
       </label>
+
+      <label class="toggle-label">
+        <input type="checkbox" name="broadcast_now" value="1">
+        <span>📢 <strong>Broadcast to Telegram, Discord & WhatsApp now</strong></span>
+      </label>
     </div>
 
     <div style="display: flex; gap: 1rem;">
