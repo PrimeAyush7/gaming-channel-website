@@ -148,3 +148,35 @@ def delete_media(media_id: int):
             cursor.execute("DELETE FROM media WHERE id = %s;", (media_id,))
             return True
         return False
+
+def download_and_save_remote_image(url: str) -> str:
+    """
+    Downloads an external image (e.g. Discord CDN, Blogger, external hotlink) and saves it locally
+    so it becomes a permanent local upload and never fails due to expiry or bot blocks.
+    Returns the permanent public URL (e.g. /static/uploads/uuid.png) or the original url if failed.
+    """
+    if not url or not (url.startswith("http://") or url.startswith("https://")):
+        return url
+    try:
+        import urllib.request
+        req = urllib.request.Request(
+            url,
+            headers={
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+                "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8"
+            }
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            if resp.status == 200:
+                data = resp.read()
+                if len(data) > 100:
+                    clean_path = url.split("?")[0].rstrip("/")
+                    raw_ext = clean_path.split(".")[-1].lower() if "." in clean_path else "png"
+                    if raw_ext not in ALLOWED_EXTENSIONS or len(raw_ext) > 5:
+                        raw_ext = "png"
+                    record, err = save_media_file(f"remote_import.{raw_ext}", data, f"image/{raw_ext}")
+                    if record and record.get("url"):
+                        return record["url"]
+    except Exception as e:
+        print(f"[REMOTE IMAGE IMPORT FAILED] {e}")
+    return url

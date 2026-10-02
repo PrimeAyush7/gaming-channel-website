@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="card" style="max-width: 800px; background: rgba(18, 8, 35, 0.8); border: 1px solid rgba(168,85,247,0.3); border-radius: 12px; padding: 2rem;">
-  <form action="/admin/tournaments/new" method="POST">
+  <form action="/admin/tournaments/new" method="POST" enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{{ admin.csrf_token }}">
 
     <div class="form-group" style="margin-bottom: 1.25rem;">
@@ -12,9 +12,16 @@
       <input type="text" name="title" required placeholder="e.g. Free Fire Bermuda Clash - Solo" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">
     </div>
 
-    <div class="form-group" style="margin-bottom: 1.25rem;">
-      <label style="color: #fff; font-weight: 600; display: block; margin-bottom: 0.4rem;">Banner Image URL</label>
-      <input type="text" name="banner_url" placeholder="/static/images/banners/banner1.jpg or external URL" style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px;">
+    <div class="form-group" style="margin-bottom: 1.25rem; background: rgba(168, 85, 247, 0.08); padding: 1rem; border: 1px dashed rgba(168, 85, 247, 0.4); border-radius: 8px;">
+      <label style="color: #fff; font-weight: 700; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+        <span>🖼️ Tournament Banner Image</span>
+        <span style="font-size: 0.72rem; color: #c084fc;">(Direct Upload)</span>
+      </label>
+      <input type="file" name="banner_file" accept="image/*" style="width: 100%; padding: 0.6rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(168,85,247,0.3); color: #fff; border-radius: 6px; cursor: pointer;">
+      <small style="color: #94a3b8; display: block; margin-top: 0.35rem; font-size: 0.75rem;">
+        Or paste URL below if not uploading from device:
+      </small>
+      <input type="text" name="banner_url" placeholder="/static/images/banners/banner1.jpg or external/discord URL" style="width: 100%; margin-top: 0.35rem; padding: 0.6rem; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 6px;">
     </div>
 
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">

@@ -178,7 +178,9 @@ async def create_post_submit(
     slug: str = Form(""),
     summary: str = Form(""),
     content: str = Form(...),
+    thumbnail_file: UploadFile = File(None),
     thumbnail_url: str = Form(""),
+    manual_thumbnail_url: str = Form(""),
     youtube_video_id: str = Form(""),
     download_url: str = Form(""),
     download_label: str = Form("DOWNLOAD FILE"),
@@ -194,12 +196,27 @@ async def create_post_submit(
         return RedirectResponse(url="/admin/login", status_code=status.HTTP_302_FOUND)
     check_csrf(request, csrf_token, admin)
 
+    final_thumbnail_url = ""
+    if thumbnail_file and thumbnail_file.filename:
+        file_bytes = await thumbnail_file.read()
+        if len(file_bytes) > 0:
+            from app.services import media as media_service
+            rec, err = media_service.save_media_file(thumbnail_file.filename, file_bytes, thumbnail_file.content_type)
+            if rec and rec.get("url"):
+                final_thumbnail_url = rec["url"]
+
+    if not final_thumbnail_url:
+        raw_url = (manual_thumbnail_url or thumbnail_url or "").strip()
+        if raw_url:
+            from app.services import media as media_service
+            final_thumbnail_url = media_service.download_and_save_remote_image(raw_url)
+
     data = {
         "title": title,
         "slug": slug,
         "summary": summary,
         "content": content,
-        "thumbnail_url": thumbnail_url,
+        "thumbnail_url": final_thumbnail_url,
         "youtube_video_id": youtube_video_id,
         "download_url": download_url,
         "download_label": download_label,
@@ -266,7 +283,9 @@ async def update_post_submit(
     slug: str = Form(""),
     summary: str = Form(""),
     content: str = Form(...),
+    thumbnail_file: UploadFile = File(None),
     thumbnail_url: str = Form(""),
+    manual_thumbnail_url: str = Form(""),
     youtube_video_id: str = Form(""),
     download_url: str = Form(""),
     download_label: str = Form("DOWNLOAD FILE"),
@@ -283,12 +302,27 @@ async def update_post_submit(
         return RedirectResponse(url="/admin/login", status_code=status.HTTP_302_FOUND)
     check_csrf(request, csrf_token, admin)
 
+    final_thumbnail_url = ""
+    if thumbnail_file and thumbnail_file.filename:
+        file_bytes = await thumbnail_file.read()
+        if len(file_bytes) > 0:
+            from app.services import media as media_service
+            rec, err = media_service.save_media_file(thumbnail_file.filename, file_bytes, thumbnail_file.content_type)
+            if rec and rec.get("url"):
+                final_thumbnail_url = rec["url"]
+
+    if not final_thumbnail_url:
+        raw_url = (manual_thumbnail_url or thumbnail_url or "").strip()
+        if raw_url:
+            from app.services import media as media_service
+            final_thumbnail_url = media_service.download_and_save_remote_image(raw_url)
+
     data = {
         "title": title,
         "slug": slug,
         "summary": summary,
         "content": content,
-        "thumbnail_url": thumbnail_url,
+        "thumbnail_url": final_thumbnail_url,
         "youtube_video_id": youtube_video_id,
         "download_url": download_url,
         "download_label": download_label,
@@ -735,6 +769,7 @@ async def admin_tournament_create(
     csrf_token: str = Form(...),
     title: str = Form(...),
     description: str = Form(""),
+    banner_file: UploadFile = File(None),
     banner_url: str = Form(""),
     game: str = Form("FREE_FIRE"),
     mode: str = Form("SQUAD"),
@@ -771,10 +806,25 @@ async def admin_tournament_create(
     clean_featured = _safe_int(is_featured, 0)
     clean_published = _safe_int(is_published, 1)
 
+    final_banner_url = ""
+    if banner_file and banner_file.filename:
+        file_bytes = await banner_file.read()
+        if len(file_bytes) > 0:
+            from app.services import media as media_service
+            rec, err = media_service.save_media_file(banner_file.filename, file_bytes, banner_file.content_type)
+            if rec and rec.get("url"):
+                final_banner_url = rec["url"]
+
+    if not final_banner_url:
+        raw_b = (banner_url or "").strip()
+        if raw_b:
+            from app.services import media as media_service
+            final_banner_url = media_service.download_and_save_remote_image(raw_b)
+
     try:
         t = tournament_service.create_tournament(
             title=title,
-            banner_url=banner_url,
+            banner_url=final_banner_url,
             description=description,
             game=game,
             mode=clean_mode,
