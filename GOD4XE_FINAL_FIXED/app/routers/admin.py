@@ -615,92 +615,57 @@ async def settings_page(request: Request, msg: str = None):
     })
 
 @router.post("/settings")
-async def update_settings_submit(
-    request: Request,
-    csrf_token: str = Form(...),
-    site_name: str = Form(...),
-    site_tagline: str = Form(""),
-    site_description: str = Form(""),
-    logo_url: str = Form(""),
-    favicon_url: str = Form(""),
-    youtube_channel_url: str = Form(""),
-    instagram_url: str = Form(""),
-    whatsapp_url: str = Form(""),
-    telegram_url: str = Form(""),
-    discord_url: str = Form(""),
-    facebook_url: str = Form(""),
-    seo_keywords: str = Form(""),
-    footer_text: str = Form(""),
-    robots_txt: str = Form(""),
-    discord_webhook_url: str = Form(""),
-    discord_activity_webhook: str = Form(""),
-    telegram_bot_token: str = Form(""),
-    telegram_chat_id: str = Form(""),
-    notify_discord_enabled: str = Form("false"),
-    notify_telegram_enabled: str = Form("false"),
-    notify_whatsapp_enabled: str = Form("false"),
-    whatsapp_webhook_url: str = Form(""),
-    apk_download_url: str = Form(""),
-    google_client_id: str = Form(""),
-    app_url: str = Form("https://god4xe.onrender.com"),
-    desc_link_1_title: str = Form(""),
-    desc_link_1_url: str = Form(""),
-    desc_link_2_title: str = Form(""),
-    desc_link_2_url: str = Form(""),
-    desc_link_3_title: str = Form(""),
-    desc_link_3_url: str = Form(""),
-    desc_link_4_title: str = Form(""),
-    desc_link_4_url: str = Form(""),
-    desc_link_5_title: str = Form(""),
-    desc_link_5_url: str = Form(""),
-    desc_link_6_title: str = Form(""),
-    desc_link_6_url: str = Form("")
-):
+async def update_settings_submit(request: Request):
     admin = check_admin(request)
     if not admin:
         return RedirectResponse(url="/admin/login", status_code=status.HTTP_302_FOUND)
+
+    form = await request.form()
+    csrf_token = form.get("csrf_token", "")
     check_csrf(request, csrf_token, admin)
 
-    settings_service.update_settings({
-        "site_name": site_name,
-        "site_tagline": site_tagline,
-        "site_description": site_description,
-        "logo_url": logo_url,
-        "favicon_url": favicon_url,
-        "youtube_channel_url": youtube_channel_url,
-        "instagram_url": instagram_url,
-        "whatsapp_url": whatsapp_url,
-        "telegram_url": telegram_url,
-        "discord_url": discord_url,
-        "facebook_url": facebook_url,
-        "seo_keywords": seo_keywords,
-        "footer_text": footer_text,
-        "robots_txt": robots_txt,
-        "discord_webhook_url": discord_webhook_url,
-        "discord_activity_webhook": discord_activity_webhook,
-        "telegram_bot_token": telegram_bot_token,
-        "telegram_chat_id": telegram_chat_id,
-        "notify_discord_enabled": notify_discord_enabled,
-        "notify_telegram_enabled": notify_telegram_enabled,
-        "apk_download_url": apk_download_url,
-        "google_client_id": google_client_id,
-        "app_url": (app_url or "https://god4xe.onrender.com").rstrip("/"),
-        "notify_whatsapp_enabled": notify_whatsapp_enabled,
-        "whatsapp_webhook_url": whatsapp_webhook_url,
-        "desc_link_1_title": desc_link_1_title,
-        "desc_link_1_url": desc_link_1_url,
-        "desc_link_2_title": desc_link_2_title,
-        "desc_link_2_url": desc_link_2_url,
-        "desc_link_3_title": desc_link_3_title,
-        "desc_link_3_url": desc_link_3_url,
-        "desc_link_4_title": desc_link_4_title,
-        "desc_link_4_url": desc_link_4_url,
-        "desc_link_5_title": desc_link_5_title,
-        "desc_link_5_url": desc_link_5_url,
-        "desc_link_6_title": desc_link_6_title,
-        "desc_link_6_url": desc_link_6_url
-    })
-    return RedirectResponse(url="/admin/settings?msg=Settings+saved+successfully", status_code=status.HTTP_302_FOUND)
+    settings_dict = {}
+    for key, val in form.items():
+        if key in ("csrf_token",):
+            continue
+        settings_dict[key] = str(val).strip()
+
+    # Unchecked checkboxes default to 'false'
+    for cb in ("notify_discord_enabled", "notify_telegram_enabled", "notify_whatsapp_enabled"):
+        if cb not in form:
+            settings_dict[cb] = "false"
+
+    if not settings_dict.get("site_name"):
+        settings_dict["site_name"] = "GOD4XE GAMING"
+
+    if "app_url" in settings_dict:
+        settings_dict["app_url"] = (settings_dict["app_url"] or "https://god4xe.onrender.com").rstrip("/")
+
+    # Diamond Economy & Arena rates synchronization:
+    # 1. Deposit rate: deposit_diamonds_per_ten_inr -> deposit_diamonds_per_inr
+    if "deposit_diamonds_per_ten_inr" in settings_dict:
+        try:
+            dep_10 = float(settings_dict["deposit_diamonds_per_ten_inr"])
+            settings_dict["deposit_diamonds_per_inr"] = str(round(dep_10 / 10.0, 4))
+        except (ValueError, TypeError):
+            pass
+
+    # 2. Withdrawal rate: withdraw_inr_per_ten_diamonds -> withdraw_diamonds_per_inr
+    if "withdraw_inr_per_ten_diamonds" in settings_dict:
+        try:
+            with_10 = float(settings_dict["withdraw_inr_per_ten_diamonds"])
+            settings_dict["withdraw_diamonds_per_inr"] = str(round(with_10 / 10.0, 4))
+        except (ValueError, TypeError):
+            pass
+
+    # 3. Synchronize arena marquee notices
+    if "arena_notice_marquee" in settings_dict:
+        settings_dict["arena_notice"] = settings_dict["arena_notice_marquee"]
+    elif "arena_notice" in settings_dict:
+        settings_dict["arena_notice_marquee"] = settings_dict["arena_notice"]
+
+    settings_service.update_settings(settings_dict)
+    return RedirectResponse(url="/admin/settings?msg=Settings+and+Diamond+Economy+saved+successfully", status_code=status.HTTP_302_FOUND)
 
 # --------------------------------------------------------------------------
 # TOURNAMENTS MANAGEMENT (SUPER_ADMIN, TOURNAMENT_ADMIN)

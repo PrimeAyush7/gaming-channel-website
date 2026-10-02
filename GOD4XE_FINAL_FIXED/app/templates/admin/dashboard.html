@@ -3,6 +3,291 @@
 {% block header_title %}Analytics & Overview{% endblock %}
 
 {% block content %}
+<style>
+/* Dashboard Guaranteed Mobile Responsive & Anti-Overflow Styles */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.stat-card {
+  background: var(--admin-card);
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.stat-card:hover {
+  border-color: rgba(168, 85, 247, 0.5);
+  transform: translateY(-2px);
+}
+
+.stat-card > div:last-child {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  flex: 1 1 auto;
+}
+
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--admin-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  word-break: break-word;
+  white-space: normal;
+  line-height: 1.3;
+}
+
+/* Quick Admin Action Chips on Mobile */
+.dash-quick-links {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.dash-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(168, 85, 247, 0.12);
+  border: 1px solid var(--admin-border);
+  color: #fff;
+  padding: 0.45rem 0.85rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.dash-chip:hover, .dash-chip:active {
+  background: rgba(168, 85, 247, 0.3);
+  border-color: var(--neon-purple);
+  color: #c084fc;
+}
+
+.dashboard-two-col-grid {
+  display: grid;
+  grid-template-columns: 1.25fr 0.75fr;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.dashboard-two-col-grid > * {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.admin-card {
+  background: var(--admin-card);
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+.table-responsive {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.dash-post-title {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-block;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.dash-post-title:hover {
+  color: var(--neon-purple);
+}
+
+.activity-feed-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.activity-feed-item {
+  padding: 0.75rem 0.85rem;
+  background: rgba(10, 5, 20, 0.5);
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.activity-feed-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.activity-feed-path {
+  color: var(--admin-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8rem;
+  min-width: 0;
+}
+
+.activity-feed-time {
+  color: var(--admin-dim);
+  font-size: 0.72rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+@media (max-width: 900px) {
+  .dashboard-two-col-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.25rem !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
+    margin-bottom: 1.25rem !important;
+  }
+  .stats-grid > .stat-card:last-child {
+    grid-column: span 2 !important;
+  }
+  .stat-card {
+    padding: 0.85rem !important;
+    gap: 0.75rem !important;
+    border-radius: 10px !important;
+  }
+  .stat-icon-wrapper {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 1.15rem !important;
+    flex-shrink: 0 !important;
+  }
+  .stat-value {
+    font-size: 1.3rem !important;
+  }
+  .stat-label {
+    font-size: 0.68rem !important;
+  }
+  .admin-table {
+    min-width: 440px !important;
+  }
+  .admin-table th,
+  .admin-table td {
+    padding: 0.65rem 0.5rem !important;
+    font-size: 0.8rem !important;
+  }
+  .dash-post-title {
+    max-width: 160px !important;
+  }
+  .admin-card {
+    padding: 1rem !important;
+    margin-bottom: 1.25rem !important;
+  }
+}
+
+@media (max-width: 540px) {
+  .activity-feed-item {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.35rem !important;
+  }
+  .activity-feed-info {
+    width: 100% !important;
+    flex-wrap: wrap !important;
+  }
+  .activity-feed-path {
+    white-space: normal !important;
+    word-break: break-all !important;
+  }
+  .activity-feed-time {
+    align-self: flex-end !important;
+  }
+}
+
+@media (max-width: 440px) {
+  .stats-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .stats-grid > .stat-card:last-child {
+    grid-column: auto !important;
+  }
+}
+</style>
+
+<!-- Quick Action Navigation Bar on Mobile/Tablet -->
+<div class="dash-quick-links">
+  <a href="/admin/tournaments" class="dash-chip">🏆 Tournaments</a>
+  <a href="/admin/posts" class="dash-chip">📝 Posts & Guides</a>
+  <a href="/admin/deposits" class="dash-chip">💳 Deposits</a>
+  <a href="/admin/withdrawals" class="dash-chip">💸 Withdrawals</a>
+  <a href="/admin/settings" class="dash-chip">⚙️ Site Settings & Rates</a>
+</div>
+
 <!-- Stats Grid -->
 <div class="stats-grid">
   <div class="stat-card">
@@ -69,7 +354,7 @@
           {% for post in stats.top_posts %}
           <tr>
             <td>
-              <a href="/post/{{ post.slug }}" target="_blank" style="color: #fff; text-decoration: none; font-weight: 600;">
+              <a href="/post/{{ post.slug }}" target="_blank" class="dash-post-title" title="{{ post.title }}">
                 {{ post.title }}
               </a>
             </td>
@@ -81,7 +366,7 @@
           </tr>
           {% else %}
           <tr>
-            <td colspan="4" style="text-align: center; color: var(--admin-dim);">No posts published yet.</td>
+            <td colspan="4" style="text-align: center; color: var(--admin-dim); padding: 1.5rem;">No posts published yet.</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -95,14 +380,14 @@
       <div class="admin-card-title">⚡ Recent System Activity</div>
     </div>
 
-    <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+    <div class="activity-feed-container">
       {% for event in stats.recent_events %}
-      <div style="padding: 0.75rem; background: rgba(10, 5, 20, 0.5); border: 1px solid var(--admin-border); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem;">
-        <div>
-          <span class="badge badge-purple" style="font-size: 0.65rem;">{{ event.event_type }}</span>
-          <span style="color: var(--admin-muted); margin-left: 0.5rem;">{{ event.page_path or ('Post #' ~ event.target_id) }}</span>
+      <div class="activity-feed-item">
+        <div class="activity-feed-info">
+          <span class="badge badge-purple" style="font-size: 0.65rem; flex-shrink: 0;">{{ event.event_type }}</span>
+          <span class="activity-feed-path" title="{{ event.page_path or ('Post #' ~ event.target_id) }}">{{ event.page_path or ('Post #' ~ event.target_id) }}</span>
         </div>
-        <div style="color: var(--admin-dim); font-size: 0.75rem;">{{ event.created_at[:16] }}</div>
+        <div class="activity-feed-time">{{ event.created_at[:16] }}</div>
       </div>
       {% else %}
       <div style="color: var(--admin-dim); text-align: center; padding: 2rem;">No recent analytics events.</div>

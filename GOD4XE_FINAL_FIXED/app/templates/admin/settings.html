@@ -225,11 +225,20 @@
     </button>
   
     <!-- Financial & Tournament Rates -->
-    <div class="admin-card" style="margin-top: 1.5rem;">
-      <h3>Diamond Economy & Arena Rates</h3>
-      <p class="text-muted">Configure deposit and withdrawal rates, multiples, minimum thresholds, and Arena notices.</p>
+    <div class="admin-card" style="margin-top: 1.5rem; border: 1px solid rgba(168, 85, 247, 0.4); background: rgba(15, 7, 33, 0.65);">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0.5rem;">
+        <div>
+          <h3 style="margin: 0; color: #fff; display: flex; align-items: center; gap: 0.5rem;">
+            <span>💎</span> Diamond Economy & Arena Rates
+          </h3>
+          <p class="text-muted" style="margin: 0.25rem 0 0; font-size: 0.85rem;">Configure deposit and withdrawal rates, multiples, minimum thresholds, and Arena notices.</p>
+        </div>
+        <button type="submit" class="btn-admin-primary" style="margin: 0;">
+          💾 Save Diamond Rules
+        </button>
+      </div>
 
-      <div class="grid grid-2" style="margin-top: 1rem; gap: 1rem;">
+      <div class="grid grid-2" style="margin-top: 1.25rem; gap: 1rem;">
         <div class="form-group">
           <label>Deposit Rate (Diamonds per ₹10)</label>
           <input type="number" name="deposit_diamonds_per_ten_inr" class="form-control" value="{{ settings.get('deposit_diamonds_per_ten_inr', '10') }}" min="1">
@@ -265,8 +274,8 @@
         <div class="form-group">
           <label>Enable Withdrawals</label>
           <select name="withdrawals_enabled" class="form-control">
-            <option value="true" {% if settings.get('withdrawals_enabled', 'true') == 'true' %}selected{% endif %}>Enabled</option>
-            <option value="false" {% if settings.get('withdrawals_enabled', 'true') == 'false' %}selected{% endif %}>Disabled</option>
+            <option value="true" {% if settings.get('withdrawals_enabled', 'true') in ('true', '1') %}selected{% endif %}>Enabled</option>
+            <option value="false" {% if settings.get('withdrawals_enabled', 'true') in ('false', '0') %}selected{% endif %}>Disabled</option>
           </select>
         </div>
 
@@ -274,6 +283,12 @@
           <label>Arena Marquee Notice</label>
           <input type="text" name="arena_notice_marquee" class="form-control" value="{{ settings.get('arena_notice_marquee', 'Please be ready before match starts') }}">
         </div>
+      </div>
+
+      <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--admin-border); display: flex; justify-content: flex-end;">
+        <button type="submit" class="btn-admin-primary" style="padding: 0.85rem 1.75rem; font-size: 0.95rem;">
+          💾 Save Diamond Rules & All Settings
+        </button>
       </div>
     </div>
 

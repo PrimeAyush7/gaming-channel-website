@@ -2,6 +2,7 @@ import json
 import os
 import urllib.request
 import urllib.error
+import uuid
 import logging
 from app.database import get_db
 
@@ -86,14 +87,138 @@ def send_discord_webhook(webhook_url: str, payload: dict) -> tuple:
         logger.warning(f"[DISCORD WEBHOOK FAILED] {e}")
         return False, str(e)
 
-def send_telegram_message(bot_token: str, chat_id: str, text: str, button_text: str = None, button_url: str = None) -> tuple:
-    """Dispatches an HTML formatted message to Telegram Bot API."""
+def _resolve_local_image_path(photo_url: str) -> str:
+    """Finds if a given photo URL or path points to a local file on disk."""
+    if not photo_url:
+        return None
+    url_or_path = str(photo_url).strip()
+    if "/static/uploads/" in url_or_path:
+        filename = url_or_path.split("/static/uploads/")[-1].split("?")[0]
+        local_path = os.path.join("app", "static", "uploads", filename)
+        if os.path.isfile(local_path):
+            return local_path
+
+    clean = url_or_path.lstrip("/")
+    candidates = [
+        clean,
+        os.path.join("app", clean),
+        os.path.join("app", "static", "uploads", os.path.basename(clean))
+    ]
+    for c in candidates:
+        if os.path.isfile(c):
+            return c
+    return None
+
+def _send_telegram_photo_multipart(bot_token: str, chat_id: str, file_path: str, caption: str = None, reply_markup: dict = None) -> tuple:
+    """Uploads a local image file directly to Telegram sendPhoto using multipart/form-data."""
+    boundary = f"----WebKitFormBoundary{uuid.uuid4().hex}"
+    parts = []
+
+    def add_field(name, val):
+        hdr = ("--" + boundary + "\r\nContent-Disposition: form-data; name=\"" + str(name) + "\"\r\n\r\n" + str(val) + "\r\n").encode("utf-8")
+        parts.append(hdr)
+
+    add_field("chat_id", chat_id)
+    if caption:
+        safe_caption = caption if len(caption) <= 1024 else caption[:1020] + "..."
+        add_field("caption", safe_caption)
+        add_field("parse_mode", "HTML")
+    if reply_markup:
+        add_field("reply_markup", json.dumps(reply_markup))
+
+    filename = os.path.basename(file_path)
+    ext = os.path.splitext(filename)[1].lower()
+    mime = "image/png"
+    if ext in (".jpg", ".jpeg"):
+        mime = "image/jpeg"
+    elif ext == ".webp":
+        mime = "image/webp"
+    elif ext == ".gif":
+        mime = "image/gif"
+
+    file_header = ("--" + boundary + "\r\nContent-Disposition: form-data; name=\"photo\"; filename=\"" + filename + "\"\r\nContent-Type: " + mime + "\r\n\r\n").encode("utf-8")
+
+    with open(file_path, "rb") as f:
+        file_bytes = f.read()
+
+    body = b"".join(parts) + file_header + file_bytes + ("\r\n--" + boundary + "--\r\n").encode("utf-8")
+
+    url = f"https://api.telegram.org/bot{bot_token.strip()}/sendPhoto"
+    req = urllib.request.Request(
+        url,
+        data=body,
+        headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
+        method="POST"
+    )
+    with urllib.request.urlopen(req, timeout=12) as resp:
+        if resp.status == 200:
+            return True, "Success"
+        return False, f"HTTP {resp.status}"
+
+def send_telegram_message(bot_token: str, chat_id: str, text: str, button_text: str = None, button_url: str = None, photo_url: str = None) -> tuple:
+    """Dispatches an HTML formatted message (with photo if available) to Telegram Bot API."""
     if not bot_token:
         return False, "Telegram Bot Token is missing in Settings"
     cleaned_chat_id = clean_telegram_chat_id(chat_id)
     if not cleaned_chat_id:
         return False, "Telegram Chat ID is missing in Settings"
 
+    reply_markup = None
+    if button_text and button_url:
+        clean_btn_url = button_url if button_url.startswith("http") else f"https://god4xe.onrender.com{button_url}"
+        reply_markup = {
+            "inline_keyboard": [
+                [{"text": button_text, "url": clean_btn_url}]
+            ]
+        }
+
+    # 1. Attempt sendPhoto if photo_url is provided
+    if photo_url and str(photo_url).strip():
+        clean_photo = str(photo_url).strip()
+        local_file = _resolve_local_image_path(clean_photo)
+
+        # Case A: Local image file on disk -> upload binary stream
+        if local_file:
+            try:
+                ok, msg = _send_telegram_photo_multipart(
+                    bot_token=bot_token,
+                    chat_id=cleaned_chat_id,
+                    file_path=local_file,
+                    caption=text,
+                    reply_markup=reply_markup
+                )
+                if ok:
+                    return True, "Success"
+            except Exception as e:
+                logger.warning(f"[TELEGRAM PHOTO MULTIPART FAILED, FALLING BACK] {e}")
+
+        # Case B: Public HTTP/HTTPS URL -> sendPhoto with URL
+        elif clean_photo.startswith("http://") or clean_photo.startswith("https://"):
+            try:
+                url = f"https://api.telegram.org/bot{bot_token.strip()}/sendPhoto"
+                safe_caption = text if len(text) <= 1024 else text[:1020] + "..."
+                payload = {
+                    "chat_id": cleaned_chat_id,
+                    "photo": clean_photo,
+                    "caption": safe_caption,
+                    "parse_mode": "HTML"
+                }
+                if reply_markup:
+                    payload["reply_markup"] = reply_markup
+                data = json.dumps(payload).encode("utf-8")
+                req = urllib.request.Request(
+                    url,
+                    data=data,
+                    headers={"Content-Type": "application/json"},
+                    method="POST"
+                )
+                with urllib.request.urlopen(req, timeout=12) as resp:
+                    if resp.status == 200:
+                        return True, "Success"
+            except Exception as e:
+                logger.warning(f"[TELEGRAM PHOTO URL FAILED, FALLING BACK] {e}")
+
+    # 2. Standard text message fallback via sendMessage
     try:
         url = f"https://api.telegram.org/bot{bot_token.strip()}/sendMessage"
         payload = {
@@ -102,13 +227,8 @@ def send_telegram_message(bot_token: str, chat_id: str, text: str, button_text: 
             "parse_mode": "HTML",
             "disable_web_page_preview": False
         }
-        if button_text and button_url:
-            clean_btn_url = button_url if button_url.startswith("http") else f"https://god4xe.onrender.com{button_url}"
-            payload["reply_markup"] = {
-                "inline_keyboard": [
-                    [{"text": button_text, "url": clean_btn_url}]
-                ]
-            }
+        if reply_markup:
+            payload["reply_markup"] = reply_markup
 
         data = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(
@@ -241,7 +361,8 @@ def notify_tournament_created(tournament_id: int, request = None) -> dict:
             chat_id=tg_chat,
             text=text,
             button_text="🎮 Register Slot on GOD4XE",
-            button_url=tourn_url
+            button_url=tourn_url,
+            photo_url=raw_banner
         )
         results["telegram"] = "Sent Successfully" if ok else f"Failed: {msg}"
 
@@ -349,7 +470,8 @@ def notify_post_created(post_id: int, request = None) -> dict:
             chat_id=tg_chat,
             text=text,
             button_text="📖 Read Full Post on GOD4XE",
-            button_url=post_url
+            button_url=post_url,
+            photo_url=thumbnail
         )
         results["telegram"] = "Sent Successfully" if ok else f"Failed: {msg}"
 

@@ -760,6 +760,17 @@ textarea.form-control {
   .dashboard-two-col-grid {
     grid-template-columns: 1fr !important;
     gap: 1.25rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .admin-two-col-grid > *,
+  .dashboard-two-col-grid > * {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   /* Cards */
@@ -769,7 +780,9 @@ textarea.form-control {
     border-radius: 10px !important;
     width: 100% !important;
     max-width: 100% !important;
+    min-width: 0 !important;
     box-sizing: border-box !important;
+    overflow: hidden !important;
   }
 
   .admin-card-header {

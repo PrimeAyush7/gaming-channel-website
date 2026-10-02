@@ -1,3 +1,5 @@
+import uuid
+import os
 import datetime
 from app.database import get_db
 
@@ -254,24 +256,120 @@ def send_discord_webhook(webhook_url: str, payload: dict) -> bool:
         logger.warning(f"[DISCORD WEBHOOK FAILED] {e}")
         return False
 
-def send_telegram_message(bot_token: str, chat_id: str, text: str, button_text: str = None, button_url: str = None) -> bool:
-    """Dispatches an HTML formatted message to Telegram Bot API."""
+def _resolve_local_image_path_cf(photo_url: str) -> str:
+    if not photo_url:
+        return None
+    url_or_path = str(photo_url).strip()
+    if "/static/uploads/" in url_or_path:
+        filename = url_or_path.split("/static/uploads/")[-1].split("?")[0]
+        local_path = os.path.join("app", "static", "uploads", filename)
+        if os.path.isfile(local_path):
+            return local_path
+    clean = url_or_path.lstrip("/")
+    candidates = [
+        clean,
+        os.path.join("app", clean),
+        os.path.join("app", "static", "uploads", os.path.basename(clean))
+    ]
+    for c in candidates:
+        if os.path.isfile(c):
+            return c
+    return None
+
+def _send_telegram_photo_multipart_cf(bot_token: str, chat_id: str, file_path: str, caption: str = None, reply_markup: dict = None) -> bool:
+    boundary = f"----WebKitFormBoundary{uuid.uuid4().hex}"
+    parts = []
+    def add_field(name, val):
+        hdr = ("--" + boundary + "\r\nContent-Disposition: form-data; name=\"" + str(name) + "\"\r\n\r\n" + str(val) + "\r\n").encode("utf-8")
+        parts.append(hdr)
+    add_field("chat_id", chat_id)
+    if caption:
+        safe_caption = caption if len(caption) <= 1024 else caption[:1020] + "..."
+        add_field("caption", safe_caption)
+        add_field("parse_mode", "HTML")
+    if reply_markup:
+        add_field("reply_markup", json.dumps(reply_markup))
+    filename = os.path.basename(file_path)
+    ext = os.path.splitext(filename)[1].lower()
+    mime = "image/png"
+    if ext in (".jpg", ".jpeg"):
+        mime = "image/jpeg"
+    elif ext == ".webp":
+        mime = "image/webp"
+    elif ext == ".gif":
+        mime = "image/gif"
+    file_header = ("--" + boundary + "\r\nContent-Disposition: form-data; name=\"photo\"; filename=\"" + filename + "\"\r\nContent-Type: " + mime + "\r\n\r\n").encode("utf-8")
+    with open(file_path, "rb") as f:
+        file_bytes = f.read()
+    body = b"".join(parts) + file_header + file_bytes + ("\r\n--" + boundary + "--\r\n").encode("utf-8")
+    url = f"https://api.telegram.org/bot{bot_token.strip()}/sendPhoto"
+    req = urllib.request.Request(
+        url,
+        data=body,
+        headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
+        method="POST"
+    )
+    with urllib.request.urlopen(req, timeout=10) as resp:
+        return resp.status == 200
+
+def send_telegram_message(bot_token: str, chat_id: str, text: str, button_text: str = None, button_url: str = None, photo_url: str = None) -> bool:
+    """Dispatches an HTML formatted message (with photo if available) to Telegram Bot API."""
     if not bot_token or not chat_id:
         return False
+
+    reply_markup = None
+    if button_text and button_url:
+        reply_markup = {
+            "inline_keyboard": [
+                [{"text": button_text, "url": button_url}]
+            ]
+        }
+
+    # Try photo if provided
+    if photo_url and str(photo_url).strip():
+        clean_photo = str(photo_url).strip()
+        local_file = _resolve_local_image_path_cf(clean_photo)
+        if local_file:
+            try:
+                if _send_telegram_photo_multipart_cf(bot_token, chat_id, local_file, caption=text, reply_markup=reply_markup):
+                    return True
+            except Exception as e:
+                logger.warning(f"[TELEGRAM PHOTO MULTIPART FAILED, FALLING BACK] {e}")
+        elif clean_photo.startswith("http://") or clean_photo.startswith("https://"):
+            try:
+                url = f"https://api.telegram.org/bot{bot_token.strip()}/sendPhoto"
+                safe_caption = text if len(text) <= 1024 else text[:1020] + "..."
+                payload = {
+                    "chat_id": chat_id,
+                    "photo": clean_photo,
+                    "caption": safe_caption,
+                    "parse_mode": "HTML"
+                }
+                if reply_markup:
+                    payload["reply_markup"] = reply_markup
+                data = json.dumps(payload).encode("utf-8")
+                req = urllib.request.Request(
+                    url,
+                    data=data,
+                    headers={"Content-Type": "application/json"},
+                    method="POST"
+                )
+                with urllib.request.urlopen(req, timeout=10) as resp:
+                    if resp.status == 200:
+                        return True
+            except Exception as e:
+                logger.warning(f"[TELEGRAM PHOTO URL FAILED, FALLING BACK] {e}")
+
     try:
-        url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+        url = f"https://api.telegram.org/bot{bot_token.strip()}/sendMessage"
         payload = {
             "chat_id": chat_id,
             "text": text,
             "parse_mode": "HTML",
             "disable_web_page_preview": False
         }
-        if button_text and button_url:
-            payload["reply_markup"] = {
-                "inline_keyboard": [
-                    [{"text": button_text, "url": button_url}]
-                ]
-            }
+        if reply_markup:
+            payload["reply_markup"] = reply_markup
 
         data = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(
@@ -346,7 +444,8 @@ def notify_tournament_created(tournament_id: int):
             chat_id=cfg.get("telegram_chat_id"),
             text=text,
             button_text="🎮 Register Slot on GOD4XE",
-            button_url=tourn_url
+            button_url=tourn_url,
+            photo_url=t.get("banner_url")
         )
 
 def notify_player_joined(tournament_id: int, user_id: int, slot_number: int, team_name: str = None):

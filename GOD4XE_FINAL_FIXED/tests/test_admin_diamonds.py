@@ -616,3 +616,95 @@ class TestV11Features(unittest.TestCase):
         self.assertEqual(bc_res.status_code, 303)
         self.assertIn("msg=", bc_res.headers["location"])
 
+
+    def test_07_diamond_economy_rules_persistence(self):
+        """Verify that Diamond Economy and Arena notices rules are properly saved and applied."""
+        from app.services import auth as auth_service
+        from app.services import settings as settings_service
+        from app.services import wallet as wallet_service
+
+        admin_user = f"adm_econ_{int(time.time()*1000)%1000000}"
+        admin_pass = "AdminEconPass123!"
+        auth_service.create_admin_with_role(admin_user, admin_pass, role="SUPER_ADMIN")
+        login_res = self.client.post("/admin/login", data={"username": admin_user, "password": admin_pass}, follow_redirects=False)
+        session_cookie = login_res.cookies.get("nexus_session")
+        with get_db() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT csrf_token FROM sessions WHERE session_id = %s;", (session_cookie,))
+            csrf_token = cursor.fetchone()["csrf_token"]
+
+        try:
+            # Save diamond economy settings
+            save_res = self.client.post(
+                "/admin/settings",
+                data={
+                    "csrf_token": csrf_token,
+                    "site_name": "GOD4XE RULES TEST",
+                    "deposit_diamonds_per_ten_inr": "15",
+                    "deposit_min_diamonds": "25",
+                    "deposit_multiples": "15",
+                    "withdraw_inr_per_ten_diamonds": "7.5",
+                    "withdraw_min_diamonds": "100",
+                    "withdraw_multiples": "25",
+                    "withdrawals_enabled": "false",
+                    "arena_notice_marquee": "Special Tournament Tonight at 9PM!"
+                },
+                cookies={"nexus_session": session_cookie},
+                follow_redirects=False
+            )
+            self.assertIn(save_res.status_code, (302, 303))
+
+            # Check settings
+            all_s = settings_service.get_all_settings()
+            self.assertEqual(all_s.get("deposit_diamonds_per_ten_inr"), "15")
+            self.assertEqual(all_s.get("deposit_min_diamonds"), "25")
+            self.assertEqual(all_s.get("withdraw_inr_per_ten_diamonds"), "7.5")
+            self.assertEqual(all_s.get("withdrawals_enabled"), "false")
+            self.assertEqual(all_s.get("arena_notice_marquee"), "Special Tournament Tonight at 9PM!")
+
+            # Verify wallet service reflects calculated rates
+            dep_cfg = wallet_service.get_deposit_settings()
+            self.assertEqual(dep_cfg["min_deposit_diamonds"], 25)
+            self.assertEqual(dep_cfg["rate_inr_per_diamond"], 1.5)
+
+            with_cfg = wallet_service.get_withdrawal_settings()
+            self.assertFalse(with_cfg["withdrawals_enabled"])
+            self.assertEqual(with_cfg["min_withdrawal_diamonds"], 100)
+            self.assertEqual(with_cfg["rate_inr_per_diamond"], 0.75)
+
+            # Verify settings page renders with the saved values
+            page_res = self.client.get("/admin/settings", cookies={"nexus_session": session_cookie})
+            self.assertEqual(page_res.status_code, 200)
+            self.assertIn('value="15"', page_res.text)
+            self.assertIn('value="25"', page_res.text)
+            self.assertIn('value="7.5"', page_res.text)
+            self.assertIn('Special Tournament Tonight at 9PM!', page_res.text)
+        finally:
+            settings_service.update_settings({
+                "deposit_diamonds_per_ten_inr": "10",
+                "deposit_diamonds_per_inr": "1.0",
+                "deposit_min_diamonds": "10",
+                "deposit_multiples": "10",
+                "withdraw_inr_per_ten_diamonds": "8",
+                "withdraw_diamonds_per_inr": "0.8",
+                "withdraw_min_diamonds": "50",
+                "withdraw_multiples": "10",
+                "withdrawals_enabled": "true",
+                "arena_notice_marquee": "Please be ready before match starts",
+                "arena_notice": "Please be ready before match starts"
+            })
+
+    def test_08_admin_dashboard_mobile_view_renders(self):
+        """Verify admin dashboard renders cleanly with responsive styles and quick chips."""
+        from app.services import auth as auth_service
+        admin_user = f"adm_dash_{int(time.time()*1000)%1000000}"
+        admin_pass = "AdminDashPass123!"
+        auth_service.create_admin_with_role(admin_user, admin_pass, role="SUPER_ADMIN")
+        login_res = self.client.post("/admin/login", data={"username": admin_user, "password": admin_pass}, follow_redirects=False)
+        session_cookie = login_res.cookies.get("nexus_session")
+
+        dash_res = self.client.get("/admin", cookies={"nexus_session": session_cookie})
+        self.assertEqual(dash_res.status_code, 200)
+        self.assertIn("dash-quick-links", dash_res.text)
+        self.assertIn("activity-feed-container", dash_res.text)
+        self.assertIn("dash-post-title", dash_res.text)
