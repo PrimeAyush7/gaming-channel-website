@@ -505,243 +505,353 @@ function initAnalyticsTracking() {
 }
 
 /* --------------------------------------------------------------------------
-   APPLE-GRADE 3D HARDWARE SHOWCASE: MACBOOK PRO OPENING & FOLDABLE IPHONE DUO
+   AUTHENTIC APPLE HARDWARE SHOWCASE ENGINE (42-SECOND CINEMATIC CYCLE)
+   - MacBook Pro 16" (macOS Sequoia) + iPhone 16 Pro (iOS 18)
    -------------------------------------------------------------------------- */
 function initAppleHardwareShowcase() {
   const stage = document.getElementById('hero-devices-stage');
+  const viewTabs = document.querySelectorAll('#device-view-selector .dev-view-tab');
+
+  // MacBook elements
   const macLid = document.getElementById('macbook-lid');
   const macHandHint = document.getElementById('mac-hand-hint');
+  const macCamLight = document.getElementById('mac-cam-light');
   const macBoot = document.getElementById('mac-boot');
-  const macBootProgress = document.getElementById('mac-boot-progress');
-  const macTopbar = document.getElementById('mac-topbar');
-  const macSlides = document.querySelectorAll('#mac-live-slides .mac-slide');
-  const macDots = document.querySelectorAll('.mac-slide-dots .s-dot');
-  
-  const duoStage = document.getElementById('iphone-duo-stage');
-  const duoDevice = document.getElementById('iphone-duo-device');
-  const duoTypedUrl = document.getElementById('duo-typed-url');
-  const duoLoadingBar = document.getElementById('duo-loading-bar');
-  const duoViewport = document.getElementById('duo-website-viewport');
-  const duoTap = document.getElementById('duo-tap-indicator');
-  const duoDownloadBtn = document.getElementById('duo-m-download-btn');
-  const duoBtnText = document.getElementById('duo-btn-text');
-  const duoBtnSub = document.getElementById('duo-btn-sub');
-  const duoBtnProgress = document.getElementById('duo-btn-progress');
-  const duoToast = document.getElementById('duo-dl-toast');
-  const duoToastStatus = document.getElementById('toast-status-text');
-  const duoToastBadge = document.getElementById('toast-badge-status');
+  const macBootFill = document.getElementById('mac-boot-fill');
+  const macDesktop = document.getElementById('mac-desktop');
+  const macSafariApp = document.getElementById('mac-safari-app');
+  const macTypedUrl = document.getElementById('mac-typed-url');
+  const macLoadingProgress = document.getElementById('mac-loading-progress');
+  const macWebview = document.getElementById('mac-webview');
+  const macSiteScroll = document.getElementById('mac-site-scroll');
+  const macMouse = document.getElementById('mac-mouse-pointer');
 
-  const replayBtn = document.getElementById('btn-replay-devices');
+  // iPhone elements
+  const iphoneScreen = document.getElementById('iphone-screen');
+  const iosDynamicIsland = document.getElementById('ios-dynamic-island');
+  const islandIcon = document.getElementById('island-icon');
+  const islandFilename = document.getElementById('island-filename');
+  const islandStatus = document.getElementById('island-status');
+  const islandProgressFill = document.getElementById('island-progress-fill');
+  const iosSafari = document.getElementById('ios-safari');
+  const iosTypedUrl = document.getElementById('ios-typed-url');
+  const iosLoadingBar = document.getElementById('ios-loading-bar');
+  const iosWebview = document.getElementById('ios-webview');
+  const iosDownloadBtn = document.getElementById('ios-download-btn');
+  const iosBtnTitle = document.getElementById('ios-btn-title');
+  const iosBtnSub = document.getElementById('ios-btn-sub');
+  const iosBtnProgress = document.getElementById('ios-btn-progress');
+  const iosTouch = document.getElementById('ios-touch-pointer');
+  const iosModal = document.getElementById('ios-download-modal');
+  const iosModalConfirm = document.getElementById('ios-modal-confirm');
 
-  if (!stage || !macLid || !duoDevice) return;
+  if (!stage || !macLid || !iphoneScreen) return;
 
-  const targetUrl = 'god4xe.onrender.com';
-  let isSequenceRunning = false;
-  let macSlideTimer = null;
-  let macCurrentSlide = 0;
-  let sequenceLoopTimeout = null;
+  // 1. Device View Tabs Switcher (Both / Mac / iPhone) for Desktop & Mobile
+  viewTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      viewTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const viewMode = tab.getAttribute('data-view');
+      stage.classList.remove('view-mode-both', 'view-mode-mac', 'view-mode-iphone');
+      stage.classList.add(`view-mode-${viewMode}`);
+    });
+  });
 
-  /* --- 1. MacBook Lid Open & Power-On Sequence --- */
-  function playMacbookOpenSequence() {
-    // Reset initial state: Lid closed, screen blacked out
+  const macTargetUrl = 'https://god4xe.onrender.com';
+  const iosTargetUrl = 'god4xe.onrender.com';
+
+  let currentCycleTimer = null;
+
+  function runEpicAppleCycle() {
+    clearTimeout(currentCycleTimer);
+
+    // ==========================================
+    // T = 0.0s: RESET TO CLEAN INITIAL STATE
+    // ==========================================
+    // MacBook Initial Reset
     macLid.classList.remove('mac-lid-opened');
     macLid.classList.add('mac-lid-closed');
-    if (macHandHint) {
-      macHandHint.classList.add('active');
-    }
+    if (macHandHint) macHandHint.classList.add('active');
+    if (macCamLight) macCamLight.classList.remove('active');
     if (macBoot) {
       macBoot.classList.remove('fade-out');
       macBoot.classList.add('active');
     }
-    if (macBootProgress) {
-      macBootProgress.style.width = '0%';
+    if (macBootFill) {
+      macBootFill.style.transition = 'none';
+      macBootFill.style.width = '0%';
     }
-    if (macTopbar) {
-      macTopbar.classList.remove('active');
+    if (macSafariApp) macSafariApp.classList.remove('active');
+    if (macTypedUrl) macTypedUrl.textContent = '';
+    if (macLoadingProgress) {
+      macLoadingProgress.style.transition = 'none';
+      macLoadingProgress.style.width = '0%';
+      macLoadingProgress.style.opacity = '1';
+    }
+    if (macWebview) macWebview.classList.remove('loaded');
+    if (macSiteScroll) macSiteScroll.scrollTop = 0;
+    if (macMouse) {
+      macMouse.style.transition = 'none';
+      macMouse.style.top = '70%';
+      macMouse.style.left = '45%';
+      macMouse.style.opacity = '0';
     }
 
-    // T+0.4s: Physically lift and open the MacBook lid in 3D
+    // iPhone Initial Reset
+    iphoneScreen.classList.remove('ios-awake');
+    if (iosDynamicIsland) {
+      iosDynamicIsland.classList.remove('expanded', 'completed');
+    }
+    if (islandProgressFill) islandProgressFill.style.width = '0%';
+    if (iosTypedUrl) iosTypedUrl.textContent = '';
+    if (iosLoadingBar) {
+      iosLoadingBar.style.transition = 'none';
+      iosLoadingBar.style.width = '0%';
+      iosLoadingBar.style.opacity = '1';
+    }
+    if (iosWebview) {
+      iosWebview.classList.remove('loaded');
+      iosWebview.scrollTop = 0;
+    }
+    if (iosTouch) iosTouch.classList.remove('active', 'tapping');
+    if (iosModal) iosModal.classList.remove('active');
+    if (iosBtnProgress) {
+      iosBtnProgress.style.transition = 'none';
+      iosBtnProgress.style.width = '0%';
+    }
+    if (iosBtnTitle) iosBtnTitle.textContent = 'DOWNLOAD OB-52 VIP CONFIG';
+    if (iosBtnSub) iosBtnSub.textContent = 'VERIFIED DIRECT MIRROR (2.4 MB)';
+
+    // ==========================================
+    // PHASE 1 (T = 1.0s – 6.0s): MACBOOK 3D UNLATCH & APPLE BOOT
+    // ==========================================
     setTimeout(() => {
+      // T = 1.0s: Physical Lid Opens in 3D
       macLid.classList.remove('mac-lid-closed');
       macLid.classList.add('mac-lid-opened');
 
-      // T+1.2s: Hide opening hand cue
+      // T = 2.0s: Hand gesture cue fades out
       setTimeout(() => {
         if (macHandHint) macHandHint.classList.remove('active');
       }, 1000);
 
-      // T+1.4s: Apple/Gaming boot bar charges up
+      // T = 2.4s: Apple Boot Bar Fills on pure black
       setTimeout(() => {
-        if (macBootProgress) {
-          macBootProgress.style.transition = 'width 1.2s cubic-bezier(0.16, 1, 0.3, 1)';
-          macBootProgress.style.width = '100%';
+        if (macCamLight) macCamLight.classList.add('active');
+        if (macBootFill) {
+          macBootFill.style.transition = 'width 2.6s cubic-bezier(0.16, 1, 0.3, 1)';
+          macBootFill.style.width = '100%';
         }
 
-        // T+2.5s: Boot screen fades out, browser window reveals & slides start!
+        // ==========================================
+        // PHASE 2 (T = 5.5s – 16.0s): MACOS DESKTOP, SAFARI LAUNCH & BROWSE
+        // ==========================================
         setTimeout(() => {
           if (macBoot) macBoot.classList.add('fade-out');
-          if (macTopbar) macTopbar.classList.add('active');
-          startMacbookSlides();
-        }, 1200);
 
-      }, 1200);
+          // T = 6.5s: Safari window zooms open on macOS desktop
+          setTimeout(() => {
+            if (macSafariApp) macSafariApp.classList.add('active');
 
-    }, 450);
-  }
-
-  function startMacbookSlides() {
-    clearInterval(macSlideTimer);
-    showMacSlide(0);
-    macSlideTimer = setInterval(() => {
-      macCurrentSlide = (macCurrentSlide + 1) % macSlides.length;
-      showMacSlide(macCurrentSlide);
-    }, 3600);
-  }
-
-  function showMacSlide(idx) {
-    macSlides.forEach((s, i) => s.classList.toggle('active', i === idx));
-    macDots.forEach((d, i) => d.classList.toggle('active', i === idx));
-    macCurrentSlide = idx;
-  }
-
-  macDots.forEach(dot => {
-    dot.addEventListener('click', (e) => {
-      e.stopPropagation();
-      clearInterval(macSlideTimer);
-      const t = parseInt(dot.getAttribute('data-target') || '1') - 1;
-      showMacSlide(t);
-      macSlideTimer = setInterval(() => {
-        macCurrentSlide = (macCurrentSlide + 1) % macSlides.length;
-        showMacSlide(macCurrentSlide);
-      }, 3600);
-    });
-  });
-
-  /* --- 2. iPhone Duo: Foldable Unfold, Safari Typing & In-App File Download --- */
-  function playIphoneDuoSequence() {
-    // Reset initial state: Folded in 3D, empty search, no download toast
-    duoDevice.classList.remove('duo-unfolded');
-    duoDevice.classList.add('duo-folded');
-    if (duoTypedUrl) duoTypedUrl.textContent = '';
-    if (duoLoadingBar) {
-      duoLoadingBar.style.transition = 'none';
-      duoLoadingBar.style.width = '0%';
-      duoLoadingBar.style.opacity = '1';
-    }
-    if (duoViewport) {
-      duoViewport.classList.remove('loaded');
-      duoViewport.scrollTop = 0;
-    }
-    if (duoTap) duoTap.classList.remove('active', 'tapping');
-    if (duoBtnProgress) duoBtnProgress.style.width = '0%';
-    if (duoBtnText) duoBtnText.textContent = 'DOWNLOAD OB-52 VIP CONFIG';
-    if (duoBtnSub) duoBtnSub.textContent = 'VERIFIED DIRECT MIRROR (2.4 MB)';
-    if (duoToast) duoToast.classList.remove('active');
-
-    // T+0.6s: Power On & 3D Unfold Motion
-    setTimeout(() => {
-      duoDevice.classList.remove('duo-folded');
-      duoDevice.classList.add('duo-unfolded');
-
-      // T+2.2s: Begin typing "god4xe.onrender.com" into Safari address bar
-      setTimeout(() => {
-        let charIndex = 0;
-        const typeTimer = setInterval(() => {
-          if (charIndex < targetUrl.length) {
-            if (duoTypedUrl) duoTypedUrl.textContent += targetUrl[charIndex];
-            charIndex++;
-          } else {
-            clearInterval(typeTimer);
-
-            // T+3.8s: Hit Go / Enter -> Blue loading bar sweeps across
+            // T = 7.5s: macOS Cursor glides to Omnibar
             setTimeout(() => {
-              if (duoLoadingBar) {
-                duoLoadingBar.style.transition = 'width 0.75s cubic-bezier(0.16, 1, 0.3, 1)';
-                duoLoadingBar.style.width = '100%';
+              if (macMouse) {
+                macMouse.style.opacity = '1';
+                macMouse.style.transition = 'top 0.8s ease, left 0.8s ease';
+                macMouse.style.top = '12px';
+                macMouse.style.left = '42%';
               }
 
-              // T+4.6s: Loading complete -> GOD4XE website renders inside unfolded iPhone!
+              // T = 8.5s: Type "https://god4xe.onrender.com"
               setTimeout(() => {
-                if (duoLoadingBar) duoLoadingBar.style.opacity = '0';
-                if (duoViewport) duoViewport.classList.add('loaded');
+                let charIdx = 0;
+                const macTypeTimer = setInterval(() => {
+                  if (charIdx < macTargetUrl.length) {
+                    if (macTypedUrl) macTypedUrl.textContent += macTargetUrl[charIdx];
+                    charIdx++;
+                  } else {
+                    clearInterval(macTypeTimer);
 
-                // T+5.6s: In-App File Download Simulation Starts!
-                setTimeout(() => {
-                  // Show animated tap finger over the download button
-                  if (duoTap) duoTap.classList.add('active');
-
-                  // Finger taps download button
-                  setTimeout(() => {
-                    if (duoTap) duoTap.classList.add('tapping');
-
-                    if (duoBtnText) duoBtnText.textContent = 'CONNECTING MIRROR...';
-                    if (duoBtnSub) duoBtnSub.textContent = 'ENCRYPTED SSL PROTOCOL';
-
-                    // Progress bar fills on button: 0% -> 50% -> 100%
+                    // T = 11.5s: Page loading progress bar sweeps across
                     setTimeout(() => {
-                      if (duoBtnText) duoBtnText.textContent = 'DOWNLOADING (2.4 MB)...';
-                      if (duoBtnProgress) {
-                        duoBtnProgress.style.transition = 'width 1.4s ease-in-out';
-                        duoBtnProgress.style.width = '100%';
+                      if (macLoadingProgress) {
+                        macLoadingProgress.style.transition = 'width 1.1s cubic-bezier(0.16, 1, 0.3, 1)';
+                        macLoadingProgress.style.width = '100%';
                       }
 
-                      // T+8.2s: Download finished -> iOS Dynamic Island Toast pops up!
+                      // T = 12.8s: GOD4XE website renders inside Safari
                       setTimeout(() => {
-                        if (duoBtnText) duoBtnText.textContent = '✓ DOWNLOAD COMPLETE!';
-                        if (duoBtnSub) duoBtnSub.textContent = '100% BAN-SAFE VERIFIED';
-                        if (duoTap) duoTap.classList.remove('active', 'tapping');
+                        if (macLoadingProgress) macLoadingProgress.style.opacity = '0';
+                        if (macWebview) macWebview.classList.add('loaded');
 
-                        if (duoToast) {
-                          duoToast.classList.add('active');
-                          if (duoToastStatus) duoToastStatus.textContent = 'DOWNLOAD FINISHED (2.4 MB)';
-                          if (duoToastBadge) duoToastBadge.textContent = '✓ VERIFIED';
+                        // macOS cursor scrolls down to inspect content
+                        setTimeout(() => {
+                          if (macSiteScroll) {
+                            macSiteScroll.scrollTo({ top: 90, behavior: 'smooth' });
+                          }
+                          if (macMouse) {
+                            macMouse.style.top = '160px';
+                            macMouse.style.left = '60%';
+                          }
+                        }, 800);
+
+                      }, 1200);
+
+                    }, 400);
+
+                  }
+                }, 75);
+
+              }, 1000);
+
+            }, 800);
+
+          }, 1000);
+
+        }, 2800);
+
+      }, 1400);
+
+    }, 1000);
+
+    // ==========================================
+    // PHASE 3 (T = 16.0s – 21.0s): IPHONE WAKES UP & SAFARI LAUNCH
+    // ==========================================
+    setTimeout(() => {
+      iphoneScreen.classList.add('ios-awake');
+
+      // ==========================================
+      // PHASE 4 (T = 21.0s – 27.0s): IOS SAFARI SEARCH & LOAD
+      // ==========================================
+      setTimeout(() => {
+        let iCharIdx = 0;
+        const iosTypeTimer = setInterval(() => {
+          if (iCharIdx < iosTargetUrl.length) {
+            if (iosTypedUrl) iosTypedUrl.textContent += iosTargetUrl[iCharIdx];
+            iCharIdx++;
+          } else {
+            clearInterval(iosTypeTimer);
+
+            // Blue Safari loading progress sweeps
+            setTimeout(() => {
+              if (iosLoadingBar) {
+                iosLoadingBar.style.transition = 'width 1.0s cubic-bezier(0.16, 1, 0.3, 1)';
+                iosLoadingBar.style.width = '100%';
+              }
+
+              // Mobile site renders inside iPhone
+              setTimeout(() => {
+                if (iosLoadingBar) iosLoadingBar.style.opacity = '0';
+                if (iosWebview) iosWebview.classList.add('loaded');
+
+                // ==========================================
+                // PHASE 5 (T = 27.0s – 37.0s): REAL IOS DOWNLOAD MODAL & DYNAMIC ISLAND
+                // ==========================================
+                setTimeout(() => {
+                  // iOS touch indicator appears
+                  if (iosTouch) {
+                    iosTouch.classList.add('active');
+                    iosTouch.style.top = '185px';
+                    iosTouch.style.left = '50%';
+                  }
+
+                  // Touch indicator taps the download button
+                  setTimeout(() => {
+                    if (iosTouch) iosTouch.classList.add('tapping');
+
+                    // T = 29.2s: Authentic iOS Modal Alert pops up!
+                    setTimeout(() => {
+                      if (iosTouch) iosTouch.classList.remove('active', 'tapping');
+                      if (iosModal) iosModal.classList.add('active');
+
+                      // Touch pointer moves to "Download" in modal
+                      setTimeout(() => {
+                        if (iosTouch) {
+                          iosTouch.classList.add('active');
+                          iosTouch.style.top = '58%';
+                          iosTouch.style.left = '68%';
                         }
 
-                        // Hold celebration state, then prepare next smooth loop
-                        clearTimeout(sequenceLoopTimeout);
-                        sequenceLoopTimeout = setTimeout(() => {
-                          runFullShowcase();
-                        }, 5200);
+                        // Finger taps "Download" on modal
+                        setTimeout(() => {
+                          if (iosTouch) iosTouch.classList.add('tapping');
+                          if (iosModalConfirm) iosModalConfirm.classList.add('pressed');
 
-                      }, 1500);
+                          // Modal dismisses & Dynamic Island expands!
+                          setTimeout(() => {
+                            if (iosModal) iosModal.classList.remove('active');
+                            if (iosTouch) iosTouch.classList.remove('active', 'tapping');
+
+                            // Expand Dynamic Island into Live Activity Pill
+                            if (iosDynamicIsland) {
+                              iosDynamicIsland.classList.add('expanded');
+                            }
+                            if (islandIcon) islandIcon.textContent = '⬇';
+                            if (islandStatus) islandStatus.textContent = 'Downloading 2.4 MB...';
+                            if (iosBtnTitle) iosBtnTitle.textContent = 'DOWNLOADING (2.4 MB)...';
+                            if (iosBtnProgress) {
+                              iosBtnProgress.style.transition = 'width 3.2s ease-in-out';
+                              iosBtnProgress.style.width = '100%';
+                            }
+                            if (islandProgressFill) {
+                              islandProgressFill.style.transition = 'width 3.2s ease-in-out';
+                              islandProgressFill.style.width = '100%';
+                            }
+
+                            // Dynamic Island finishes download celebration!
+                            setTimeout(() => {
+                              if (islandIcon) islandIcon.textContent = '✓';
+                              if (islandStatus) islandStatus.textContent = 'Download Complete!';
+                              if (iosBtnTitle) iosBtnTitle.textContent = '✓ DOWNLOAD COMPLETE';
+                              if (iosBtnSub) iosBtnSub.textContent = '100% BAN-SAFE VERIFIED';
+                              if (iosDynamicIsland) iosDynamicIsland.classList.add('completed');
+
+                              // Contract Dynamic Island back to sleek pill
+                              setTimeout(() => {
+                                if (iosDynamicIsland) {
+                                  iosDynamicIsland.classList.remove('expanded');
+                                }
+                              }, 2200);
+
+                            }, 3400);
+
+                          }, 550);
+
+                        }, 600);
+
+                      }, 900);
 
                     }, 650);
 
                   }, 650);
 
-                }, 1000);
+                }, 900);
 
-              }, 800);
+              }, 1100);
 
             }, 300);
+
           }
-        }, 95);
+        }, 90);
 
-      }, 1400);
+      }, 1000);
 
-    }, 600);
+    }, 16000);
+
+    // ==========================================
+    // PHASE 6 (T = 37.0s – 42.0s): DUAL DEVICE GRAND FINALE
+    // ==========================================
+    // Loops continuously every 42 seconds
+    currentCycleTimer = setTimeout(() => {
+      runEpicAppleCycle();
+    }, 42000);
   }
 
-  function runFullShowcase() {
-    isSequenceRunning = true;
-    playMacbookOpenSequence();
-    playIphoneDuoSequence();
-  }
+  // Launch initial cycle
+  runEpicAppleCycle();
 
-  // Initial trigger
-  runFullShowcase();
-
-  // Replay control button
-  if (replayBtn) {
-    replayBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      clearTimeout(sequenceLoopTimeout);
-      clearInterval(macSlideTimer);
-      runFullShowcase();
-    });
-  }
-
-  // 3D Mouse Parallax Tracking on Desktop
+  // Desktop 3D Mouse Parallax
   const isTouch = window.matchMedia('(pointer: coarse)').matches || ('ontouchstart' in window);
   const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (!isTouch && !prefersReduced && window.innerWidth > 1024) {
@@ -751,18 +861,20 @@ function initAppleHardwareShowcase() {
       const y = (e.clientY - rect.top) / rect.height - 0.5;
 
       const macDevice = document.getElementById('macbook-showcase');
+      const iphoneWrap = document.getElementById('iphone-stage');
       if (macDevice && macLid.classList.contains('mac-lid-opened')) {
-        macDevice.style.transform = `perspective(1200px) rotateY(${x * 10 - 4}deg) rotateX(${-y * 8 + 3}deg) translateY(-5px)`;
+        macDevice.style.transform = `perspective(1200px) rotateY(${x * 8 - 4}deg) rotateX(${-y * 6 + 2}deg) translateY(-5px)`;
       }
-      if (duoStage && duoDevice.classList.contains('duo-unfolded')) {
-        duoStage.style.transform = `perspective(1200px) rotateY(${x * 12 - 8}deg) rotateX(${-y * 8 + 4}deg) translateZ(15px)`;
+      if (iphoneWrap) {
+        iphoneWrap.style.transform = `perspective(1200px) rotateY(${x * 10 + 2}deg) rotateX(${-y * 6 + 2}deg) translateZ(15px)`;
       }
     });
 
     stage.addEventListener('mouseleave', () => {
       const macDevice = document.getElementById('macbook-showcase');
+      const iphoneWrap = document.getElementById('iphone-stage');
       if (macDevice) macDevice.style.transform = '';
-      if (duoStage) duoStage.style.transform = '';
+      if (iphoneWrap) iphoneWrap.style.transform = '';
     });
   }
 }

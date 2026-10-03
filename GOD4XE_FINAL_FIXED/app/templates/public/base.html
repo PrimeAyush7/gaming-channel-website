@@ -67,7 +67,7 @@
           <img src="{{ settings.logo_url }}" alt="{{ settings.site_name }} Logo" class="brand-crest-img">
         {% else %}
           <img src="/static/images/1000074856.jpg.jpeg" alt="GOD4XE Logo" class="brand-crest-img">
-          <div class="site-brand-text">{{ settings.site_name }} <span>ESPORTS</span></div>
+          <div class="site-brand-text">{{ settings.site_name }}</div>
         {% endif %}
       </a>
 
@@ -146,17 +146,20 @@
           </span>
           <a href="/logout" class="btn btn-secondary btn-sm user-logout-btn" title="Logout">Logout</a>
         </div>
-        <!-- Mobile Header User Badge -->
+        <!-- Mobile Header User Badge & Logout -->
         <a href="/esports" class="mobile-header-user-btn" title="Player Account">
           <span class="pulse-dot"></span>
           <span>💎 {{ current_user.diamond_balance }}</span>
+        </a>
+        <a href="/logout" class="mobile-header-logout-btn" title="Logout" aria-label="Logout">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
         </a>
         {% else %}
         <div class="desktop-auth-btns">
           <a href="/login" class="btn btn-secondary btn-sm auth-btn-login">Login</a>
           <a href="/register" class="btn btn-primary btn-sm auth-btn-reg">Register</a>
         </div>
-        <!-- Mobile Header Direct Login Button (Always Visible on Mobile!) -->
+        <!-- Mobile Header Direct Login Button (Prominent & Always Visible on Mobile!) -->
         <a href="/login" class="mobile-header-login-btn" aria-label="Player Login">
           <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
           <span>Login</span>
@@ -296,7 +299,7 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-brand">
-          <div class="site-brand-text">{{ settings.site_name }} <span>ESPORTS</span></div>
+          <div class="site-brand-text">{{ settings.site_name }}</div>
           <p>{{ settings.site_description }}</p>
           {% set custom_footer_links = [
             (settings.get('desc_link_1_title', ''), settings.get('desc_link_1_url', '')),

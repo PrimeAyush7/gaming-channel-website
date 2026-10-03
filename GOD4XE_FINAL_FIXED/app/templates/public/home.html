@@ -150,7 +150,7 @@
         {% else %}
         <div class="featured-video-card cyber-card" style="padding: 2.5rem; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 280px;">
           <div style="font-size: 3.5rem; margin-bottom: 1rem; filter: drop-shadow(0 0 20px var(--neon-cyan));">🎮</div>
-          <h3 style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 800; color: #fff; margin-bottom: 0.5rem;">GOD4XE ESPORTS ARENA</h3>
+          <h3 style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 800; color: #fff; margin-bottom: 0.5rem;">GOD4XE ARENA</h3>
           <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 320px; margin-bottom: 1.25rem;">Daily verified custom rooms, Free Fire tournaments, and direct diamond payouts.</p>
           <a href="/esports" class="btn btn-primary btn-sm">Enter Arena &rarr;</a>
         </div>
@@ -184,189 +184,186 @@
     </div>
   </section>
 
-  <!-- 3D DUAL DEVICE SHOWCASE SECTION: MACBOOK PRO (PHYSICAL UNLATCH & POWER ON) + IPHONE DUO (APPLE FOLDABLE) -->
+  <!-- 3D APPLE HARDWARE SHOWCASE SECTION: MACBOOK PRO 16" (MACOS SEQUOIA) + IPHONE 16 PRO (IOS 18) -->
   <section class="device-showcase-section" id="device-showcase-section">
     <div class="device-showcase-header">
-      <span class="download-badge">⚡ APPLE-GRADE HARDWARE SHOWCASE</span>
+      <span class="download-badge"> APPLE-GRADE HARDWARE SIMULATOR</span>
       <h2 class="device-showcase-title">
-        SEAMLESS ON <span class="gradient-text">MACBOOK PRO &amp; IPHONE DUO</span>
+        SEAMLESS ON <span class="gradient-text">MACBOOK PRO &amp; IPHONE</span>
       </h2>
       <p class="device-showcase-subtitle">
-        Watch the MacBook physically open and power on, while the foldable iPhone Duo unfolds to search god4xe.onrender.com and download VIP configs in real-time.
+        Authentic macOS Sequoia &amp; iOS 18 simulator — watch MacBook physically unlatch and open, while iPhone Safari navigates to god4xe.onrender.com with live Dynamic Island VIP config download.
       </p>
-      
-      <!-- Interactive Replay Control Pill -->
-      <div class="showcase-control-pills">
-        <button type="button" class="btn-replay-showcase" id="btn-replay-devices" title="Replay 3D Sequence">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-          <span>REPLAY 3D OPENING &amp; IN-APP DOWNLOAD SEQUENCE</span>
+
+      <!-- Apple Device View Selector for Mobile & Desktop -->
+      <div class="device-view-selector" id="device-view-selector">
+        <button type="button" class="dev-view-tab active" data-view="both">
+          <span>✨ Both Devices</span>
+        </button>
+        <button type="button" class="dev-view-tab" data-view="mac">
+          <span>💻 MacBook Pro 16"</span>
+        </button>
+        <button type="button" class="dev-view-tab" data-view="iphone">
+          <span>📱 iPhone 16 Pro</span>
         </button>
       </div>
     </div>
 
     <div class="devices-stage-container">
-      <div class="hero-devices-showcase" id="hero-devices-stage">
+      <div class="hero-devices-showcase view-mode-both" id="hero-devices-stage">
         
-        <!-- Ambient Ground Neon Glow Aura -->
+        <!-- Ambient Ground Apple Glow Aura -->
         <div class="devices-ambient-glow" aria-hidden="true"></div>
 
-        <!-- 1. MACBOOK PRO 16-INCH (With Physical Unlatch Opening & Screen Power-On Sequence) -->
+        <!-- 1. MACBOOK PRO 16-INCH (GENUINE MACOS SEQUOIA EXPERIENCE) -->
         <div class="macbook-stage-wrap" id="macbook-stage">
           <div class="macbook-device macbook-3d" id="macbook-showcase">
             
-            <!-- Opening Hands Graphic / Indicator (Fades out once opened) -->
+            <!-- Opening Hands / Lifting Hint -->
             <div class="mac-open-hand-hint" id="mac-hand-hint" aria-hidden="true">
               <div class="hand-gesture">
                 <span class="hand-lift-arrow">↑</span>
-                <span class="hand-label">LIFTING LID &amp; POWERING ON...</span>
+                <span class="hand-label">OPENING LID &amp; POWERING ON...</span>
               </div>
             </div>
 
-            <!-- MacBook Display Lid (Pivots open in 3D from closed state!) -->
+            <!-- MacBook Display Lid (Pivots open in 3D) -->
             <div class="macbook-lid" id="macbook-lid">
               <div class="macbook-notch">
                 <span class="macbook-camera"></span>
+                <span class="macbook-cam-indicator" id="mac-cam-light"></span>
               </div>
               
               <!-- Screen Display -->
               <div class="macbook-screen" id="macbook-screen">
                 
-                <!-- Power-On Blackout & Boot Screen -->
+                <!-- 1A: Apple Boot Screen (Pure Black with Apple Logo & White Progress Bar) -->
                 <div class="mac-boot-screen" id="mac-boot">
-                  <div class="mac-apple-boot-icon">
-                    <span class="boot-logo">🎮</span>
-                    <span class="boot-bar"><span class="boot-progress" id="mac-boot-progress"></span></span>
+                  <div class="mac-apple-boot-box">
+                    <svg class="mac-apple-logo" width="46" height="46" viewBox="0 0 170 170" fill="currentColor">
+                      <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.08-7.55-7.85-11.59-14.34-5.35-8.52-9.74-18.06-13.18-28.61-3.44-10.55-5.16-20.73-5.16-29.54 0-14.24 3.73-25.77 11.19-34.58 7.46-8.81 16.78-13.32 27.97-13.55 4.58 0 9.84 1.25 15.78 3.76 5.94 2.51 9.79 3.82 11.55 3.92 1.45 0 5.37-1.35 11.75-4.04 6.38-2.69 11.83-3.92 16.36-3.7 12.18.55 22.18 5.09 29.98 13.62-10.66 6.42-15.88 15.25-15.66 26.5.22 8.71 3.59 15.93 10.12 21.65 6.53 5.72 14.15 9.04 22.86 9.97-2.39 7.18-5.46 14.7-9.22 22.56zM119.22 33.3c0-7.39 2.67-14.28 8.01-20.67 5.34-6.39 12-10.66 19.97-12.82.22 1.3.33 2.51.33 3.63 0 7.39-2.73 14.42-8.19 21.09-5.46 6.67-12.16 10.77-20.12 12.31z"/>
+                    </svg>
+                    <div class="mac-apple-boot-bar">
+                      <div class="mac-apple-boot-fill" id="mac-boot-fill"></div>
+                    </div>
                   </div>
                 </div>
 
-                <!-- Safari / Browser Window Chrome -->
-                <div class="mac-browser-topbar" id="mac-topbar">
-                  <div class="mac-traffic-dots">
-                    <span class="m-dot dot-red"></span>
-                    <span class="m-dot dot-yellow"></span>
-                    <span class="m-dot dot-green"></span>
-                  </div>
+                <!-- 1B: macOS Sequoia Desktop Canvas -->
+                <div class="mac-desktop-canvas" id="mac-desktop">
                   
-                  <div class="mac-browser-tabs">
-                    <div class="mac-tab active">
-                      <span class="tab-icon">🔥</span>
-                      <span class="tab-title">GOD4XE ESPORTS ARENA</span>
+                  <!-- macOS Menu Bar -->
+                  <div class="macos-menu-bar">
+                    <div class="macos-menu-left">
+                      <span class="m-apple-icon"></span>
+                      <span class="m-menu-item active">Safari</span>
+                      <span class="m-menu-item">File</span>
+                      <span class="m-menu-item">Edit</span>
+                      <span class="m-menu-item">View</span>
+                      <span class="m-menu-item">History</span>
+                      <span class="m-menu-item">Bookmarks</span>
+                      <span class="m-menu-item">Window</span>
+                      <span class="m-menu-item">Help</span>
                     </div>
-                    <div class="mac-tab">
-                      <span class="tab-icon">🎯</span>
-                      <span class="tab-title">OB-52 VIP CONFIGS</span>
-                    </div>
-                  </div>
-
-                  <div class="mac-url-bar">
-                    <svg class="mac-padlock" width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
-                    <span class="mac-url-text">https://god4xe.onrender.com</span>
-                    <span class="mac-url-status">● LIVE 120 FPS</span>
-                  </div>
-                </div>
-
-                <!-- Live Website Slide Simulator (Plays like a video showcase!) -->
-                <div class="macbook-live-stage" id="mac-live-slides">
-                  
-                  <!-- Slide 1: 3D Vanguard Hero Showcase -->
-                  <div class="mac-slide active" data-slide="1">
-                    <div class="mac-slide-bg-grid"></div>
-                    <div class="mac-hero-banner">
-                      <span class="mac-chip-badge">DIMENSIONAL CORE v4.5 // TOURNAMENT READY</span>
-                      <h3 class="mac-banner-head">IMMERSIVE ESPORTS CONFIGS</h3>
-                      <p class="mac-banner-sub">Engineered with absolute physics precision for Free Fire OB-52 arena.</p>
-                      <div class="mac-banner-actions">
-                        <span class="mac-btn-mini btn-cyan">🏆 Arena Tournaments</span>
-                        <span class="mac-btn-mini btn-dark">📱 Android APK</span>
-                      </div>
-                    </div>
-                    <div class="mac-stats-row">
-                      <div class="mac-stat-card">
-                        <div class="ms-label">HEADSHOT RATE</div>
-                        <div class="ms-val">98.4%</div>
-                      </div>
-                      <div class="mac-stat-card">
-                        <div class="ms-label">LATENCY</div>
-                        <div class="ms-val">2 ms</div>
-                      </div>
-                      <div class="mac-stat-card">
-                        <div class="ms-label">FPS RATE</div>
-                        <div class="ms-val">120 FPS</div>
-                      </div>
+                    <div class="macos-menu-right">
+                      <span class="m-menu-status">🔋 100%</span>
+                      <span class="m-menu-status">📶</span>
+                      <span class="m-menu-status">🔍</span>
+                      <span class="m-menu-status">⚙️</span>
+                      <span class="m-menu-time">Sun Oct 4 &nbsp;9:41 AM</span>
                     </div>
                   </div>
 
-                  <!-- Slide 2: Esports Tournament Arena Showcase -->
-                  <div class="mac-slide" data-slide="2">
-                    <div class="mac-slide-bg-grid"></div>
-                    <div class="mac-arena-preview">
-                      <div class="mac-arena-head">
-                        <span class="mac-chip-badge badge-warn">LIVE MATCH LOBBY #04</span>
-                        <span class="mac-live-time">TIMER: 04:12:35</span>
+                  <!-- macOS Safari Application Window -->
+                  <div class="macos-safari-window" id="mac-safari-app">
+                    
+                    <!-- Window Titlebar with Traffic Lights -->
+                    <div class="macos-window-titlebar">
+                      <div class="macos-traffic-lights">
+                        <span class="tl-dot tl-red"></span>
+                        <span class="tl-dot tl-yellow"></span>
+                        <span class="tl-dot tl-green"></span>
                       </div>
-                      <h4 class="mac-arena-title">FF OB52 GRAND SQUAD CHAMPIONSHIP</h4>
-                      <div class="mac-match-details">
-                        <div class="mm-detail">
-                          <span>PRIZE POOL</span>
-                          <strong class="text-neon-cyan">💎 2,500 DIAMONDS</strong>
-                        </div>
-                        <div class="mm-detail">
-                          <span>MAP &amp; MODE</span>
-                          <strong>BERMUDA • SQUAD 4v4</strong>
-                        </div>
-                        <div class="mm-detail">
-                          <span>SLOTS FILLED</span>
-                          <strong class="text-neon-emerald">44 / 48 JOINED</strong>
-                        </div>
+                      <div class="macos-nav-arrows">
+                        <span class="nav-arrow">&lsaquo;</span>
+                        <span class="nav-arrow disabled">&rsaquo;</span>
                       </div>
-                      <div class="mac-match-slots-bar">
-                        <div class="slots-fill" style="width: 92%;"></div>
+                      
+                      <!-- Safari Omnibar -->
+                      <div class="macos-safari-omnibar">
+                        <svg class="macos-lock-icon" width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                        <div class="macos-omnibar-text">
+                          <span id="mac-typed-url"></span><span class="macos-cursor">|</span>
+                        </div>
+                        <span class="macos-reload-btn">↻</span>
+                        <div class="macos-page-progress" id="mac-loading-progress"></div>
+                      </div>
+
+                      <div class="macos-safari-actions">
+                        <span class="sa-btn">⎋</span>
+                        <span class="sa-btn">⊞</span>
                       </div>
                     </div>
-                  </div>
 
-                  <!-- Slide 3: VIP Sensitivity Topology -->
-                  <div class="mac-slide" data-slide="3">
-                    <div class="mac-slide-bg-grid"></div>
-                    <div class="mac-sens-preview">
-                      <div class="sens-header">
-                        <span class="mac-chip-badge">AIM CALIBRATION RADAR</span>
-                        <span class="sens-dpi">800 DPI // 120HZ</span>
-                      </div>
-                      <div class="sens-sliders-grid">
-                        <div class="sens-item">
-                          <div class="sens-info"><span>General Sens</span><strong>98%</strong></div>
-                          <div class="sens-track"><div class="sens-fill" style="width: 98%;"></div></div>
+                    <!-- Safari Web Page Viewport -->
+                    <div class="macos-webview-viewport" id="mac-webview">
+                      <div class="mac-site-content" id="mac-site-scroll">
+                        <!-- Clean GOD4XE Hero Banner inside macOS -->
+                        <div class="ms-hero">
+                          <div class="ms-hero-brand">
+                            <span class="ms-badge">GOD4XE v1.3.6</span>
+                            <span class="ms-live-badge">● LIVE 120 FPS</span>
+                          </div>
+                          <h3 class="ms-title">DOMINATE THE LOBBY</h3>
+                          <p class="ms-desc">Free Fire VIP headshot configs, custom tournament lobbies &amp; sensitivity engine.</p>
+                          <div class="ms-actions">
+                            <span class="ms-btn ms-btn-primary">🏆 Tournament Lobbies</span>
+                            <span class="ms-btn ms-btn-outline">⚡ VIP Configs (OB-52)</span>
+                          </div>
                         </div>
-                        <div class="sens-item">
-                          <div class="sens-info"><span>Red Dot Sight</span><strong>95%</strong></div>
-                          <div class="sens-track"><div class="sens-fill" style="width: 95%;"></div></div>
+
+                        <!-- Real-time Telemetry & Radar in macOS -->
+                        <div class="ms-grid">
+                          <div class="ms-card">
+                            <span class="msc-title">ACTIVE MATCH #FF-04</span>
+                            <strong class="msc-val text-neon-cyan">💎 2,500 DIAMONDS</strong>
+                            <div class="msc-progress"><div class="msc-bar" style="width: 88%;"></div></div>
+                            <span class="msc-sub">44/48 SLOTS FILLED</span>
+                          </div>
+                          <div class="ms-card">
+                            <span class="msc-title">HEADSHOT ACCURACY</span>
+                            <strong class="msc-val text-neon-emerald">98.4% CALIBRATED</strong>
+                            <div class="msc-progress"><div class="msc-bar bar-emerald" style="width: 98%;"></div></div>
+                            <span class="msc-sub">OB-52 ZERO-RECOIL</span>
+                          </div>
                         </div>
-                        <div class="sens-item">
-                          <div class="sens-info"><span>2x Scope Aim</span><strong>92%</strong></div>
-                          <div class="sens-track"><div class="sens-fill" style="width: 92%;"></div></div>
-                        </div>
-                      </div>
-                      <div class="sens-bottom-cta">
-                        <span class="btn-download-cyber-mini">⚡ DOWNLOAD OB-52 HEADSHOT CONFIG</span>
                       </div>
                     </div>
+
+                    <!-- Simulated macOS Mouse Cursor -->
+                    <div class="macos-pointer" id="mac-mouse-pointer" aria-hidden="true">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 3l13 9.5-6.5 1.5 4 8-3 1.5-4-8-4.5 4V3z" fill="#000" stroke="#fff" stroke-width="1.5"/></svg>
+                    </div>
+
                   </div>
 
-                </div>
+                  <!-- macOS Dock -->
+                  <div class="macos-dock">
+                    <div class="dock-item">📁</div>
+                    <div class="dock-item active">🧭</div>
+                    <div class="dock-item">💬</div>
+                    <div class="dock-item">✉️</div>
+                    <div class="dock-item">🎮</div>
+                    <div class="dock-item">⚙️</div>
+                  </div>
 
-                <!-- Slide Indicators at bottom of MacBook screen -->
-                <div class="mac-slide-dots">
-                  <span class="s-dot active" data-target="1"></span>
-                  <span class="s-dot" data-target="2"></span>
-                  <span class="s-dot" data-target="3"></span>
                 </div>
 
                 <div class="screen-glare"></div>
               </div>
             </div>
 
-            <!-- MacBook Base Chassis with Keyboard Deck -->
+            <!-- MacBook Base Chassis with Trackpad -->
             <div class="macbook-base">
               <div class="macbook-keyboard-deck">
                 <div class="mac-keyboard-rows">
@@ -382,132 +379,134 @@
           </div>
         </div>
 
-        <!-- 2. IPHONE DUO (APPLE FOLDABLE DUAL-SCREEN PHONE WITH UNFOLD & IN-APP FILE DOWNLOAD) -->
-        <div class="iphone-duo-foldable-wrap" id="iphone-duo-stage">
-          <div class="iphone-duo-device" id="iphone-duo-device">
+        <!-- 2. IPHONE 16 PRO (GENUINE SEAMLESS RETINA DISPLAY & AUTHENTIC IOS 18 WORKFLOW) -->
+        <div class="iphone-seamless-stage-wrap" id="iphone-stage">
+          <div class="iphone-pro-device" id="iphone-device">
             
-            <!-- Central Titanium Fold Hinge -->
-            <div class="duo-hinge-spine" aria-hidden="true">
-              <span class="hinge-metal-core"></span>
-            </div>
+            <div class="iphone-titanium-bezel">
+              <div class="iphone-retina-screen" id="iphone-screen">
+                
+                <!-- iOS 18 Ambient Fluid Wallpaper -->
+                <div class="ios-ambient-wallpaper"></div>
 
-            <!-- LEFT DISPLAY WING (Expands from fold to flat!) -->
-            <div class="duo-wing duo-wing-left" id="duo-wing-left">
-              <div class="duo-wing-bezel">
-                <div class="duo-inner-screen">
-                  <div class="duo-screen-header">
-                    <span class="duo-clock">9:41</span>
-                    <span class="duo-tag">5G // PRO DUO</span>
-                  </div>
-                  <!-- Left Wing Content: Live Tournament Radar & Telemetry -->
-                  <div class="duo-left-content">
-                    <div class="duo-telemetry-badge">LIVE ARENA TELEMETRY</div>
-                    <div class="duo-radar-compass">
-                      <span class="duo-radar-icon">🎯</span>
-                      <span class="duo-radar-sweep"></span>
+                <!-- iOS Status Bar with Dynamic Island -->
+                <div class="ios-status-bar">
+                  <span class="ios-time">9:41</span>
+                  
+                  <!-- Authentic Apple Dynamic Island -->
+                  <div class="ios-dynamic-island" id="ios-dynamic-island">
+                    <div class="island-collapsed">
+                      <span class="island-cam"></span>
+                      <span class="island-sensor"></span>
                     </div>
-                    <div class="duo-telemetry-stats">
-                      <div class="dt-stat">
-                        <span>MATCH ID</span>
-                        <strong>#FF-OB52</strong>
+                    <div class="island-expanded-content" id="island-expanded">
+                      <span class="island-dl-icon" id="island-icon">⬇</span>
+                      <div class="island-dl-text">
+                        <strong id="island-filename">OB52_VIP_CONFIG.zip</strong>
+                        <span id="island-status">Downloading 2.4 MB</span>
                       </div>
-                      <div class="dt-stat">
-                        <span>PRIZE POOL</span>
-                        <strong class="text-neon-cyan">💎 2,500</strong>
+                      <div class="island-progress-ring">
+                        <div class="island-progress-fill" id="island-progress-fill"></div>
                       </div>
-                    </div>
-                    <div class="duo-status-indicator">
-                      <span class="pulse-dot"></span> SENSITIVITY CALIBRATED
                     </div>
                   </div>
-                </div>
-                <div class="screen-glare"></div>
-              </div>
-            </div>
 
-            <!-- RIGHT DISPLAY WING (Expansive Safari Browser & In-App File Download Simulator) -->
-            <div class="duo-wing duo-wing-right" id="duo-wing-right">
-              <div class="duo-wing-bezel">
-                <div class="duo-inner-screen">
-                  <!-- Right Screen Dynamic Island & Status -->
-                  <div class="duo-screen-header">
-                    <div class="duo-island"></div>
-                    <span class="duo-battery">100% 🔋</span>
-                  </div>
-
-                  <!-- Safari Browser Container -->
-                  <div class="duo-safari-app">
-                    
-                    <!-- Safari Search Bar: Types god4xe.onrender.com -->
-                    <div class="duo-safari-bar" id="duo-safari-bar">
-                      <svg class="safari-search-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                      <div class="safari-url-display">
-                        <span class="safari-typed-text" id="duo-typed-url"></span><span class="safari-cursor">|</span>
-                      </div>
-                      <span class="safari-reload-icon">↻</span>
-                      <div class="safari-loading-bar" id="duo-loading-bar"></div>
-                    </div>
-
-                    <!-- iOS Dynamic Island Download Notification Banner (Appears on file download!) -->
-                    <div class="duo-download-toast" id="duo-dl-toast" aria-hidden="true">
-                      <div class="toast-icon">📥</div>
-                      <div class="toast-info">
-                        <strong>OB52_VIP_CONFIG.ZIP</strong>
-                        <span id="toast-status-text">DOWNLOADING... 2.4 MB</span>
-                      </div>
-                      <div class="toast-badge" id="toast-badge-status">✓ SAFE</div>
-                    </div>
-
-                    <!-- Mobile Website Viewport Inside Unfolded iPhone Duo -->
-                    <div class="duo-website-viewport" id="duo-website-viewport">
-                      <div class="m-site-header">
-                        <div class="m-brand">
-                          <span class="m-logo-dot"></span>
-                          <span class="m-brand-name">GOD4XE</span>
-                        </div>
-                        <span class="m-user-pill">💎 250</span>
-                      </div>
-
-                      <div class="m-site-hero">
-                        <span class="m-hero-badge">OB-52 VIP ARENA</span>
-                        <h4 class="m-hero-title">HEADSHOT CONFIG ENGINE</h4>
-                        <p class="m-hero-sub">Battle-tested sensitivity configs for tournaments.</p>
-
-                        <!-- Simulated Tap Indicator pointing to Download -->
-                        <div class="duo-tap-finger" id="duo-tap-indicator" aria-hidden="true">
-                          <span class="tap-ring"></span>
-                          <span class="tap-dot"></span>
-                        </div>
-
-                        <!-- The In-Mobile Animated Download Button -->
-                        <div class="m-action-download-box" id="duo-m-download-btn">
-                          <div class="m-dl-btn-inner">
-                            <span class="m-dl-icon">⚡</span>
-                            <div class="m-dl-texts">
-                              <strong id="duo-btn-text">DOWNLOAD OB-52 VIP CONFIG</strong>
-                              <span id="duo-btn-sub">VERIFIED DIRECT MIRROR (2.4 MB)</span>
-                            </div>
-                            <span class="m-dl-arrow">↓</span>
-                          </div>
-                          <!-- In-button Download Progress Fill -->
-                          <div class="m-dl-progress-bar" id="duo-btn-progress"></div>
-                        </div>
-
-                        <div class="m-sliders" style="margin-top: 10px;">
-                          <div class="m-slider-row">
-                            <span>General Sens</span><strong>98%</strong>
-                          </div>
-                          <div class="m-slider-track"><div class="m-slider-fill" style="width: 98%;"></div></div>
-                          <div class="m-slider-row">
-                            <span>Red Dot Scope</span><strong>95%</strong>
-                          </div>
-                          <div class="m-slider-track"><div class="m-slider-fill" style="width: 95%;"></div></div>
-                        </div>
-                      </div>
-                    </div>
-
+                  <div class="ios-status-icons">
+                    <span class="ios-5g">5G</span>
+                    <span class="ios-wifi">📶</span>
+                    <span class="ios-battery"><span class="battery-fill"></span></span>
                   </div>
                 </div>
+
+                <!-- iOS Safari Application Container -->
+                <div class="ios-safari-container" id="ios-safari">
+                  
+                  <!-- Safari Floating Address Capsule (Authentic iOS Style) -->
+                  <div class="ios-safari-capsule" id="ios-safari-capsule">
+                    <span class="ios-aa-btn">aA</span>
+                    <div class="ios-capsule-url">
+                      <svg class="ios-lock-icon" width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                      <span class="ios-typed-domain" id="ios-typed-url"></span><span class="ios-cursor">|</span>
+                    </div>
+                    <span class="ios-reload-btn">↻</span>
+                    <div class="ios-capsule-progress" id="ios-loading-bar"></div>
+                  </div>
+
+                  <!-- Loaded Mobile Website inside iPhone -->
+                  <div class="ios-website-viewport" id="ios-webview">
+                    <div class="ios-site-header">
+                      <div class="ios-site-brand">
+                        <span class="is-dot"></span>
+                        <span class="is-name">GOD4XE</span>
+                      </div>
+                      <span class="is-balance">💎 250</span>
+                    </div>
+
+                    <div class="ios-site-body">
+                      <span class="ios-hero-badge">OB-52 VIP ARENA</span>
+                      <h4 class="ios-hero-title">HEADSHOT CONFIG ENGINE</h4>
+                      <p class="ios-hero-desc">Direct mirror for tournament-grade zero recoil sensitivity.</p>
+
+                      <!-- The In-Mobile Animated Download Button -->
+                      <div class="ios-dl-action-card" id="ios-download-btn">
+                        <div class="ios-dl-btn-content">
+                          <span class="ios-dl-icon">⚡</span>
+                          <div class="ios-dl-labels">
+                            <strong id="ios-btn-title">DOWNLOAD OB-52 VIP CONFIG</strong>
+                            <span id="ios-btn-sub">VERIFIED DIRECT MIRROR (2.4 MB)</span>
+                          </div>
+                          <span class="ios-dl-chevron">↓</span>
+                        </div>
+                        <div class="ios-dl-progress-line" id="ios-btn-progress"></div>
+                      </div>
+
+                      <div class="ios-sens-sliders">
+                        <div class="iss-row">
+                          <span>General Sensitivity</span><strong>98%</strong>
+                        </div>
+                        <div class="iss-track"><div class="iss-fill" style="width: 98%;"></div></div>
+                        <div class="iss-row">
+                          <span>Red Dot Scope</span><strong>95%</strong>
+                        </div>
+                        <div class="iss-track"><div class="iss-fill" style="width: 95%;"></div></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Simulated iOS Touch Finger Indicator -->
+                  <div class="ios-touch-indicator" id="ios-touch-pointer" aria-hidden="true">
+                    <span class="touch-ring"></span>
+                    <span class="touch-center"></span>
+                  </div>
+
+                  <!-- Authentic iOS Modal Alert Sheet -->
+                  <div class="ios-alert-modal" id="ios-download-modal">
+                    <div class="ios-alert-box">
+                      <div class="ios-alert-head">
+                        <h5>Do you want to download "GOD4XE_VIP_CONFIG.zip"?</h5>
+                        <p>2.4 MB • 100% Ban-Safe Verified Config</p>
+                      </div>
+                      <div class="ios-alert-actions">
+                        <span class="ios-alert-btn btn-cancel">Cancel</span>
+                        <span class="ios-alert-btn btn-confirm active" id="ios-modal-confirm">Download</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- iOS Bottom Safari Navigation Bar -->
+                  <div class="ios-safari-bottom-bar">
+                    <span class="sbb-icon">&lsaquo;</span>
+                    <span class="sbb-icon disabled">&rsaquo;</span>
+                    <span class="sbb-icon">⎋</span>
+                    <span class="sbb-icon">📖</span>
+                    <span class="sbb-icon">⊞</span>
+                  </div>
+
+                  <!-- iOS Home Indicator -->
+                  <div class="ios-home-indicator"></div>
+
+                </div>
+
                 <div class="screen-glare"></div>
               </div>
             </div>
