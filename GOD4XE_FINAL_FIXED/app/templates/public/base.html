@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>{% block title %}{{ settings.site_name }} - {{ settings.site_tagline }}{% endblock %}</title>
   
   <meta name="description" content="{% block meta_description %}{{ settings.site_description }}{% endblock %}">
@@ -39,7 +39,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="/static/css/style.css?v=3.2.0">
+  <link rel="stylesheet" href="/static/css/style.css?v=3.3.0">
 
   {% if ads and ads.is_enabled and ads.client_id %}
   <!-- Google AdSense Official Loader (Active when client_id is set) -->
@@ -276,8 +276,11 @@
     {% block content %}{% endblock %}
   </main>
 
+  <!-- Quick Preview Backdrop Overlay -->
+  <div id="quick-preview-backdrop" class="quick-preview-backdrop" aria-hidden="true"></div>
+
   <!-- Floating HUD Quick Preview Popover Window (Hover & Quick Peek) -->
-  <div id="quick-preview-popover" class="quick-preview-hud" aria-hidden="true">
+  <div id="quick-preview-popover" class="quick-preview-hud" aria-hidden="true" role="dialog" aria-modal="true">
     <div class="preview-hud-inner cyber-card">
       <div class="preview-hud-topbar">
         <div class="terminal-dots">
@@ -286,7 +289,7 @@
           <span class="t-dot dot-green"></span>
         </div>
         <span class="preview-hud-tag">CYBER_PREVIEW // HUD_VIEWPORT</span>
-        <button type="button" class="preview-hud-close" aria-label="Close preview">&times;</button>
+        <button type="button" class="preview-hud-close" id="preview-hud-close-btn" aria-label="Close preview" title="Close Preview">✕</button>
       </div>
       <div class="preview-hud-body">
         <div class="preview-hud-media" id="hud-preview-media-box">
@@ -414,7 +417,7 @@
     </div>
   </footer>
 
-  <script src="/static/js/main.js?v=3.2.0"></script>
+  <script src="/static/js/main.js?v=3.3.0"></script>
   {% block extra_scripts %}{% endblock %}
 <script>
 if ('serviceWorker' in navigator) {
