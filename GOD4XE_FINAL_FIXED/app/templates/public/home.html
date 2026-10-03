@@ -421,16 +421,7 @@
     {% if posts %}
     <div class="posts-grid">
       {% for post in posts %}
-      <article class="post-card cyber-card" 
-               data-post-preview="true"
-               data-preview-title="{{ post.title }}"
-               data-preview-excerpt="{{ post.summary or (post.content[:160] ~ '...') }}"
-               data-preview-url="/post/{{ post.slug }}"
-               data-preview-date="{{ post.published_at[:10] }}"
-               data-preview-views="{{ post.view_count }}"
-               data-preview-badge="{{ post.section_name or 'GUIDE' }}"
-               data-preview-image="{{ post.thumbnail_url or '' }}"
-               data-preview-download="{{ post.download_url or '' }}">
+      <article class="post-card cyber-card">
         <a href="/post/{{ post.slug }}" class="post-thumb-link">
           {% if post.thumbnail_url %}
           <img src="{{ post.thumbnail_url }}" alt="{{ post.title }}" class="post-thumb-img" loading="lazy">
@@ -441,10 +432,6 @@
           <span class="post-badge">{{ post.section_name }}</span>
           {% endif %}
           <div class="thumb-gradient-overlay"></div>
-          <!-- Quick Peek Icon Pill -->
-          <button type="button" class="card-quick-peek-btn" title="Quick Preview" aria-label="Quick Preview">
-            👁️ Quick Peek
-          </button>
         </a>
 
         <div class="post-content-box">
@@ -495,16 +482,7 @@
 
     <div class="posts-grid">
       {% for post in popular_posts %}
-      <article class="post-card cyber-card"
-               data-post-preview="true"
-               data-preview-title="{{ post.title }}"
-               data-preview-excerpt="{{ post.summary or (post.content[:160] ~ '...') }}"
-               data-preview-url="/post/{{ post.slug }}"
-               data-preview-date="{{ post.published_at[:10] if post.published_at else 'Hot' }}"
-               data-preview-views="{{ post.view_count }}"
-               data-preview-badge="{{ post.section_name or 'POPULAR' }}"
-               data-preview-image="{{ post.thumbnail_url or '' }}"
-               data-preview-download="{{ post.download_url or '' }}">
+      <article class="post-card cyber-card">
         <a href="/post/{{ post.slug }}" class="post-thumb-link">
           {% if post.thumbnail_url %}
           <img src="{{ post.thumbnail_url }}" alt="{{ post.title }}" class="post-thumb-img" loading="lazy">
@@ -515,9 +493,6 @@
           <span class="post-badge badge-accent">{{ post.section_name }}</span>
           {% endif %}
           <div class="thumb-gradient-overlay"></div>
-          <button type="button" class="card-quick-peek-btn" title="Quick Preview" aria-label="Quick Preview">
-            👁️ Quick Peek
-          </button>
         </a>
 
         <div class="post-content-box">

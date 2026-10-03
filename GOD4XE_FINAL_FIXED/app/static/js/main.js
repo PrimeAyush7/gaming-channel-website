@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initCursorGlow();
   initMobileNav();
   initCardMotionAndLighting();
-  initPostQuickPreview();
   initAnalyticsTracking();
   initDeviceShowcaseParallax();
   initDimensionalWebGL();
@@ -369,7 +368,7 @@ function initDimensionalUI() {
 }
 
 /* --------------------------------------------------------------------------
-   CARD MOTION & SPECULAR REACTION
+   CARD MOTION & SUBTLE HOVER ZOOM (SMOOTH & CLEAN, NO POPUPS)
    -------------------------------------------------------------------------- */
 function initCardMotionAndLighting() {
   const cards = document.querySelectorAll('.cyber-card');
@@ -387,156 +386,25 @@ function initCardMotionAndLighting() {
       card.style.setProperty('--card-mouse-x', `${x}px`);
       card.style.setProperty('--card-mouse-y', `${y}px`);
 
-      if (!isTouch && !prefersReduced && window.innerWidth > 1024 && !card.classList.contains('no-tilt') && !card.closest('.quick-preview-hud')) {
+      if (!isTouch && !prefersReduced && window.innerWidth > 1024 && !card.classList.contains('no-tilt')) {
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
-        const rotateX = ((y - centerY) / centerY) * -4;
-        const rotateY = ((x - centerX) / centerX) * 4;
+        const rotateX = ((y - centerY) / centerY) * -2.5;
+        const rotateY = ((x - centerX) / centerX) * 2.5;
         
-        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-5px)`;
+        // Post cards get subtle smooth zoom-in (scale 1.025)
+        if (card.classList.contains('post-card')) {
+          card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-5px) scale(1.025)`;
+        } else {
+          card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-5px)`;
+        }
       }
     }, { passive: true });
 
+    // When cursor leaves the card, immediately & smoothly reset transform
     card.addEventListener('mouseleave', () => {
-      if (!isTouch && !prefersReduced && !card.classList.contains('no-tilt')) {
-        card.style.transform = '';
-      }
+      card.style.transform = '';
     });
-  });
-}
-
-/* --------------------------------------------------------------------------
-   POST CARD HOVER POP & QUICK PREVIEW HUD SYSTEM
-   Bulletproof close handlers on tap, click, outside backdrop, and ESC
-   -------------------------------------------------------------------------- */
-function initPostQuickPreview() {
-  const popover = document.getElementById('quick-preview-popover');
-  const backdrop = document.getElementById('quick-preview-backdrop');
-  if (!popover) return;
-
-  const hudImg = document.getElementById('hud-preview-img');
-  const hudBadge = document.getElementById('hud-preview-badge');
-  const hudDate = document.getElementById('hud-preview-date');
-  const hudViews = document.getElementById('hud-preview-views');
-  const hudTitle = document.getElementById('hud-preview-title');
-  const hudExcerpt = document.getElementById('hud-preview-excerpt');
-  const hudLink = document.getElementById('hud-preview-link');
-  const hudDl = document.getElementById('hud-preview-dl');
-  const hudClose = document.getElementById('preview-hud-close-btn') || popover.querySelector('.preview-hud-close');
-
-  const cards = document.querySelectorAll('[data-post-preview]');
-  let hoverTimer = null;
-
-  function closePreview() {
-    clearTimeout(hoverTimer);
-    popover.classList.remove('active');
-    popover.setAttribute('aria-hidden', 'true');
-    if (backdrop) backdrop.classList.remove('active');
-    document.body.classList.remove('preview-hud-open');
-  }
-
-  function showPreview(card) {
-    const title = card.getAttribute('data-preview-title') || '';
-    const excerpt = card.getAttribute('data-preview-excerpt') || '';
-    const url = card.getAttribute('data-preview-url') || '#';
-    const date = card.getAttribute('data-preview-date') || '';
-    const views = card.getAttribute('data-preview-views') || '0';
-    const badge = card.getAttribute('data-preview-badge') || 'GUIDE';
-    const img = card.getAttribute('data-preview-image') || '';
-    const dl = card.getAttribute('data-preview-download') || '';
-
-    if (hudTitle) hudTitle.textContent = title;
-    if (hudExcerpt) hudExcerpt.textContent = excerpt;
-    if (hudDate) hudDate.textContent = `📅 ${date}`;
-    if (hudViews) hudViews.textContent = `👁️ ${views} views`;
-    if (hudBadge) hudBadge.textContent = badge;
-    if (hudLink) hudLink.href = url;
-
-    const mediaBox = document.getElementById('hud-preview-media-box');
-    if (hudImg && mediaBox) {
-      if (img) {
-        hudImg.src = img;
-        mediaBox.style.display = 'block';
-      } else {
-        mediaBox.style.display = 'none';
-      }
-    }
-
-    if (hudDl) {
-      if (dl) {
-        hudDl.href = dl;
-        hudDl.style.display = 'inline-flex';
-      } else {
-        hudDl.style.display = 'none';
-      }
-    }
-
-    popover.classList.add('active');
-    popover.setAttribute('aria-hidden', 'false');
-    if (backdrop) backdrop.classList.add('active');
-    document.body.classList.add('preview-hud-open');
-  }
-
-  if (hudClose) {
-    const handleClose = (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      closePreview();
-    };
-    hudClose.addEventListener('click', handleClose);
-    hudClose.addEventListener('touchend', handleClose, { passive: false });
-  }
-
-  if (backdrop) {
-    backdrop.addEventListener('click', (e) => {
-      e.preventDefault();
-      closePreview();
-    });
-    backdrop.addEventListener('touchend', (e) => {
-      e.preventDefault();
-      closePreview();
-    }, { passive: false });
-  }
-
-  cards.forEach(card => {
-    card.addEventListener('mouseenter', () => {
-      if (window.innerWidth > 1024) {
-        clearTimeout(hoverTimer);
-        hoverTimer = setTimeout(() => {
-          showPreview(card);
-        }, 320);
-      }
-    });
-
-    card.addEventListener('mouseleave', () => {
-      clearTimeout(hoverTimer);
-    });
-
-    const peekBtn = card.querySelector('.card-quick-peek-btn');
-    if (peekBtn) {
-      const handlePeek = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        showPreview(card);
-      };
-      peekBtn.addEventListener('click', handlePeek);
-      peekBtn.addEventListener('touchend', handlePeek, { passive: false });
-    }
-  });
-
-  document.addEventListener('click', (e) => {
-    if (popover.classList.contains('active')) {
-      const inner = popover.querySelector('.preview-hud-inner');
-      if (inner && !inner.contains(e.target) && !e.target.closest('.card-quick-peek-btn')) {
-        closePreview();
-      }
-    }
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && popover.classList.contains('active')) {
-      closePreview();
-    }
   });
 }
 
