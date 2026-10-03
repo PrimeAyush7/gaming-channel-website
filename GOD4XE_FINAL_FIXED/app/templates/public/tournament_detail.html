@@ -4,20 +4,20 @@
 {% block meta_description %}Free Fire {{ tournament.mode }} {{ tournament.format }} on {{ tournament.map_name }}. Entry: {{ 'FREE' if tournament.entry_type == 'FREE' else tournament.entry_fee_diamonds ~ ' 💎' }}. Slots: {{ tournament.joined_players }}/{{ tournament.max_slots }}. Register now on GOD4XE!{% endblock %}
 
 {% block content %}
-<div class="container" style="padding-top: 2rem; padding-bottom: 4rem; max-width: 900px;">
+<div class="container" style="padding-top: 2rem; padding-bottom: 4rem; max-width: 960px;">
 
-  <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-    <a href="/tournaments" style="color: var(--neon-purple); text-decoration: none; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 0.3rem;">
-      ← Back to All Tournaments
+  <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+    <a href="/tournaments" class="read-more-link" style="font-size: 0.95rem;">
+      &larr; Back to All Tournaments
     </a>
-    <span style="color: var(--text-muted); font-size: 0.85rem;">Tournament ID: #{{ tournament.id }}</span>
+    <span style="color: var(--neon-cyan); font-family: var(--font-heading); font-size: 0.85rem;">TOURNAMENT ID: #{{ tournament.id }}</span>
   </div>
 
   {% if request.query_params.get('joined') %}
   <div style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #6ee7b7; padding: 1rem 1.25rem; border-radius: 10px; margin-bottom: 1.5rem; font-size: 1rem; display: flex; align-items: center; gap: 0.75rem;">
-    <span style="font-size: 1.5rem;">🎉</span>
+    <span style="font-size: 1.8rem;">🎉</span>
     <div>
-      <strong style="color: #fff; display: block;">Registration Confirmed!</strong>
+      <strong style="color: #fff; display: block; font-family: var(--font-display); font-size: 1.1rem;">Registration Confirmed!</strong>
       You have successfully reserved your slot. Custom Room ID & Password will be revealed below before match start.
     </div>
   </div>
@@ -33,22 +33,22 @@
   </div>
   {% endif %}
 
-  <div class="card" style="background: rgba(18, 8, 35, 0.85); border: 1px solid rgba(168,85,247,0.3); border-radius: 16px; overflow: hidden; padding: 0; margin-bottom: 2rem;">
+  <div class="cyber-card" style="overflow: hidden; padding: 0; margin-bottom: 2rem; border-color: var(--neon-cyan);">
     {% if tournament.banner_url %}
     <img src="{{ tournament.banner_url }}" alt="{{ tournament.title }}" style="width: 100%; max-height: 320px; object-fit: cover;">
     {% endif %}
 
     <div style="padding: 2rem;">
       <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
-        <span class="badge" style="{% if tournament.status == 'LIVE' %}background: #ef4444;{% elif tournament.status == 'UPCOMING' %}background: #10b981;{% else %}background: #6b7280;{% endif %} color: #fff;">
+        <span class="badge {% if tournament.status == 'LIVE' %}badge-live{% elif tournament.status == 'UPCOMING' %}badge-upcoming{% else %}badge-ended{% endif %}">
           {{ tournament.status }}
         </span>
-        <span class="badge" style="background: rgba(168,85,247,0.2); color: #c084fc;">
+        <span class="badge badge-cyan">
           {{ tournament.game }} • {{ tournament.mode }} • {{ tournament.map_name }}
         </span>
       </div>
 
-      <h1 style="font-size: 2rem; font-weight: 800; color: #fff; margin-bottom: 1rem;">{{ tournament.title }}</h1>
+      <h1 style="font-family: var(--font-display); font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 900; color: #fff; margin-bottom: 1rem; letter-spacing: 0.5px;">{{ tournament.title }}</h1>
       
       <p style="color: var(--text-muted); font-size: 1.05rem; line-height: 1.7; margin-bottom: 2rem;">
         {{ tournament.description or 'Official competitive Free Fire custom match hosted on GOD4XE ESPORTS platform.' }}
@@ -56,44 +56,42 @@
 
       <!-- Key Details Cards -->
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-        <div style="background: rgba(0,0,0,0.4); padding: 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.06);">
-          <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Entry Fee</div>
-          <div style="font-size: 1.2rem; font-weight: 700; color: {% if tournament.entry_type == 'FREE' %}#10b981{% else %}#c084fc{% endif %}; margin-top: 0.25rem;">
-            {% if tournament.entry_type == 'FREE' %}FREE ENTRY{% else %}💎 {{ tournament.entry_fee_diamonds }} Diamonds{% endif %}
+        <div style="background: rgba(14, 22, 38, 0.7); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+          <div style="font-family: var(--font-heading); font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">Entry Fee</div>
+          <div style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 900; color: {% if tournament.entry_type == 'FREE' %}#10b981{% else %}#00f2fe{% endif %}; margin-top: 0.25rem;">
+            {% if tournament.entry_type == 'FREE' %}FREE ENTRY{% else %}💎 {{ tournament.entry_fee_diamonds }} D{% endif %}
           </div>
         </div>
 
-        <div style="background: rgba(0,0,0,0.4); padding: 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.06);">
-          <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Total Prize Pool</div>
-          <div style="font-size: 1.2rem; font-weight: 700; color: #fbbf24; margin-top: 0.25rem;">
+        <div style="background: rgba(14, 22, 38, 0.7); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+          <div style="font-family: var(--font-heading); font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">Total Prize Pool</div>
+          <div style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 900; color: #fbbf24; margin-top: 0.25rem;">
             💎 {{ tournament.prize_amount_diamonds }} Diamonds
           </div>
         </div>
 
-        <div style="background: rgba(0,0,0,0.4); padding: 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.06);">
-          <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Slots Availability</div>
-          <div style="font-size: 1.2rem; font-weight: 700; color: #fff; margin-top: 0.25rem;">
+        <div style="background: rgba(14, 22, 38, 0.7); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+          <div style="font-family: var(--font-heading); font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">Slots Availability</div>
+          <div style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 900; color: #fff; margin-top: 0.25rem;">
             {{ tournament.joined_players }} / {{ tournament.max_slots }} Slots
           </div>
         </div>
 
-        <div style="background: rgba(0,0,0,0.4); padding: 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.06);">
-          <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Match Time</div>
-          <div style="font-size: 1rem; font-weight: 600; color: #fff; margin-top: 0.25rem;">
+        <div style="background: rgba(14, 22, 38, 0.7); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+          <div style="font-family: var(--font-heading); font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">Match Time</div>
+          <div style="font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: #fff; margin-top: 0.25rem;">
             {{ tournament.start_time[:16].replace('T', ' ') if tournament.start_time else 'TBA' }}
           </div>
         </div>
       </div>
 
-      <!-- ==========================================
-           DIRECT WEBSITE TOURNAMENT JOIN SECTION
-           ========================================== -->
-      <div style="background: rgba(168, 85, 247, 0.08); border: 2px solid var(--neon-purple); border-radius: 14px; padding: 2rem; margin-bottom: 2.5rem; position: relative;">
+      <!-- DIRECT WEBSITE TOURNAMENT JOIN SECTION -->
+      <div class="cyber-card" style="background: rgba(8, 14, 26, 0.9); border: 2px solid var(--neon-cyan); border-radius: var(--radius-md); padding: 2rem; margin-bottom: 2.5rem; position: relative;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.5rem;">
-          <h2 style="font-size: 1.4rem; font-weight: 800; color: #fff; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-            <span>⚔️</span> Join Tournament Directly on Website
+          <h2 style="font-family: var(--font-display); font-size: 1.35rem; font-weight: 900; color: #fff; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+            <span>⚔️</span> JOIN TOURNAMENT DIRECTLY ON WEBSITE
           </h2>
-          <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981;">
+          <span class="badge badge-success">
             Instant Web Registration
           </span>
         </div>
@@ -105,29 +103,29 @@
               <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
                 <span style="font-size: 1.8rem;">✅</span>
                 <div>
-                  <h3 style="color: #6ee7b7; margin: 0; font-size: 1.2rem;">You Are Enrolled in this Match</h3>
+                  <h3 style="color: #6ee7b7; margin: 0; font-family: var(--font-display); font-size: 1.25rem;">You Are Enrolled in this Match</h3>
                   <p style="color: var(--text-muted); margin: 0.2rem 0 0 0; font-size: 0.9rem;">
-                    Slot Number: <strong style="color: #fff;">#{{ my_slot.slot_number if my_slot else 'Assigned' }}</strong> | IGN: <strong style="color: #fff;">{{ my_slot.ff_ign if my_slot else current_user.ff_ign }}</strong>
+                    Slot Number: <strong style="color: #fff;">#{{ my_slot.slot_number if my_slot else 'Assigned' }}</strong> | IGN: <strong style="color: #00f2fe;">{{ my_slot.ff_ign if my_slot else current_user.ff_ign }}</strong>
                   </p>
                 </div>
               </div>
 
               <!-- Room Credentials Box -->
-              <div style="background: rgba(0, 0, 0, 0.5); padding: 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
-                <div style="font-weight: 700; color: #c084fc; margin-bottom: 0.5rem;">🔑 Match Room Credentials:</div>
+              <div style="background: rgba(5, 8, 15, 0.85); padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-subtle);">
+                <div style="font-family: var(--font-heading); font-size: 0.85rem; font-weight: 800; color: var(--neon-cyan); margin-bottom: 0.75rem;">🔑 MATCH ROOM CREDENTIALS:</div>
                 {% if tournament.room_id %}
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                  <div style="background: rgba(255,255,255,0.05); padding: 0.75rem; border-radius: 6px;">
-                    <span style="color: var(--text-muted); font-size: 0.8rem; display: block;">ROOM ID</span>
-                    <strong style="color: #fbbf24; font-size: 1.2rem; letter-spacing: 1px;">{{ tournament.room_id }}</strong>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                  <div style="background: rgba(14, 22, 38, 0.8); padding: 0.85rem; border-radius: 6px; border: 1px solid var(--border-subtle);">
+                    <span style="color: var(--text-dim); font-size: 0.75rem; font-family: var(--font-heading); display: block;">ROOM ID</span>
+                    <strong style="color: #00f2fe; font-family: var(--font-heading); font-size: 1.35rem; letter-spacing: 1.5px;">{{ tournament.room_id }}</strong>
                   </div>
-                  <div style="background: rgba(255,255,255,0.05); padding: 0.75rem; border-radius: 6px;">
-                    <span style="color: var(--text-muted); font-size: 0.8rem; display: block;">ROOM PASSWORD</span>
-                    <strong style="color: #fbbf24; font-size: 1.2rem; letter-spacing: 1px;">{{ tournament.room_password }}</strong>
+                  <div style="background: rgba(14, 22, 38, 0.8); padding: 0.85rem; border-radius: 6px; border: 1px solid var(--border-subtle);">
+                    <span style="color: var(--text-dim); font-size: 0.75rem; font-family: var(--font-heading); display: block;">ROOM PASSWORD</span>
+                    <strong style="color: #fbbf24; font-family: var(--font-heading); font-size: 1.35rem; letter-spacing: 1.5px;">{{ tournament.room_password }}</strong>
                   </div>
                 </div>
                 {% else %}
-                <p style="color: var(--text-muted); margin: 0; font-size: 0.9rem;">
+                <p style="color: var(--text-muted); margin: 0; font-size: 0.92rem; line-height: 1.6;">
                   ⏳ Custom Room ID and Password will be displayed here <strong>15 minutes before the match</strong>. Check back here before start time!
                 </p>
                 {% endif %}
@@ -137,54 +135,54 @@
           {% elif tournament.joined_players >= tournament.max_slots %}
             <!-- Full Slots Warning -->
             <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; border-radius: 10px; padding: 1.25rem; text-align: center;">
-              <h3 style="color: #fca5a5; margin: 0 0 0.5rem 0;">Tournament is Full</h3>
+              <h3 style="color: #fca5a5; margin: 0 0 0.5rem 0; font-family: var(--font-display);">Tournament is Full</h3>
               <p style="color: var(--text-muted); margin: 0;">All {{ tournament.max_slots }} slots have been booked. Check other upcoming tournaments.</p>
             </div>
 
           {% elif tournament.status != 'UPCOMING' %}
             <div style="background: rgba(107, 114, 128, 0.2); border: 1px solid #6b7280; border-radius: 10px; padding: 1.25rem; text-align: center;">
-              <h3 style="color: #d1d5db; margin: 0;">Registration Closed</h3>
+              <h3 style="color: #d1d5db; margin: 0; font-family: var(--font-display);">Registration Closed</h3>
               <p style="color: var(--text-muted); margin: 0.5rem 0 0 0;">This match is currently {{ tournament.status }}.</p>
             </div>
 
           {% else %}
             <!-- Interactive Join Form -->
             <form action="/tournaments/{{ tournament.id }}/join" method="POST">
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
                 <div>
-                  <label for="ff_uid" style="display: block; font-size: 0.85rem; font-weight: 600; color: #c084fc; margin-bottom: 0.4rem; text-transform: uppercase;">Free Fire UID *</label>
-                  <input type="text" id="ff_uid" name="ff_uid" value="{{ current_user.ff_uid or '' }}" required placeholder="e.g. 192837465" style="width: 100%; padding: 0.75rem 1rem; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 8px; color: #fff; font-size: 0.95rem; outline: none;">
+                  <label for="ff_uid" style="display: block; font-family: var(--font-display); font-size: 0.88rem; font-weight: 700; color: var(--neon-cyan); margin-bottom: 0.4rem; text-transform: uppercase;">Free Fire UID *</label>
+                  <input type="text" id="ff_uid" name="ff_uid" value="{{ current_user.ff_uid or '' }}" required placeholder="e.g. 192837465" class="form-control">
                 </div>
                 <div>
-                  <label for="ff_ign" style="display: block; font-size: 0.85rem; font-weight: 600; color: #c084fc; margin-bottom: 0.4rem; text-transform: uppercase;">In-Game Name (IGN) *</label>
-                  <input type="text" id="ff_ign" name="ff_ign" value="{{ current_user.ff_ign or '' }}" required placeholder="e.g. GOD4XE_PRO" style="width: 100%; padding: 0.75rem 1rem; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 8px; color: #fff; font-size: 0.95rem; outline: none;">
+                  <label for="ff_ign" style="display: block; font-family: var(--font-display); font-size: 0.88rem; font-weight: 700; color: var(--neon-cyan); margin-bottom: 0.4rem; text-transform: uppercase;">In-Game Name (IGN) *</label>
+                  <input type="text" id="ff_ign" name="ff_ign" value="{{ current_user.ff_ign or '' }}" required placeholder="e.g. GOD4XE_PRO" class="form-control">
                 </div>
               </div>
 
               {% if tournament.mode in ('DUO', 'SQUAD') %}
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
                 <div>
-                  <label for="team_name" style="display: block; font-size: 0.85rem; font-weight: 600; color: #c084fc; margin-bottom: 0.4rem; text-transform: uppercase;">Team / Squad Name</label>
-                  <input type="text" id="team_name" name="team_name" placeholder="e.g. Team Phoenix" style="width: 100%; padding: 0.75rem 1rem; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 8px; color: #fff; font-size: 0.95rem; outline: none;">
+                  <label for="team_name" style="display: block; font-family: var(--font-display); font-size: 0.88rem; font-weight: 700; color: var(--neon-cyan); margin-bottom: 0.4rem; text-transform: uppercase;">Team / Squad Name</label>
+                  <input type="text" id="team_name" name="team_name" placeholder="e.g. Team Phoenix" class="form-control">
                 </div>
                 <div>
-                  <label for="teammates" style="display: block; font-size: 0.85rem; font-weight: 600; color: #c084fc; margin-bottom: 0.4rem; text-transform: uppercase;">Teammates UIDs (comma separated)</label>
-                  <input type="text" id="teammates" name="teammates" placeholder="e.g. 123456, 789012" style="width: 100%; padding: 0.75rem 1rem; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 8px; color: #fff; font-size: 0.95rem; outline: none;">
+                  <label for="teammates" style="display: block; font-family: var(--font-display); font-size: 0.88rem; font-weight: 700; color: var(--neon-cyan); margin-bottom: 0.4rem; text-transform: uppercase;">Teammates UIDs (comma separated)</label>
+                  <input type="text" id="teammates" name="teammates" placeholder="e.g. 123456, 789012" class="form-control">
                 </div>
               </div>
               {% endif %}
 
               <!-- Entry Fee & Balance Summary -->
-              <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+              <div style="background: rgba(14, 22, 38, 0.7); border: 1px solid var(--border-subtle); padding: 1rem 1.25rem; border-radius: 8px; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
                 <div>
                   <span style="color: var(--text-muted); font-size: 0.85rem;">Tournament Entry Fee:</span>
-                  <strong style="color: {% if tournament.entry_type == 'FREE' %}#10b981{% else %}#c084fc{% endif %}; margin-left: 0.5rem; font-size: 1.05rem;">
+                  <strong style="color: {% if tournament.entry_type == 'FREE' %}#10b981{% else %}#00f2fe{% endif %}; margin-left: 0.5rem; font-family: var(--font-heading); font-size: 1.05rem;">
                     {% if tournament.entry_type == 'FREE' %}FREE (0 💎){% else %}💎 {{ tournament.entry_fee_diamonds }} Diamonds{% endif %}
                   </strong>
                 </div>
                 <div>
                   <span style="color: var(--text-muted); font-size: 0.85rem;">Your Balance:</span>
-                  <strong style="color: #fbbf24; margin-left: 0.5rem; font-size: 1.05rem;">💎 {{ current_user.diamond_balance }} Diamonds</strong>
+                  <strong style="color: #fbbf24; margin-left: 0.5rem; font-family: var(--font-heading); font-size: 1.05rem;">💎 {{ current_user.diamond_balance }} Diamonds</strong>
                 </div>
               </div>
 
@@ -192,11 +190,11 @@
               <div style="margin-bottom: 1rem; color: #fca5a5; font-size: 0.9rem;">
                 ⚠️ Insufficient diamonds in your wallet. Please use redeem codes or add diamonds via the app to register.
               </div>
-              <button type="submit" disabled class="btn btn-secondary" style="width: 100%; padding: 0.85rem; font-weight: 700; border-radius: 8px; opacity: 0.6; cursor: not-allowed;">
+              <button type="submit" disabled class="btn btn-secondary" style="width: 100%; opacity: 0.6; cursor: not-allowed;">
                 Insufficient Diamonds (💎 {{ tournament.entry_fee_diamonds }} Required)
               </button>
               {% else %}
-              <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem; font-weight: 700; font-size: 1.05rem; border-radius: 8px; cursor: pointer; background: linear-gradient(135deg, #a855f7, #7c3aed); border: none; color: #fff; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);">
+              <button type="submit" class="btn btn-primary" style="width: 100%;">
                 ⚔️ Confirm Free Fire UID & Join Match ({{ tournament.max_slots - tournament.joined_players }} Slots Left)
               </button>
               {% endif %}
@@ -210,10 +208,10 @@
               You must be logged in to reserve your Free Fire slot directly from the website.
             </p>
             <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
-              <a href="/login?return_to=/tournaments/{{ tournament.id }}" class="btn btn-primary" style="padding: 0.75rem 1.8rem; font-weight: 700; text-decoration: none; border-radius: 8px;">
+              <a href="/login?return_to=/tournaments/{{ tournament.id }}" class="btn btn-primary">
                 🔑 Login to Join Match
               </a>
-              <a href="/register?return_to=/tournaments/{{ tournament.id }}" class="btn btn-secondary" style="padding: 0.75rem 1.8rem; font-weight: 700; text-decoration: none; border-radius: 8px; border: 1px solid var(--border-subtle);">
+              <a href="/register?return_to=/tournaments/{{ tournament.id }}" class="btn btn-secondary">
                 ➕ Create Free Account
               </a>
             </div>
@@ -223,8 +221,8 @@
 
       <!-- Rules & Instructions -->
       {% if tournament.rules %}
-      <div style="background: rgba(0,0,0,0.3); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
-        <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 0.75rem;">📜 Tournament Rules & Guidelines</h3>
+      <div style="background: rgba(14, 22, 38, 0.6); border: 1px solid var(--border-subtle); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
+        <h3 style="font-family: var(--font-display); font-size: 1.25rem; font-weight: 800; color: #fff; margin-bottom: 0.75rem;">📜 Tournament Rules & Guidelines</h3>
         <div style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.7; white-space: pre-line;">
           {{ tournament.rules }}
         </div>
@@ -232,32 +230,32 @@
       {% endif %}
 
       <!-- Registered Participants Table -->
-      <div style="background: rgba(0,0,0,0.3); padding: 1.5rem; border-radius: 12px; margin-bottom: 2.5rem;">
+      <div style="background: rgba(14, 22, 38, 0.6); border: 1px solid var(--border-subtle); padding: 1.5rem; border-radius: 12px; margin-bottom: 2.5rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-          <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin: 0;">👥 Registered Players ({{ participants|length }})</h3>
-          <span style="font-size: 0.85rem; color: var(--text-muted);">Capacity: {{ tournament.max_slots }}</span>
+          <h3 style="font-family: var(--font-display); font-size: 1.25rem; font-weight: 800; color: #fff; margin: 0;">👥 Registered Players ({{ participants|length }})</h3>
+          <span style="font-size: 0.85rem; color: var(--text-dim); font-family: var(--font-heading);">Capacity: {{ tournament.max_slots }}</span>
         </div>
 
         {% if participants %}
-        <div style="overflow-x: auto;">
+        <div class="table-responsive">
           <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
             <thead>
-              <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--neon-purple);">
-                <th style="padding: 0.6rem 0.75rem;">Slot #</th>
-                <th style="padding: 0.6rem 0.75rem;">Player (IGN)</th>
-                <th style="padding: 0.6rem 0.75rem;">Free Fire UID</th>
-                <th style="padding: 0.6rem 0.75rem;">Team</th>
-                <th style="padding: 0.6rem 0.75rem;">Joined Time</th>
+              <tr style="border-bottom: 1px solid var(--border-subtle); color: var(--neon-cyan); font-family: var(--font-heading); font-size: 0.8rem;">
+                <th style="padding: 0.75rem;">Slot #</th>
+                <th style="padding: 0.75rem;">Player (IGN)</th>
+                <th style="padding: 0.75rem;">Free Fire UID</th>
+                <th style="padding: 0.75rem;">Team</th>
+                <th style="padding: 0.75rem;">Joined Time</th>
               </tr>
             </thead>
             <tbody>
               {% for p in participants %}
-              <tr style="border-bottom: 1px solid rgba(255,255,255,0.04); color: #e2e8f0;">
-                <td style="padding: 0.6rem 0.75rem; font-weight: 700; color: #c084fc;">#{{ p.slot_number }}</td>
-                <td style="padding: 0.6rem 0.75rem; font-weight: 600;">{{ p.ff_ign or p.display_name or p.username }}</td>
-                <td style="padding: 0.6rem 0.75rem; color: var(--text-muted);">{{ p.ff_uid or 'Hidden' }}</td>
-                <td style="padding: 0.6rem 0.75rem; color: var(--text-muted);">{{ p.team_name or '-' }}</td>
-                <td style="padding: 0.6rem 0.75rem; color: var(--text-muted); font-size: 0.8rem;">{{ p.joined_at[:16].replace('T', ' ') if p.joined_at else '' }}</td>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #e2e8f0;">
+                <td style="padding: 0.75rem; font-family: var(--font-heading); font-weight: 800; color: var(--neon-cyan);">#{{ p.slot_number }}</td>
+                <td style="padding: 0.75rem; font-weight: 700; color: #fff;">{{ p.ff_ign or p.display_name or p.username }}</td>
+                <td style="padding: 0.75rem; color: var(--text-muted);">{{ p.ff_uid or 'Hidden' }}</td>
+                <td style="padding: 0.75rem; color: var(--text-muted);">{{ p.team_name or '-' }}</td>
+                <td style="padding: 0.75rem; color: var(--text-dim); font-size: 0.8rem;">{{ p.joined_at[:16].replace('T', ' ') if p.joined_at else '' }}</td>
               </tr>
               {% endfor %}
             </tbody>
@@ -269,28 +267,28 @@
       </div>
 
       <!-- Android App & Dynamic QR Section -->
-      <div style="background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(30,10,50,0.4)); border: 1px solid #a855f7; border-radius: 12px; padding: 2rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem;">
-        <div style="flex: 1 1 400px;">
-          <h3 style="color: #fff; font-size: 1.3rem; margin-bottom: 0.5rem;">📱 GOD4XE ESPORTS Official Android App</h3>
-          <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.25rem;">
+      <div class="cyber-card" style="padding: 2rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem; border-color: var(--neon-cyan);">
+        <div style="flex: 1 1 380px;">
+          <h3 style="font-family: var(--font-display); color: #fff; font-size: 1.35rem; font-weight: 800; margin-bottom: 0.5rem;">📱 GOD4XE ESPORTS Official Android App</h3>
+          <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.25rem; line-height: 1.6;">
             Play smoothly on mobile with instant push notifications when room passwords drop, automatic scoreboard tracking, and fast diamond cashouts.
           </p>
           <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-            <a href="/download-app" class="btn btn-primary" style="padding: 0.75rem 1.6rem; border-radius: 8px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+            <a href="/download-app" class="btn btn-primary">
               <span>⬇️</span> Download APK
             </a>
-            <a href="https://api.whatsapp.com/send?text=Join%20the%20Free%20Fire%20{{ tournament.title|urlencode }}%20tournament%20on%20GOD4XE!%20Prize%20Pool:%20{{ tournament.prize_amount_diamonds }}%20Diamonds.%20Register%20now:%20{{ request.url }}" target="_blank" rel="noopener noreferrer" class="btn" style="background: #25D366; color: #fff; padding: 0.75rem 1.4rem; border-radius: 8px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+            <a href="https://api.whatsapp.com/send?text=Join%20the%20Free%20Fire%20{{ tournament.title|urlencode }}%20tournament%20on%20GOD4XE!%20Prize%20Pool:%20{{ tournament.prize_amount_diamonds }}%20Diamonds.%20Register%20now:%20{{ request.url }}" target="_blank" rel="noopener noreferrer" class="btn" style="background: #25D366; color: #fff; box-shadow: 0 0 15px rgba(37,211,102,0.4);">
               <span>💬</span> Share Match
             </a>
           </div>
         </div>
 
         <!-- Dynamic Real QR Code -->
-        <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); text-align: center; min-width: 150px;">
-          <div style="width: 120px; height: 120px; background: #fff; border-radius: 8px; margin: 0 auto 0.5rem; padding: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+        <div style="background: rgba(14, 22, 38, 0.7); padding: 1rem; border-radius: 12px; border: 1px solid var(--border-subtle); text-align: center; min-width: 150px; flex-shrink: 0;">
+          <div style="width: 120px; height: 120px; background: #fff; border-radius: 8px; margin: 0 auto 0.5rem; padding: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 0 15px rgba(0,242,254,0.25);">
             <img src="/api/qr" alt="Scan to Install APK" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=' + encodeURIComponent(window.location.origin + '/download-app');">
           </div>
-          <span style="font-size: 0.75rem; color: #c084fc; font-weight: 600; text-transform: uppercase;">Scan to Install APK</span>
+          <span style="font-size: 0.75rem; color: var(--neon-cyan); font-family: var(--font-heading); font-weight: 800; text-transform: uppercase;">Scan to Install APK</span>
         </div>
       </div>
 

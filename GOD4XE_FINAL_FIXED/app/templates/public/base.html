@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>{% block title %}{{ settings.site_name }} - {{ settings.site_tagline }}{% endblock %}</title>
   
   <meta name="description" content="{% block meta_description %}{{ settings.site_description }}{% endblock %}">
@@ -39,7 +39,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="/static/css/style.css?v=3.0.0">
+  <link rel="stylesheet" href="/static/css/style.css?v=3.2.0">
 
   {% if ads and ads.is_enabled and ads.client_id %}
   <!-- Google AdSense Official Loader (Active when client_id is set) -->
@@ -133,7 +133,7 @@
         </a>
         {% endif %}
 
-        <!-- User Authentication Widget (Preserved from v1.3.6) -->
+        <!-- User Authentication Widget (v1.3.6) -->
         {% if current_user %}
         <div class="user-auth-pill">
           <span class="user-balance-badge">
@@ -276,6 +276,44 @@
     {% block content %}{% endblock %}
   </main>
 
+  <!-- Floating HUD Quick Preview Popover Window (Hover & Quick Peek) -->
+  <div id="quick-preview-popover" class="quick-preview-hud" aria-hidden="true">
+    <div class="preview-hud-inner cyber-card">
+      <div class="preview-hud-topbar">
+        <div class="terminal-dots">
+          <span class="t-dot dot-red"></span>
+          <span class="t-dot dot-yellow"></span>
+          <span class="t-dot dot-green"></span>
+        </div>
+        <span class="preview-hud-tag">CYBER_PREVIEW // HUD_VIEWPORT</span>
+        <button type="button" class="preview-hud-close" aria-label="Close preview">&times;</button>
+      </div>
+      <div class="preview-hud-body">
+        <div class="preview-hud-media" id="hud-preview-media-box">
+          <img id="hud-preview-img" src="" alt="Guide Preview">
+          <span id="hud-preview-badge" class="post-badge">GUIDE</span>
+        </div>
+        <div class="preview-hud-info">
+          <div class="preview-hud-meta">
+            <span id="hud-preview-date">📅 2026-10-01</span>
+            <span class="meta-dot">•</span>
+            <span id="hud-preview-views">👁️ 1.2K views</span>
+          </div>
+          <h3 id="hud-preview-title" class="preview-hud-title">Title Here</h3>
+          <p id="hud-preview-excerpt" class="preview-hud-desc">Excerpt here...</p>
+          <div class="preview-hud-actions">
+            <a id="hud-preview-link" href="#" class="btn btn-primary btn-sm">
+              <span>Read Full Guide</span> &rarr;
+            </a>
+            <a id="hud-preview-dl" href="#" target="_blank" class="btn btn-secondary btn-sm" style="display: none;">
+              <span>⚡ Direct Download</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer class="site-footer">
     <div class="container">
@@ -376,7 +414,7 @@
     </div>
   </footer>
 
-  <script src="/static/js/main.js?v=3.0.0"></script>
+  <script src="/static/js/main.js?v=3.2.0"></script>
   {% block extra_scripts %}{% endblock %}
 <script>
 if ('serviceWorker' in navigator) {

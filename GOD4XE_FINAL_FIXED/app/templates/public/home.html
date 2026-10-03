@@ -92,7 +92,7 @@
         </div>
       </div>
 
-      <!-- Featured YouTube Video or Post Highlight -->
+      <!-- Hero Media Col: Featured Video or Featured Post Highlight -->
       <div class="hero-media-col">
         {% if featured_video %}
         <div class="featured-video-card cyber-card" data-track-youtube="1">
@@ -107,7 +107,7 @@
           <div class="video-card-footer">
             <div class="video-card-title">{{ featured_video.title }}</div>
             {% if settings.youtube_channel_url %}
-            <a href="{{ settings.youtube_channel_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" data-track-youtube="1">Watch More</a>
+            <a href="{{ settings.youtube_channel_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" data-track-youtube="1">Watch Channel</a>
             {% endif %}
           </div>
         </div>
@@ -122,94 +122,135 @@
           </div>
         </div>
         {% else %}
-        <!-- Default Dual Device 3D Presentation if no featured video -->
-        <div class="hero-devices-showcase" id="hero-devices-stage">
-          <div class="devices-ambient-glow"></div>
-          <div class="macbook-device">
-            <div class="macbook-lid">
-              <div class="macbook-notch"><span class="macbook-camera"></span></div>
-              <div class="macbook-screen">
-                <div class="macbook-screen-content">
-                  <div class="macbook-terminal">
-                    <div class="terminal-bar">
-                      <div class="terminal-dots">
-                        <span class="t-dot dot-red"></span>
-                        <span class="t-dot dot-yellow"></span>
-                        <span class="t-dot dot-green"></span>
-                      </div>
-                      <span class="t-title">GOD4XE_HUB // v3.0_CYBER</span>
-                      <span class="t-status">● LIVE</span>
-                    </div>
-                    <div class="terminal-body">
-                      <div class="terminal-hero-banner">
-                        <div class="t-tag">VIP ESPORTS ENGINE</div>
-                        <div class="t-head">HEADSHOT SENSITIVITY OB52</div>
-                        <div class="t-meta">FPS: 120 | RECOIL: 0% | DPI: 800</div>
-                      </div>
-                      <div class="terminal-grid">
-                        <div class="t-stat-box">
-                          <div class="t-stat-label">HEADSHOT RATE</div>
-                          <div class="t-stat-val">98.4%</div>
-                        </div>
-                        <div class="t-stat-box">
-                          <div class="t-stat-label">TOURNAMENTS</div>
-                          <div class="t-stat-val">68 WON</div>
-                        </div>
-                        <div class="t-stat-box">
-                          <div class="t-stat-label">ACTIVE PLAYERS</div>
-                          <div class="t-stat-val">250K+</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="screen-glare"></div>
-              </div>
-            </div>
-            <div class="macbook-base"><div class="macbook-indent"></div></div>
-          </div>
-          <div class="iphone-device">
-            <div class="iphone-bezel">
-              <div class="iphone-island-wrap"><div class="iphone-island"></div></div>
-              <div class="iphone-screen">
-                <div class="iphone-status-bar"><span>9:41</span><span class="status-pill">5G // VIP</span></div>
-                <div class="iphone-app-content">
-                  <div class="iphone-app-header">
-                    <div class="iphone-app-title">GOD4XE</div>
-                    <span class="iphone-vip-badge">PRO</span>
-                  </div>
-                  <div class="iphone-radar-box">
-                    <div class="radar-circle"><span class="radar-icon">🎯</span></div>
-                    <div class="radar-text">Auto Aim Radar Active</div>
-                  </div>
-                  <div class="iphone-sliders">
-                    <div class="iphone-slider-item">
-                      <div class="slider-info"><span>General</span><span>98%</span></div>
-                      <div class="slider-track"><div class="slider-fill" style="width: 98%;"></div></div>
-                    </div>
-                    <div class="iphone-slider-item">
-                      <div class="slider-info"><span>Red Dot</span><span>95%</span></div>
-                      <div class="slider-track"><div class="slider-fill" style="width: 95%;"></div></div>
-                    </div>
-                    <div class="iphone-slider-item">
-                      <div class="slider-info"><span>2x Scope</span><span>92%</span></div>
-                      <div class="slider-track"><div class="slider-fill" style="width: 92%;"></div></div>
-                    </div>
-                  </div>
-                  <div class="iphone-quick-btn"><span>⚡ SYNC CONFIG</span></div>
-                </div>
-                <div class="iphone-home-indicator"></div>
-                <div class="screen-glare"></div>
-              </div>
-            </div>
-          </div>
+        <div class="featured-video-card cyber-card" style="padding: 2.5rem; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 280px;">
+          <div style="font-size: 3.5rem; margin-bottom: 1rem; filter: drop-shadow(0 0 20px var(--neon-cyan));">🎮</div>
+          <h3 style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 800; color: #fff; margin-bottom: 0.5rem;">GOD4XE ESPORTS ARENA</h3>
+          <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 320px; margin-bottom: 1.25rem;">Daily verified custom rooms, Free Fire tournaments, and direct diamond payouts.</p>
+          <a href="/esports" class="btn btn-primary btn-sm">Enter Arena &rarr;</a>
         </div>
         {% endif %}
       </div>
     </div>
   </section>
 
-  <!-- Esports Tournaments Section (Preserved from v1.3.6) -->
+  <!-- 3D DUAL DEVICE SHOWCASE SECTION: MACBOOK PRO + IPHONE PRO -->
+  <section class="device-showcase-section">
+    <div class="device-showcase-header">
+      <span class="download-badge">⚡ MULTI-DEVICE GAMING HUB</span>
+      <h2 class="device-showcase-title">
+        SEAMLESS ON <span class="gradient-text">MACBOOK &amp; MOBILE</span>
+      </h2>
+      <p class="device-showcase-subtitle">
+        Sync battle-tested sensitivity configs, live tournament lobbies, and real-time cloud updates across web and mobile.
+      </p>
+    </div>
+
+    <div class="devices-stage-container">
+      <div class="hero-devices-showcase" id="hero-devices-stage">
+        
+        <!-- Ambient Ground Neon Glow -->
+        <div class="devices-ambient-glow"></div>
+
+        <!-- MacBook Pro Device Mockup -->
+        <div class="macbook-device">
+          <div class="macbook-lid">
+            <div class="macbook-notch">
+              <span class="macbook-camera"></span>
+            </div>
+            <div class="macbook-screen">
+              <div class="macbook-screen-content">
+                <div class="macbook-terminal">
+                  <div class="terminal-bar">
+                    <div class="terminal-dots">
+                      <span class="t-dot dot-red"></span>
+                      <span class="t-dot dot-yellow"></span>
+                      <span class="t-dot dot-green"></span>
+                    </div>
+                    <span class="t-title">GOD4XE_DESKTOP // v3.0_CYBER</span>
+                    <span class="t-status">● LIVE 120 FPS</span>
+                  </div>
+                  <div class="terminal-body">
+                    <div class="terminal-hero-banner">
+                      <div class="t-tag">VIP ESPORTS ENGINE</div>
+                      <div class="t-head">FREE FIRE OB52 HEADSHOT CALIBRATION</div>
+                      <div class="t-meta">RES: 2560x1600 | DPI: 800 | LATENCY: 2ms</div>
+                    </div>
+                    <div class="terminal-grid">
+                      <div class="t-stat-box">
+                        <div class="t-stat-label">HEADSHOT RATE</div>
+                        <div class="t-stat-val">98.4%</div>
+                      </div>
+                      <div class="t-stat-box">
+                        <div class="t-stat-label">TOURNAMENTS</div>
+                        <div class="t-stat-val">68 WON</div>
+                      </div>
+                      <div class="t-stat-box">
+                        <div class="t-stat-label">ACTIVE GAMERS</div>
+                        <div class="t-stat-val">250K+</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="screen-glare"></div>
+            </div>
+          </div>
+          <div class="macbook-base">
+            <div class="macbook-indent"></div>
+          </div>
+        </div>
+
+        <!-- Smartphone / iPhone Pro Device Mockup -->
+        <div class="iphone-device">
+          <div class="iphone-bezel">
+            <div class="iphone-island-wrap">
+              <div class="iphone-island"></div>
+            </div>
+            <div class="iphone-screen">
+              <div class="iphone-status-bar">
+                <span>9:41</span>
+                <span class="status-pill">5G // VIP</span>
+              </div>
+              <div class="iphone-app-content">
+                <div class="iphone-app-header">
+                  <div class="iphone-app-title">GOD4XE</div>
+                  <span class="iphone-vip-badge">PRO</span>
+                </div>
+                <div class="iphone-radar-box">
+                  <div class="radar-circle">
+                    <span class="radar-icon">🎯</span>
+                  </div>
+                  <div class="radar-text">Auto Aim Radar Active</div>
+                </div>
+                <div class="iphone-sliders">
+                  <div class="iphone-slider-item">
+                    <div class="slider-info"><span>General</span><span>98%</span></div>
+                    <div class="slider-track"><div class="slider-fill" style="width: 98%;"></div></div>
+                  </div>
+                  <div class="iphone-slider-item">
+                    <div class="slider-info"><span>Red Dot</span><span>95%</span></div>
+                    <div class="slider-track"><div class="slider-fill" style="width: 95%;"></div></div>
+                  </div>
+                  <div class="iphone-slider-item">
+                    <div class="slider-info"><span>2x Scope</span><span>92%</span></div>
+                    <div class="slider-track"><div class="slider-fill" style="width: 92%;"></div></div>
+                  </div>
+                </div>
+                <div class="iphone-quick-btn">
+                  <span>⚡ SYNC CONFIG</span>
+                </div>
+              </div>
+              <div class="iphone-home-indicator"></div>
+              <div class="screen-glare"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Esports Tournaments Section -->
   {% if esports_tournaments %}
   <section style="margin-bottom: 4rem;">
     <div class="section-header">
@@ -253,7 +294,7 @@
   </section>
   {% endif %}
 
-  <!-- Announcements Spotlight Section (Preserved from v1.3.6) -->
+  <!-- Announcements Spotlight Section -->
   {% if announcements %}
   <section style="margin-bottom: 4rem;">
     <div class="section-header">
@@ -330,7 +371,16 @@
     {% if posts %}
     <div class="posts-grid">
       {% for post in posts %}
-      <article class="post-card cyber-card">
+      <article class="post-card cyber-card" 
+               data-post-preview="true"
+               data-preview-title="{{ post.title }}"
+               data-preview-excerpt="{{ post.summary or (post.content[:160] ~ '...') }}"
+               data-preview-url="/post/{{ post.slug }}"
+               data-preview-date="{{ post.published_at[:10] }}"
+               data-preview-views="{{ post.view_count }}"
+               data-preview-badge="{{ post.section_name or 'GUIDE' }}"
+               data-preview-image="{{ post.thumbnail_url or '' }}"
+               data-preview-download="{{ post.download_url or '' }}">
         <a href="/post/{{ post.slug }}" class="post-thumb-link">
           {% if post.thumbnail_url %}
           <img src="{{ post.thumbnail_url }}" alt="{{ post.title }}" class="post-thumb-img" loading="lazy">
@@ -341,6 +391,10 @@
           <span class="post-badge">{{ post.section_name }}</span>
           {% endif %}
           <div class="thumb-gradient-overlay"></div>
+          <!-- Quick Peek Icon Pill -->
+          <button type="button" class="card-quick-peek-btn" title="Quick Preview" aria-label="Quick Preview">
+            👁️ Quick Peek
+          </button>
         </a>
 
         <div class="post-content-box">
@@ -391,7 +445,16 @@
 
     <div class="posts-grid">
       {% for post in popular_posts %}
-      <article class="post-card cyber-card">
+      <article class="post-card cyber-card"
+               data-post-preview="true"
+               data-preview-title="{{ post.title }}"
+               data-preview-excerpt="{{ post.summary or (post.content[:160] ~ '...') }}"
+               data-preview-url="/post/{{ post.slug }}"
+               data-preview-date="{{ post.published_at[:10] if post.published_at else 'Hot' }}"
+               data-preview-views="{{ post.view_count }}"
+               data-preview-badge="{{ post.section_name or 'POPULAR' }}"
+               data-preview-image="{{ post.thumbnail_url or '' }}"
+               data-preview-download="{{ post.download_url or '' }}">
         <a href="/post/{{ post.slug }}" class="post-thumb-link">
           {% if post.thumbnail_url %}
           <img src="{{ post.thumbnail_url }}" alt="{{ post.title }}" class="post-thumb-img" loading="lazy">
@@ -402,6 +465,9 @@
           <span class="post-badge badge-accent">{{ post.section_name }}</span>
           {% endif %}
           <div class="thumb-gradient-overlay"></div>
+          <button type="button" class="card-quick-peek-btn" title="Quick Preview" aria-label="Quick Preview">
+            👁️ Quick Peek
+          </button>
         </a>
 
         <div class="post-content-box">

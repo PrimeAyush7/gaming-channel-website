@@ -7,49 +7,48 @@
 <div class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
 
   <!-- Header Banner -->
-  <div class="card" style="background: linear-gradient(135deg, rgba(20, 10, 45, 0.9) 0%, rgba(10, 3, 22, 0.95) 100%); border: 1px solid var(--border-glow); border-radius: 16px; padding: 2rem; margin-bottom: 2.5rem; text-align: center;">
-    <span class="badge" style="background: rgba(168,85,247,0.2); color: #c084fc; border: 1px solid #a855f7; margin-bottom: 0.75rem; display: inline-block;">SYSTEM BROADCASTS</span>
-    <h1 style="font-size: 2.2rem; font-weight: 800; color: #fff; margin-bottom: 0.5rem;">OFFICIAL ANNOUNCEMENTS</h1>
-    <p style="color: var(--text-muted); font-size: 1rem; max-width: 650px; margin: 0 auto;">
+  <div class="category-hero-card cyber-card" style="margin-bottom: 2.5rem;">
+    <div class="cat-hero-glow"></div>
+    <span class="download-badge">SYSTEM BROADCASTS</span>
+    <h1 class="cat-hero-title">OFFICIAL ANNOUNCEMENTS</h1>
+    <p class="cat-hero-desc">
       Stay updated with real-time Free Fire tournament notices, maintenance schedules, diamond reward distributions, and arena policy updates.
     </p>
   </div>
 
   <!-- Arena Notice Marquee Highlight -->
   {% if arena_notice %}
-  <div style="background: rgba(168, 85, 247, 0.1); border-left: 4px solid var(--neon-purple); padding: 1rem 1.25rem; border-radius: 8px; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.75rem;">
-    <span style="font-size: 1.3rem;">📢</span>
-    <div style="flex: 1; color: #f3e8ff; font-weight: 600; font-size: 0.95rem;">
-      <strong style="color: #c084fc;">ARENA NOTICE:</strong> {{ arena_notice }}
-    </div>
+  <div class="arena-notice-bar cyber-card" style="margin-bottom: 2rem;">
+    <span class="badge badge-cyan">ARENA NOTICE</span>
+    <marquee class="arena-notice-marquee" scrollamount="6">{{ arena_notice }}</marquee>
   </div>
   {% endif %}
 
   <!-- Announcements List -->
   {% if announcements %}
-  <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+  <div style="display: flex; flex-direction: column; gap: 1.5rem;">
     {% for a in announcements %}
-    <div class="cyber-card" style="padding: 1.5rem; border-radius: 12px; background: rgba(15, 7, 28, 0.7); border: 1px solid rgba(168, 85, 247, 0.25);">
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
-        <div style="display: flex; align-items: center; gap: 0.5rem;">
+    <div class="cyber-card" style="padding: 1.75rem; border-radius: var(--radius-md);">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
           {% if a.type == 'EVENT' %}
-          <span class="badge" style="background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid #a855f7;">EVENT</span>
+          <span class="badge badge-cyan">EVENT</span>
           {% elif a.type == 'WARNING' %}
-          <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fcd34d; border: 1px solid #f59e0b;">IMPORTANT</span>
+          <span class="badge badge-warn">IMPORTANT</span>
           {% else %}
-          <span class="badge" style="background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid #3b82f6;">INFO</span>
+          <span class="badge badge-info">INFO</span>
           {% endif %}
-          <h2 style="font-size: 1.25rem; font-weight: 700; color: #fff; margin: 0;">{{ a.title }}</h2>
+          <h2 style="font-family: var(--font-display); font-size: 1.35rem; font-weight: 800; color: #fff; margin: 0;">{{ a.title }}</h2>
         </div>
-        <span style="color: var(--text-muted); font-size: 0.85rem;">📅 {{ a.created_at[:16].replace('T', ' ') if a.created_at else 'Recent' }}</span>
+        <span style="color: var(--text-dim); font-size: 0.85rem; font-family: var(--font-heading);">📅 {{ a.created_at[:16].replace('T', ' ') if a.created_at else 'Recent' }}</span>
       </div>
 
-      <div style="color: #d1d5db; font-size: 0.95rem; line-height: 1.6; white-space: pre-line;">
+      <div style="color: #cbd5e1; font-size: 0.98rem; line-height: 1.7; white-space: pre-line;">
         {{ a.message }}
       </div>
 
       {% if a.banner_url %}
-      <div style="margin-top: 1rem; border-radius: 8px; overflow: hidden; max-height: 250px;">
+      <div style="margin-top: 1.25rem; border-radius: 10px; overflow: hidden; max-height: 280px; border: 1px solid var(--border-subtle);">
         <img src="{{ a.banner_url }}" alt="{{ a.title }}" style="width: 100%; height: 100%; object-fit: cover;">
       </div>
       {% endif %}
@@ -57,8 +56,11 @@
     {% endfor %}
   </div>
   {% else %}
-  <div class="cyber-card" style="text-align: center; padding: 3rem; color: var(--text-muted); border-radius: 12px;">
-    <div style="font-size: 3rem; margin-bottom: 1rem;">📢</div>\n    <h3 style="color: #fff;">No Announcements Published Yet</h3>\n    <p>Official news and server notices will appear here as soon as they are announced.</p>\n  </div>
+  <div class="cyber-card empty-card">
+    <div class="empty-icon">📢</div>
+    <h3>No Broadcasts Active</h3>
+    <p>All tournament announcements and system notices will appear here in real-time.</p>
+  </div>
   {% endif %}
 
 </div>

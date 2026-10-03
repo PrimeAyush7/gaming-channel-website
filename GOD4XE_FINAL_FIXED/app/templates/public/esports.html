@@ -7,22 +7,23 @@
 <div class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
 
   <!-- Hero Header -->
-  <div class="card" style="background: linear-gradient(135deg, rgba(30, 10, 60, 0.9) 0%, rgba(10, 3, 20, 0.95) 100%); border: 1px solid var(--border-glow); border-radius: 16px; padding: 2.5rem 2rem; margin-bottom: 2.5rem; text-align: center; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(168, 85, 247, 0.2);">
-    <span class="badge" style="background: rgba(168,85,247,0.25); color: #c084fc; border: 1px solid #a855f7; margin-bottom: 1rem; display: inline-block; font-size: 0.85rem; padding: 0.35rem 0.85rem;">FREE FIRE ESPORTS ARENA</span>
-    <h1 style="font-size: 2.5rem; font-weight: 800; color: #fff; margin-bottom: 1rem; text-shadow: 0 0 20px rgba(168,85,247,0.6);">DOMINATE THE BATTLEFIELD</h1>
-    <p style="color: var(--text-muted); font-size: 1.1rem; max-width: 700px; margin: 0 auto 1.75rem; line-height: 1.6;">
+  <div class="category-hero-card cyber-card" style="margin-bottom: 2.5rem;">
+    <div class="cat-hero-glow"></div>
+    <span class="download-badge">FREE FIRE ESPORTS ARENA</span>
+    <h1 class="cat-hero-title">DOMINATE THE BATTLEFIELD</h1>
+    <p class="cat-hero-desc">
       Join daily verified Free Fire tournaments, compete against pro players, earn real Diamonds, and rise to the top of the national leaderboard.
     </p>
 
-    <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
-      <a href="/download-app" class="btn btn-primary" style="padding: 0.85rem 1.8rem; font-weight: 700; border-radius: 10px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);">
+    <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem;">
+      <a href="/download-app" class="btn btn-primary" style="padding: 0.85rem 1.8rem; font-weight: 800; border-radius: var(--radius-sm); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
         <span>📱</span> Download Android APK
       </a>
-      <a href="/tournaments" class="btn btn-secondary" style="padding: 0.85rem 1.8rem; font-weight: 700; border-radius: 10px; text-decoration: none; border: 1px solid var(--neon-purple); color: #fff;">
+      <a href="/tournaments" class="btn btn-secondary" style="padding: 0.85rem 1.8rem; font-weight: 800; border-radius: var(--radius-sm); text-decoration: none;">
         <span>🏆</span> View All Matches
       </a>
       {% if not current_user %}
-      <a href="/register" class="btn btn-secondary" style="padding: 0.85rem 1.8rem; font-weight: 700; border-radius: 10px; text-decoration: none; background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #6ee7b7;">
+      <a href="/register" class="btn btn-secondary" style="padding: 0.85rem 1.8rem; font-weight: 800; border-radius: var(--radius-sm); text-decoration: none; border-color: #10b981; color: #34d399; background: rgba(16, 185, 129, 0.15);">
         <span>➕</span> Register as Player
       </a>
       {% endif %}
@@ -30,64 +31,67 @@
   </div>
 
   <!-- Quick How-It-Works Steps -->
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin-bottom: 3rem;">
-    <div class="cyber-card" style="padding: 1.25rem; border-radius: 12px; background: rgba(15, 7, 28, 0.6); text-align: center;">
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin-bottom: 3.5rem;">
+    <div class="cyber-card" style="padding: 1.5rem 1.2rem; text-align: center;">
       <div style="font-size: 2rem; margin-bottom: 0.5rem;">1️⃣</div>
-      <h3 style="font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 0.35rem;">Register Account</h3>
-      <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">Sign up on web or install the app and link your Free Fire UID & IGN.</p>
+      <h3 style="font-family: var(--font-display); font-size: 1.15rem; font-weight: 800; color: #fff; margin-bottom: 0.35rem;">Register Account</h3>
+      <p style="font-size: 0.88rem; color: var(--text-muted); margin: 0; line-height: 1.5;">Sign up on web or install the app and link your Free Fire UID & IGN.</p>
     </div>
-    <div class="cyber-card" style="padding: 1.25rem; border-radius: 12px; background: rgba(15, 7, 28, 0.6); text-align: center;">
+    <div class="cyber-card" style="padding: 1.5rem 1.2rem; text-align: center;">
       <div style="font-size: 2rem; margin-bottom: 0.5rem;">2️⃣</div>
-      <h3 style="font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 0.35rem;">Choose Match</h3>
-      <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">Pick your preferred mode (Solo, Duo, Squad) or join 100% Free entry events.</p>
+      <h3 style="font-family: var(--font-display); font-size: 1.15rem; font-weight: 800; color: #fff; margin-bottom: 0.35rem;">Choose Match</h3>
+      <p style="font-size: 0.88rem; color: var(--text-muted); margin: 0; line-height: 1.5;">Pick your preferred mode (Solo, Duo, Squad) or join 100% Free entry events.</p>
     </div>
-    <div class="cyber-card" style="padding: 1.25rem; border-radius: 12px; background: rgba(15, 7, 28, 0.6); text-align: center;">
+    <div class="cyber-card" style="padding: 1.5rem 1.2rem; text-align: center;">
       <div style="font-size: 2rem; margin-bottom: 0.5rem;">3️⃣</div>
-      <h3 style="font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 0.35rem;">Get Room ID</h3>
-      <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">Custom Room ID and Password are sent 15 minutes before the match start.</p>
+      <h3 style="font-family: var(--font-display); font-size: 1.15rem; font-weight: 800; color: #fff; margin-bottom: 0.35rem;">Get Room ID</h3>
+      <p style="font-size: 0.88rem; color: var(--text-muted); margin: 0; line-height: 1.5;">Custom Room ID and Password are sent 15 minutes before the match start.</p>
     </div>
-    <div class="cyber-card" style="padding: 1.25rem; border-radius: 12px; background: rgba(15, 7, 28, 0.6); text-align: center;">
+    <div class="cyber-card" style="padding: 1.5rem 1.2rem; text-align: center;">
       <div style="font-size: 2rem; margin-bottom: 0.5rem;">4️⃣</div>
-      <h3 style="font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 0.35rem;">Win & Cashout</h3>
-      <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">Diamonds are credited automatically for kills and rank finishes.</p>
+      <h3 style="font-family: var(--font-display); font-size: 1.15rem; font-weight: 800; color: #fff; margin-bottom: 0.35rem;">Win & Cashout</h3>
+      <p style="font-size: 0.88rem; color: var(--text-muted); margin: 0; line-height: 1.5;">Diamonds are credited automatically for kills and rank finishes.</p>
     </div>
   </div>
 
   <!-- Featured Tournaments Section -->
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
-    <h2 style="font-size: 1.6rem; font-weight: 700; color: #fff; margin: 0;">🔥 Featured Tournaments</h2>
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.75rem; flex-wrap: wrap; gap: 1rem;">
+    <h2 class="section-title">
+      <span class="title-bar"></span> 🔥 FEATURED TOURNAMENTS
+    </h2>
     <a href="/tournaments" class="btn btn-secondary btn-sm" style="text-decoration: none;">Explore Directory &rarr;</a>
   </div>
 
   {% if tournaments %}
-  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
+  <div class="tournaments-cards-grid" style="margin-bottom: 3.5rem;">
     {% for t in tournaments %}
-    <div class="card" style="background: rgba(15, 7, 28, 0.7); border: 1px solid rgba(168,85,247,0.25); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column;">
-      <div style="position: relative; height: 160px; background: #0e051d;">
+    <div class="tournament-match-card cyber-card" style="padding: 0; overflow: hidden;">
+      <div style="position: relative; height: 160px; background: #0c1424; overflow: hidden;">
         {% if t.banner_url %}
         <img src="{{ t.banner_url }}" alt="{{ t.title }}" style="width: 100%; height: 100%; object-fit: cover;">
-        {% else %}\n        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 3rem; background: linear-gradient(135deg, #1f0b38, #0a0314);">🎮</div>
+        {% else %}
+        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 3rem; background: linear-gradient(135deg, #0e1a30, #060a12);">🎮</div>
         {% endif %}
-        <span class="badge" style="position: absolute; top: 12px; left: 12px; {% if t.status == 'LIVE' %}background: #ef4444; color: #fff;{% elif t.status == 'UPCOMING' %}background: #10b981; color: #fff;{% else %}background: #6b7280; color: #fff;{% endif %}">
+        <span class="badge {% if t.status == 'LIVE' %}badge-live{% elif t.status == 'UPCOMING' %}badge-upcoming{% else %}badge-ended{% endif %}" style="position: absolute; top: 12px; left: 12px;">
           {{ t.status }}
         </span>
-        <span class="badge" style="position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.7); color: #c084fc; border: 1px solid rgba(168,85,247,0.4);">
+        <span class="badge" style="position: absolute; top: 12px; right: 12px; background: rgba(5,7,15,0.85); color: var(--neon-cyan); border: 1px solid rgba(0,242,254,0.4);">
           {{ t.mode }} • {{ t.map_name }}
         </span>
       </div>
 
-      <div style="padding: 1.25rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+      <div style="padding: 1.35rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
         <div>
-          <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; color: #fff;">{{ t.title }}</h3>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; background: rgba(0,0,0,0.3); padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem;">
+          <h3 class="t-match-title" style="margin-bottom: 0.75rem;">{{ t.title }}</h3>
+          <div class="t-match-stats-row">
             <div>
-              <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Entry</div>
-              <div style="font-size: 0.95rem; font-weight: 700; color: {% if t.entry_type == 'FREE' %}#10b981{% else %}#c084fc{% endif %};">
+              <div class="t-stat-dim-label">Entry</div>
+              <div style="font-size: 0.95rem; font-weight: 700; color: {% if t.entry_type == 'FREE' %}#10b981{% else %}#00f2fe{% endif %};">
                 {% if t.entry_type == 'FREE' %}FREE ENTRY{% else %}💎 {{ t.entry_fee_diamonds }} D{% endif %}
               </div>
             </div>
-            <div>
-              <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Prize</div>
+            <div style="text-align: right;">
+              <div class="t-stat-dim-label">Prize</div>
               <div style="font-size: 0.95rem; font-weight: 700; color: #fbbf24;">
                 💎 {{ t.prize_amount_diamonds }} Diamonds
               </div>
@@ -101,8 +105,8 @@
             <span>Starts: <strong style="color: #fff;">{{ t.start_time[:16].replace('T', ' ') if t.start_time else 'TBA' }}</strong></span>
           </div>
 
-          <a href="/tournaments/{{ t.id }}" class="btn btn-outline" style="width: 100%; text-align: center; justify-content: center; display: block; text-decoration: none; padding: 0.65rem; border: 1px solid var(--neon-purple); color: #c084fc; border-radius: 8px; font-weight: 600;">
-            View Match Details & Enter
+          <a href="/tournaments/{{ t.id }}" class="btn btn-secondary" style="width: 100%; text-align: center; justify-content: center; display: block; text-decoration: none; padding: 0.7rem; border-radius: var(--radius-sm); font-size: 0.88rem;">
+            View Match Details & Enter &rarr;
           </a>
         </div>
       </div>
@@ -110,7 +114,9 @@
     {% endfor %}
   </div>
   {% else %}
-  <div class="cyber-card" style="text-align: center; padding: 2.5rem; color: var(--text-muted); margin-bottom: 3rem;">
+  <div class="cyber-card empty-card" style="margin-bottom: 3.5rem;">
+    <div class="empty-icon">🏆</div>
+    <h3>No Tournaments Active Right Now</h3>
     <p>New Free Fire tournaments will be posted shortly. Download the app to get instant alerts!</p>
   </div>
   {% endif %}
