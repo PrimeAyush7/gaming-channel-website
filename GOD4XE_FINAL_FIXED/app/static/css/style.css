@@ -1853,8 +1853,8 @@ body.preview-hud-open {
    -------------------------------------------------------------------------- */
 .iphone-seamless-stage-wrap {
   position: relative;
-  width: 280px;
-  height: 375px;
+  width: 250px;
+  height: 490px;
   perspective: 1200px;
   transform-style: preserve-3d;
   flex-shrink: 0;
@@ -1896,6 +1896,51 @@ body.preview-hud-open {
 
 .iphone-retina-screen.ios-awake {
   opacity: 1;
+}
+
+/* iPhone Apple Boot Screen (Simultaneous with Mac) */
+.ios-boot-screen {
+  position: absolute;
+  inset: 0;
+  background: #000000;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transition: opacity 0.7s ease;
+}
+
+.ios-boot-screen.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ios-apple-boot-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.ios-apple-logo {
+  color: #ffffff;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+}
+
+.ios-apple-boot-bar {
+  width: 75px;
+  height: 2.5px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.ios-apple-boot-fill {
+  width: 0%;
+  height: 100%;
+  background: #ffffff;
+  border-radius: 2px;
 }
 
 /* iOS 18 Ambient Wallpaper */
@@ -2859,6 +2904,49 @@ body.preview-hud-open {
 
 .read-more-link.link-accent:hover {
   color: #ff2e55;
+}
+
+.read-more-link,
+.btn-read-guide {
+  background: rgba(0, 242, 254, 0.08) !important;
+  border: 1px solid rgba(0, 242, 254, 0.35) !important;
+  border-radius: var(--radius-full) !important;
+  padding: 0.35rem 0.9rem !important;
+  font-family: var(--font-display) !important;
+  color: var(--neon-cyan) !important;
+  text-decoration: none !important;
+  font-size: 0.84rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.75px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  cursor: pointer !important;
+  outline: none !important;
+  transition: all var(--transition-fast) !important;
+  box-shadow: 0 0 10px rgba(0, 242, 254, 0.15) !important;
+}
+
+.read-more-link:hover,
+.btn-read-guide:hover {
+  background: var(--neon-cyan) !important;
+  color: #05070f !important;
+  box-shadow: 0 0 18px var(--neon-cyan) !important;
+  transform: translateX(4px) !important;
+}
+
+.read-more-link.link-accent,
+.btn-read-guide.link-accent {
+  background: rgba(255, 122, 0, 0.1) !important;
+  border-color: rgba(255, 122, 0, 0.4) !important;
+  color: #ff9f43 !important;
+}
+
+.read-more-link.link-accent:hover,
+.btn-read-guide.link-accent:hover {
+  background: #ff7a00 !important;
+  color: #05070f !important;
+  box-shadow: 0 0 18px #ff7a00 !important;
 }
 
 /* Badges */
@@ -3952,18 +4040,20 @@ body.preview-hud-open {
 
 @media (max-width: 768px) {
 
-  /* 3D Apple Devices Showcase on Mobile (Both Devices Visible & Clean) */
+  /* 3D Apple Devices Showcase on Mobile (MacBook on top, Phone directly below, Simultaneous) */
   .hero-devices-showcase {
     flex-direction: column !important;
+    align-items: center !important;
     gap: 2.25rem !important;
     min-height: auto !important;
-    margin-top: 1rem !important;
+    margin-top: 1.25rem !important;
   }
 
   .macbook-stage-wrap {
     width: 100% !important;
-    max-width: 340px !important;
+    max-width: 350px !important;
     margin: 0 auto !important;
+    transform: none !important;
   }
 
   .macbook-lid {
@@ -3983,15 +4073,10 @@ body.preview-hud-open {
   }
 
   .iphone-seamless-stage-wrap {
-    width: 100% !important;
-    max-width: 260px !important;
-    height: 345px !important;
+    width: 230px !important;
+    height: 450px !important;
     margin: 0 auto !important;
-  }
-
-  .dev-view-tab {
-    font-size: 0.68rem !important;
-    padding: 0.35rem 0.8rem !important;
+    transform: none !important;
   }
 
   .hero-dimensional-section {

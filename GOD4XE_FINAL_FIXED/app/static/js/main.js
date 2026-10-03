@@ -505,12 +505,12 @@ function initAnalyticsTracking() {
 }
 
 /* --------------------------------------------------------------------------
-   AUTHENTIC APPLE HARDWARE SHOWCASE ENGINE (42-SECOND CINEMATIC CYCLE)
+   SIMULTANEOUS APPLE HARDWARE SHOWCASE ENGINE (PARALLEL MACBOOK & IPHONE)
    - MacBook Pro 16" (macOS Sequoia) + iPhone 16 Pro (iOS 18)
+   - Running at the EXACT SAME TIME in full synchronization!
    -------------------------------------------------------------------------- */
 function initAppleHardwareShowcase() {
   const stage = document.getElementById('hero-devices-stage');
-  const viewTabs = document.querySelectorAll('#device-view-selector .dev-view-tab');
 
   // MacBook elements
   const macLid = document.getElementById('macbook-lid');
@@ -518,7 +518,6 @@ function initAppleHardwareShowcase() {
   const macCamLight = document.getElementById('mac-cam-light');
   const macBoot = document.getElementById('mac-boot');
   const macBootFill = document.getElementById('mac-boot-fill');
-  const macDesktop = document.getElementById('mac-desktop');
   const macSafariApp = document.getElementById('mac-safari-app');
   const macTypedUrl = document.getElementById('mac-typed-url');
   const macLoadingProgress = document.getElementById('mac-loading-progress');
@@ -528,12 +527,13 @@ function initAppleHardwareShowcase() {
 
   // iPhone elements
   const iphoneScreen = document.getElementById('iphone-screen');
+  const iosBoot = document.getElementById('ios-boot');
+  const iosBootFill = document.getElementById('ios-boot-fill');
   const iosDynamicIsland = document.getElementById('ios-dynamic-island');
   const islandIcon = document.getElementById('island-icon');
   const islandFilename = document.getElementById('island-filename');
   const islandStatus = document.getElementById('island-status');
   const islandProgressFill = document.getElementById('island-progress-fill');
-  const iosSafari = document.getElementById('ios-safari');
   const iosTypedUrl = document.getElementById('ios-typed-url');
   const iosLoadingBar = document.getElementById('ios-loading-bar');
   const iosWebview = document.getElementById('ios-webview');
@@ -547,29 +547,18 @@ function initAppleHardwareShowcase() {
 
   if (!stage || !macLid || !iphoneScreen) return;
 
-  // 1. Device View Tabs Switcher (Both / Mac / iPhone) for Desktop & Mobile
-  viewTabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      viewTabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      const viewMode = tab.getAttribute('data-view');
-      stage.classList.remove('view-mode-both', 'view-mode-mac', 'view-mode-iphone');
-      stage.classList.add(`view-mode-${viewMode}`);
-    });
-  });
-
   const macTargetUrl = 'https://god4xe.onrender.com';
   const iosTargetUrl = 'god4xe.onrender.com';
 
   let currentCycleTimer = null;
 
-  function runEpicAppleCycle() {
+  function runSimultaneousCycle() {
     clearTimeout(currentCycleTimer);
 
     // ==========================================
-    // T = 0.0s: RESET TO CLEAN INITIAL STATE
+    // T = 0.0s: RESET BOTH DEVICES TOGETHER
     // ==========================================
-    // MacBook Initial Reset
+    // MacBook Reset
     macLid.classList.remove('mac-lid-opened');
     macLid.classList.add('mac-lid-closed');
     if (macHandHint) macHandHint.classList.add('active');
@@ -598,8 +587,16 @@ function initAppleHardwareShowcase() {
       macMouse.style.opacity = '0';
     }
 
-    // iPhone Initial Reset
+    // iPhone Reset (Simultaneous)
     iphoneScreen.classList.remove('ios-awake');
+    if (iosBoot) {
+      iosBoot.classList.remove('fade-out');
+      iosBoot.classList.add('active');
+    }
+    if (iosBootFill) {
+      iosBootFill.style.transition = 'none';
+      iosBootFill.style.width = '0%';
+    }
     if (iosDynamicIsland) {
       iosDynamicIsland.classList.remove('expanded', 'completed');
     }
@@ -624,232 +621,208 @@ function initAppleHardwareShowcase() {
     if (iosBtnSub) iosBtnSub.textContent = 'VERIFIED DIRECT MIRROR (2.4 MB)';
 
     // ==========================================
-    // PHASE 1 (T = 1.0s – 6.0s): MACBOOK 3D UNLATCH & APPLE BOOT
+    // PHASE 1 (T = 0.8s): SIMULTANEOUS UNLATCH & BOOT
     // ==========================================
     setTimeout(() => {
-      // T = 1.0s: Physical Lid Opens in 3D
+      // MacBook Lid Opens in 3D
       macLid.classList.remove('mac-lid-closed');
       macLid.classList.add('mac-lid-opened');
 
-      // T = 2.0s: Hand gesture cue fades out
+      // Hand gesture fades out
       setTimeout(() => {
         if (macHandHint) macHandHint.classList.remove('active');
-      }, 1000);
+      }, 900);
 
-      // T = 2.4s: Apple Boot Bar Fills on pure black
+      // BOTH Apple Boot Bars Fill at the EXACT SAME TIME!
       setTimeout(() => {
         if (macCamLight) macCamLight.classList.add('active');
         if (macBootFill) {
-          macBootFill.style.transition = 'width 2.6s cubic-bezier(0.16, 1, 0.3, 1)';
+          macBootFill.style.transition = 'width 2.4s cubic-bezier(0.16, 1, 0.3, 1)';
           macBootFill.style.width = '100%';
+        }
+        if (iosBootFill) {
+          iosBootFill.style.transition = 'width 2.4s cubic-bezier(0.16, 1, 0.3, 1)';
+          iosBootFill.style.width = '100%';
         }
 
         // ==========================================
-        // PHASE 2 (T = 5.5s – 16.0s): MACOS DESKTOP, SAFARI LAUNCH & BROWSE
+        // PHASE 2 (T = 4.2s): SIMULTANEOUS OS & SAFARI LAUNCH
         // ==========================================
         setTimeout(() => {
+          // MacBook: Boot screen fades -> macOS wallpaper -> Safari opens
           if (macBoot) macBoot.classList.add('fade-out');
+          if (macSafariApp) macSafariApp.classList.add('active');
 
-          // T = 6.5s: Safari window zooms open on macOS desktop
+          // iPhone: Boot screen fades -> iOS 18 wallpaper -> Safari active
+          if (iosBoot) iosBoot.classList.add('fade-out');
+          iphoneScreen.classList.add('ios-awake');
+
+          // ==========================================
+          // PHASE 3 (T = 5.8s): SIMULTANEOUS TYPING & SEARCH
+          // ==========================================
           setTimeout(() => {
-            if (macSafariApp) macSafariApp.classList.add('active');
+            // macOS cursor moves to Omnibar
+            if (macMouse) {
+              macMouse.style.opacity = '1';
+              macMouse.style.transition = 'top 0.6s ease, left 0.6s ease';
+              macMouse.style.top = '12px';
+              macMouse.style.left = '42%';
+            }
 
-            // T = 7.5s: macOS Cursor glides to Omnibar
-            setTimeout(() => {
-              if (macMouse) {
-                macMouse.style.opacity = '1';
-                macMouse.style.transition = 'top 0.8s ease, left 0.8s ease';
-                macMouse.style.top = '12px';
-                macMouse.style.left = '42%';
+            // Both devices type URL in parallel!
+            let charIndex = 0;
+            const parallelTypingTimer = setInterval(() => {
+              let hasMore = false;
+              if (charIndex < macTargetUrl.length) {
+                if (macTypedUrl) macTypedUrl.textContent += macTargetUrl[charIndex];
+                hasMore = true;
               }
-
-              // T = 8.5s: Type "https://god4xe.onrender.com"
-              setTimeout(() => {
-                let charIdx = 0;
-                const macTypeTimer = setInterval(() => {
-                  if (charIdx < macTargetUrl.length) {
-                    if (macTypedUrl) macTypedUrl.textContent += macTargetUrl[charIdx];
-                    charIdx++;
-                  } else {
-                    clearInterval(macTypeTimer);
-
-                    // T = 11.5s: Page loading progress bar sweeps across
-                    setTimeout(() => {
-                      if (macLoadingProgress) {
-                        macLoadingProgress.style.transition = 'width 1.1s cubic-bezier(0.16, 1, 0.3, 1)';
-                        macLoadingProgress.style.width = '100%';
-                      }
-
-                      // T = 12.8s: GOD4XE website renders inside Safari
-                      setTimeout(() => {
-                        if (macLoadingProgress) macLoadingProgress.style.opacity = '0';
-                        if (macWebview) macWebview.classList.add('loaded');
-
-                        // macOS cursor scrolls down to inspect content
-                        setTimeout(() => {
-                          if (macSiteScroll) {
-                            macSiteScroll.scrollTo({ top: 90, behavior: 'smooth' });
-                          }
-                          if (macMouse) {
-                            macMouse.style.top = '160px';
-                            macMouse.style.left = '60%';
-                          }
-                        }, 800);
-
-                      }, 1200);
-
-                    }, 400);
-
-                  }
-                }, 75);
-
-              }, 1000);
-
-            }, 800);
-
-          }, 1000);
-
-        }, 2800);
-
-      }, 1400);
-
-    }, 1000);
-
-    // ==========================================
-    // PHASE 3 (T = 16.0s – 21.0s): IPHONE WAKES UP & SAFARI LAUNCH
-    // ==========================================
-    setTimeout(() => {
-      iphoneScreen.classList.add('ios-awake');
-
-      // ==========================================
-      // PHASE 4 (T = 21.0s – 27.0s): IOS SAFARI SEARCH & LOAD
-      // ==========================================
-      setTimeout(() => {
-        let iCharIdx = 0;
-        const iosTypeTimer = setInterval(() => {
-          if (iCharIdx < iosTargetUrl.length) {
-            if (iosTypedUrl) iosTypedUrl.textContent += iosTargetUrl[iCharIdx];
-            iCharIdx++;
-          } else {
-            clearInterval(iosTypeTimer);
-
-            // Blue Safari loading progress sweeps
-            setTimeout(() => {
-              if (iosLoadingBar) {
-                iosLoadingBar.style.transition = 'width 1.0s cubic-bezier(0.16, 1, 0.3, 1)';
-                iosLoadingBar.style.width = '100%';
+              if (charIndex < iosTargetUrl.length) {
+                if (iosTypedUrl) iosTypedUrl.textContent += iosTargetUrl[charIndex];
+                hasMore = true;
               }
+              charIndex++;
 
-              // Mobile site renders inside iPhone
-              setTimeout(() => {
-                if (iosLoadingBar) iosLoadingBar.style.opacity = '0';
-                if (iosWebview) iosWebview.classList.add('loaded');
+              if (!hasMore) {
+                clearInterval(parallelTypingTimer);
 
                 // ==========================================
-                // PHASE 5 (T = 27.0s – 37.0s): REAL IOS DOWNLOAD MODAL & DYNAMIC ISLAND
+                // PHASE 4 (T = 9.2s): SIMULTANEOUS LOADING BARS SWEEP
                 // ==========================================
                 setTimeout(() => {
-                  // iOS touch indicator appears
-                  if (iosTouch) {
-                    iosTouch.classList.add('active');
-                    iosTouch.style.top = '185px';
-                    iosTouch.style.left = '50%';
+                  if (macLoadingProgress) {
+                    macLoadingProgress.style.transition = 'width 0.9s cubic-bezier(0.16, 1, 0.3, 1)';
+                    macLoadingProgress.style.width = '100%';
+                  }
+                  if (iosLoadingBar) {
+                    iosLoadingBar.style.transition = 'width 0.9s cubic-bezier(0.16, 1, 0.3, 1)';
+                    iosLoadingBar.style.width = '100%';
                   }
 
-                  // Touch indicator taps the download button
+                  // ==========================================
+                  // PHASE 5 (T = 10.4s): SIMULTANEOUS WEBSITE RENDER
+                  // ==========================================
                   setTimeout(() => {
-                    if (iosTouch) iosTouch.classList.add('tapping');
+                    if (macLoadingProgress) macLoadingProgress.style.opacity = '0';
+                    if (iosLoadingBar) iosLoadingBar.style.opacity = '0';
 
-                    // T = 29.2s: Authentic iOS Modal Alert pops up!
+                    if (macWebview) macWebview.classList.add('loaded');
+                    if (iosWebview) iosWebview.classList.add('loaded');
+
+                    // ==========================================
+                    // PHASE 6 (T = 11.8s): SIMULTANEOUS INTERACTION
+                    // ==========================================
                     setTimeout(() => {
-                      if (iosTouch) iosTouch.classList.remove('active', 'tapping');
-                      if (iosModal) iosModal.classList.add('active');
+                      // MacBook: Cursor scrolls site
+                      if (macSiteScroll) {
+                        macSiteScroll.scrollTo({ top: 90, behavior: 'smooth' });
+                      }
+                      if (macMouse) {
+                        macMouse.style.top = '150px';
+                        macMouse.style.left = '58%';
+                      }
 
-                      // Touch pointer moves to "Download" in modal
+                      // iPhone: Touch finger glides to download button & taps!
+                      if (iosTouch) {
+                        iosTouch.classList.add('active');
+                        iosTouch.style.top = '185px';
+                        iosTouch.style.left = '50%';
+                      }
+
                       setTimeout(() => {
-                        if (iosTouch) {
-                          iosTouch.classList.add('active');
-                          iosTouch.style.top = '58%';
-                          iosTouch.style.left = '68%';
-                        }
+                        if (iosTouch) iosTouch.classList.add('tapping');
 
-                        // Finger taps "Download" on modal
+                        // iOS Download Modal Alert Pops Up
                         setTimeout(() => {
-                          if (iosTouch) iosTouch.classList.add('tapping');
-                          if (iosModalConfirm) iosModalConfirm.classList.add('pressed');
+                          if (iosTouch) iosTouch.classList.remove('active', 'tapping');
+                          if (iosModal) iosModal.classList.add('active');
 
-                          // Modal dismisses & Dynamic Island expands!
+                          // Touch pointer moves to "Download" in modal
                           setTimeout(() => {
-                            if (iosModal) iosModal.classList.remove('active');
-                            if (iosTouch) iosTouch.classList.remove('active', 'tapping');
-
-                            // Expand Dynamic Island into Live Activity Pill
-                            if (iosDynamicIsland) {
-                              iosDynamicIsland.classList.add('expanded');
-                            }
-                            if (islandIcon) islandIcon.textContent = '⬇';
-                            if (islandStatus) islandStatus.textContent = 'Downloading 2.4 MB...';
-                            if (iosBtnTitle) iosBtnTitle.textContent = 'DOWNLOADING (2.4 MB)...';
-                            if (iosBtnProgress) {
-                              iosBtnProgress.style.transition = 'width 3.2s ease-in-out';
-                              iosBtnProgress.style.width = '100%';
-                            }
-                            if (islandProgressFill) {
-                              islandProgressFill.style.transition = 'width 3.2s ease-in-out';
-                              islandProgressFill.style.width = '100%';
+                            if (iosTouch) {
+                              iosTouch.classList.add('active');
+                              iosTouch.style.top = '58%';
+                              iosTouch.style.left = '68%';
                             }
 
-                            // Dynamic Island finishes download celebration!
+                            // Tap "Download" button on modal
                             setTimeout(() => {
-                              if (islandIcon) islandIcon.textContent = '✓';
-                              if (islandStatus) islandStatus.textContent = 'Download Complete!';
-                              if (iosBtnTitle) iosBtnTitle.textContent = '✓ DOWNLOAD COMPLETE';
-                              if (iosBtnSub) iosBtnSub.textContent = '100% BAN-SAFE VERIFIED';
-                              if (iosDynamicIsland) iosDynamicIsland.classList.add('completed');
+                              if (iosTouch) iosTouch.classList.add('tapping');
+                              if (iosModalConfirm) iosModalConfirm.classList.add('pressed');
 
-                              // Contract Dynamic Island back to sleek pill
+                              // Modal dismisses & Dynamic Island expands!
                               setTimeout(() => {
+                                if (iosModal) iosModal.classList.remove('active');
+                                if (iosTouch) iosTouch.classList.remove('active', 'tapping');
+
+                                // Dynamic Island expands into active Live Activity download pill
                                 if (iosDynamicIsland) {
-                                  iosDynamicIsland.classList.remove('expanded');
+                                  iosDynamicIsland.classList.add('expanded');
                                 }
-                              }, 2200);
+                                if (islandIcon) islandIcon.textContent = '⬇';
+                                if (islandStatus) islandStatus.textContent = 'Downloading 2.4 MB...';
+                                if (iosBtnTitle) iosBtnTitle.textContent = 'DOWNLOADING (2.4 MB)...';
+                                if (iosBtnProgress) {
+                                  iosBtnProgress.style.transition = 'width 2.8s ease-in-out';
+                                  iosBtnProgress.style.width = '100%';
+                                }
+                                if (islandProgressFill) {
+                                  islandProgressFill.style.transition = 'width 2.8s ease-in-out';
+                                  islandProgressFill.style.width = '100%';
+                                }
 
-                            }, 3400);
+                                // Download complete celebration
+                                setTimeout(() => {
+                                  if (islandIcon) islandIcon.textContent = '✓';
+                                  if (islandStatus) islandStatus.textContent = 'Download Complete!';
+                                  if (iosBtnTitle) iosBtnTitle.textContent = '✓ DOWNLOAD COMPLETE';
+                                  if (iosBtnSub) iosBtnSub.textContent = '100% BAN-SAFE VERIFIED';
+                                  if (iosDynamicIsland) iosDynamicIsland.classList.add('completed');
 
-                          }, 550);
+                                  // Contract Dynamic Island back to sleek pill
+                                  setTimeout(() => {
+                                    if (iosDynamicIsland) {
+                                      iosDynamicIsland.classList.remove('expanded');
+                                    }
+                                  }, 2200);
 
-                        }, 600);
+                                }, 3000);
 
-                      }, 900);
+                              }, 450);
 
-                    }, 650);
+                            }, 500);
 
-                  }, 650);
+                          }, 750);
 
-                }, 900);
+                        }, 550);
 
-              }, 1100);
+                      }, 550);
 
-            }, 300);
+                    }, 1400);
 
-          }
-        }, 90);
+                  }, 1000);
 
-      }, 1000);
+                }, 300);
 
-    }, 16000);
+              }
+            }, 80);
 
-    // ==========================================
-    // PHASE 6 (T = 37.0s – 42.0s): DUAL DEVICE GRAND FINALE
-    // ==========================================
-    // Loops continuously every 42 seconds
+          }, 1200);
+
+        }, 2600);
+
+      }, 1200);
+
+    }, 800);
+
+    // Continuous smooth loop
     currentCycleTimer = setTimeout(() => {
-      runEpicAppleCycle();
-    }, 42000);
+      runSimultaneousCycle();
+    }, 28000);
   }
 
-  // Launch initial cycle
-  runEpicAppleCycle();
+  // Launch initial simultaneous cycle
+  runSimultaneousCycle();
 
   // Desktop 3D Mouse Parallax
   const isTouch = window.matchMedia('(pointer: coarse)').matches || ('ontouchstart' in window);
