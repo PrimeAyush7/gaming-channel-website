@@ -138,7 +138,7 @@
         </a>
         {% endif %}
 
-        <!-- User Authentication Widget (v1.3.6) -->
+        <!-- User Authentication Widget (Desktop & Mobile Sync) -->
         {% if current_user %}
         <div class="user-auth-pill">
           <span class="user-balance-badge">
@@ -146,11 +146,21 @@
           </span>
           <a href="/logout" class="btn btn-secondary btn-sm user-logout-btn" title="Logout">Logout</a>
         </div>
+        <!-- Mobile Header User Badge -->
+        <a href="/esports" class="mobile-header-user-btn" title="Player Account">
+          <span class="pulse-dot"></span>
+          <span>💎 {{ current_user.diamond_balance }}</span>
+        </a>
         {% else %}
         <div class="desktop-auth-btns">
           <a href="/login" class="btn btn-secondary btn-sm auth-btn-login">Login</a>
           <a href="/register" class="btn btn-primary btn-sm auth-btn-reg">Register</a>
         </div>
+        <!-- Mobile Header Direct Login Button (Always Visible on Mobile!) -->
+        <a href="/login" class="mobile-header-login-btn" aria-label="Player Login">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+          <span>Login</span>
+        </a>
         {% endif %}
 
         <!-- Mobile Search Button -->

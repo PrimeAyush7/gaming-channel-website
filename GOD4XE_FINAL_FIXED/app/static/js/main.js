@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initCardMotionAndLighting();
   initAnalyticsTracking();
   initDeviceShowcaseParallax();
+  initMacbookSlideShow();
+  initIphoneSafariSimulator();
   initDimensionalWebGL();
   initDimensionalUI();
   initArticleSlideDrawer();
@@ -505,7 +507,7 @@ function initAnalyticsTracking() {
 }
 
 /* --------------------------------------------------------------------------
-   3D DUAL DEVICE SHOWCASE PARALLAX INTERACTION (DESKTOP ONLY)
+   3D DUAL DEVICE SHOWCASE: MACBOOK VIDEO SIMULATOR + IPHONE DUO (DESKTOP & MOBILE)
    -------------------------------------------------------------------------- */
 function initDeviceShowcaseParallax() {
   const stage = document.getElementById('hero-devices-stage');
@@ -516,22 +518,138 @@ function initDeviceShowcaseParallax() {
   if (isTouch || prefersReduced || window.innerWidth <= 1024) return;
 
   const macbook = stage.querySelector('.macbook-device');
-  const iphone = stage.querySelector('.iphone-device');
-  if (!macbook || !iphone) return;
+  const duoContainer = document.getElementById('iphone-duo-container');
+  if (!macbook) return;
 
   stage.addEventListener('mousemove', (e) => {
     const rect = stage.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width - 0.5;
     const y = (e.clientY - rect.top) / rect.height - 0.5;
 
-    macbook.style.transform = `rotateY(${x * 12 - 6}deg) rotateX(${-y * 10 + 5}deg) translateY(-6px)`;
-    iphone.style.transform = `rotateY(${x * 16 - 15}deg) rotateX(${-y * 14 + 7}deg) translateZ(35px) translateY(-10px)`;
+    macbook.style.transform = `perspective(1200px) rotateY(${x * 10 - 4}deg) rotateX(${-y * 8 + 3}deg) translateY(-5px)`;
+    if (duoContainer) {
+      duoContainer.style.transform = `perspective(1200px) rotateY(${x * 12 - 8}deg) rotateX(${-y * 8 + 4}deg) translateZ(20px)`;
+    }
   });
 
   stage.addEventListener('mouseleave', () => {
     macbook.style.transform = '';
-    iphone.style.transform = '';
+    if (duoContainer) {
+      duoContainer.style.transform = '';
+    }
   });
+}
+
+/* --- MacBook Screen: Automated Live Website Video/Slide Simulator --- */
+function initMacbookSlideShow() {
+  const slides = document.querySelectorAll('#mac-live-slides .mac-slide');
+  const dots = document.querySelectorAll('.mac-slide-dots .s-dot');
+  if (!slides.length) return;
+
+  let currentIdx = 0;
+  let slideTimer = null;
+
+  function showSlide(idx) {
+    slides.forEach((s, i) => {
+      s.classList.toggle('active', i === idx);
+    });
+    dots.forEach((d, i) => {
+      d.classList.toggle('active', i === idx);
+    });
+    currentIdx = idx;
+  }
+
+  function nextSlide() {
+    const nextIdx = (currentIdx + 1) % slides.length;
+    showSlide(nextIdx);
+  }
+
+  slideTimer = setInterval(nextSlide, 3800);
+
+  dots.forEach(dot => {
+    dot.addEventListener('click', (e) => {
+      e.stopPropagation();
+      clearInterval(slideTimer);
+      const target = parseInt(dot.getAttribute('data-target') || '1') - 1;
+      showSlide(target);
+      slideTimer = setInterval(nextSlide, 3800);
+    });
+  });
+}
+
+/* --- iPhone Duo: Safari URL Typing, Site Launch & Feed Scrolling Loop --- */
+function initIphoneSafariSimulator() {
+  const typedUrl = document.getElementById('safari-typed-url');
+  const loadingLine = document.getElementById('safari-loading-line');
+  const webContent = document.getElementById('safari-web-content');
+  const duoStage = document.getElementById('iphone-duo-container');
+
+  if (!typedUrl || !loadingLine || !webContent) return;
+
+  const urlText = 'god4xe.com';
+  let isTyping = false;
+
+  function runSafariCycle() {
+    if (isTyping) return;
+    isTyping = true;
+
+    // Reset initial search state
+    typedUrl.textContent = '';
+    loadingLine.style.transition = 'none';
+    loadingLine.style.width = '0%';
+    loadingLine.style.opacity = '1';
+    webContent.classList.remove('loaded');
+    webContent.scrollTop = 0;
+
+    // Trigger iPhone Duo unfold effect
+    if (duoStage) {
+      duoStage.classList.add('unfolded');
+    }
+
+    // Step 1: Type URL letter by letter
+    let charIdx = 0;
+    const typeInterval = setInterval(() => {
+      if (charIdx < urlText.length) {
+        typedUrl.textContent += urlText[charIdx];
+        charIdx++;
+      } else {
+        clearInterval(typeInterval);
+
+        // Step 2: Simulate Enter & Progress Bar Sweep
+        setTimeout(() => {
+          loadingLine.style.transition = 'width 0.75s cubic-bezier(0.16, 1, 0.3, 1)';
+          loadingLine.style.width = '100%';
+
+          setTimeout(() => {
+            loadingLine.style.opacity = '0';
+            webContent.classList.add('loaded');
+
+            // Step 3: Gentle auto-scroll through the loaded mobile site
+            setTimeout(() => {
+              webContent.scrollTo({ top: 110, behavior: 'smooth' });
+
+              setTimeout(() => {
+                webContent.scrollTo({ top: 0, behavior: 'smooth' });
+
+                // Step 4: Hold and repeat cycle seamlessly
+                setTimeout(() => {
+                  isTyping = false;
+                  runSafariCycle();
+                }, 4200);
+
+              }, 2800);
+
+            }, 1200);
+
+          }, 800);
+
+        }, 350);
+      }
+    }, 110);
+  }
+
+  // Run cycle after short delay
+  setTimeout(runSafariCycle, 600);
 }
 
 
