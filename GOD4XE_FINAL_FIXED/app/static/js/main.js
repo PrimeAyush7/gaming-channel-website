@@ -14,9 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initMobileNav();
   initCardMotionAndLighting();
   initAnalyticsTracking();
-  initDeviceShowcaseParallax();
-  initMacbookSlideShow();
-  initIphoneSafariSimulator();
+  initAppleHardwareShowcase();
   initDimensionalWebGL();
   initDimensionalUI();
   initArticleSlideDrawer();
@@ -507,151 +505,267 @@ function initAnalyticsTracking() {
 }
 
 /* --------------------------------------------------------------------------
-   3D DUAL DEVICE SHOWCASE: MACBOOK VIDEO SIMULATOR + IPHONE DUO (DESKTOP & MOBILE)
+   APPLE-GRADE 3D HARDWARE SHOWCASE: MACBOOK PRO OPENING & FOLDABLE IPHONE DUO
    -------------------------------------------------------------------------- */
-function initDeviceShowcaseParallax() {
+function initAppleHardwareShowcase() {
   const stage = document.getElementById('hero-devices-stage');
-  if (!stage) return;
+  const macLid = document.getElementById('macbook-lid');
+  const macHandHint = document.getElementById('mac-hand-hint');
+  const macBoot = document.getElementById('mac-boot');
+  const macBootProgress = document.getElementById('mac-boot-progress');
+  const macTopbar = document.getElementById('mac-topbar');
+  const macSlides = document.querySelectorAll('#mac-live-slides .mac-slide');
+  const macDots = document.querySelectorAll('.mac-slide-dots .s-dot');
+  
+  const duoStage = document.getElementById('iphone-duo-stage');
+  const duoDevice = document.getElementById('iphone-duo-device');
+  const duoTypedUrl = document.getElementById('duo-typed-url');
+  const duoLoadingBar = document.getElementById('duo-loading-bar');
+  const duoViewport = document.getElementById('duo-website-viewport');
+  const duoTap = document.getElementById('duo-tap-indicator');
+  const duoDownloadBtn = document.getElementById('duo-m-download-btn');
+  const duoBtnText = document.getElementById('duo-btn-text');
+  const duoBtnSub = document.getElementById('duo-btn-sub');
+  const duoBtnProgress = document.getElementById('duo-btn-progress');
+  const duoToast = document.getElementById('duo-dl-toast');
+  const duoToastStatus = document.getElementById('toast-status-text');
+  const duoToastBadge = document.getElementById('toast-badge-status');
 
-  const isTouch = window.matchMedia('(pointer: coarse)').matches || ('ontouchstart' in window);
-  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (isTouch || prefersReduced || window.innerWidth <= 1024) return;
+  const replayBtn = document.getElementById('btn-replay-devices');
 
-  const macbook = stage.querySelector('.macbook-device');
-  const duoContainer = document.getElementById('iphone-duo-container');
-  if (!macbook) return;
+  if (!stage || !macLid || !duoDevice) return;
 
-  stage.addEventListener('mousemove', (e) => {
-    const rect = stage.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
+  const targetUrl = 'god4xe.onrender.com';
+  let isSequenceRunning = false;
+  let macSlideTimer = null;
+  let macCurrentSlide = 0;
+  let sequenceLoopTimeout = null;
 
-    macbook.style.transform = `perspective(1200px) rotateY(${x * 10 - 4}deg) rotateX(${-y * 8 + 3}deg) translateY(-5px)`;
-    if (duoContainer) {
-      duoContainer.style.transform = `perspective(1200px) rotateY(${x * 12 - 8}deg) rotateX(${-y * 8 + 4}deg) translateZ(20px)`;
+  /* --- 1. MacBook Lid Open & Power-On Sequence --- */
+  function playMacbookOpenSequence() {
+    // Reset initial state: Lid closed, screen blacked out
+    macLid.classList.remove('mac-lid-opened');
+    macLid.classList.add('mac-lid-closed');
+    if (macHandHint) {
+      macHandHint.classList.add('active');
     }
-  });
-
-  stage.addEventListener('mouseleave', () => {
-    macbook.style.transform = '';
-    if (duoContainer) {
-      duoContainer.style.transform = '';
+    if (macBoot) {
+      macBoot.classList.remove('fade-out');
+      macBoot.classList.add('active');
     }
-  });
-}
+    if (macBootProgress) {
+      macBootProgress.style.width = '0%';
+    }
+    if (macTopbar) {
+      macTopbar.classList.remove('active');
+    }
 
-/* --- MacBook Screen: Automated Live Website Video/Slide Simulator --- */
-function initMacbookSlideShow() {
-  const slides = document.querySelectorAll('#mac-live-slides .mac-slide');
-  const dots = document.querySelectorAll('.mac-slide-dots .s-dot');
-  if (!slides.length) return;
+    // T+0.4s: Physically lift and open the MacBook lid in 3D
+    setTimeout(() => {
+      macLid.classList.remove('mac-lid-closed');
+      macLid.classList.add('mac-lid-opened');
 
-  let currentIdx = 0;
-  let slideTimer = null;
+      // T+1.2s: Hide opening hand cue
+      setTimeout(() => {
+        if (macHandHint) macHandHint.classList.remove('active');
+      }, 1000);
 
-  function showSlide(idx) {
-    slides.forEach((s, i) => {
-      s.classList.toggle('active', i === idx);
-    });
-    dots.forEach((d, i) => {
-      d.classList.toggle('active', i === idx);
-    });
-    currentIdx = idx;
+      // T+1.4s: Apple/Gaming boot bar charges up
+      setTimeout(() => {
+        if (macBootProgress) {
+          macBootProgress.style.transition = 'width 1.2s cubic-bezier(0.16, 1, 0.3, 1)';
+          macBootProgress.style.width = '100%';
+        }
+
+        // T+2.5s: Boot screen fades out, browser window reveals & slides start!
+        setTimeout(() => {
+          if (macBoot) macBoot.classList.add('fade-out');
+          if (macTopbar) macTopbar.classList.add('active');
+          startMacbookSlides();
+        }, 1200);
+
+      }, 1200);
+
+    }, 450);
   }
 
-  function nextSlide() {
-    const nextIdx = (currentIdx + 1) % slides.length;
-    showSlide(nextIdx);
+  function startMacbookSlides() {
+    clearInterval(macSlideTimer);
+    showMacSlide(0);
+    macSlideTimer = setInterval(() => {
+      macCurrentSlide = (macCurrentSlide + 1) % macSlides.length;
+      showMacSlide(macCurrentSlide);
+    }, 3600);
   }
 
-  slideTimer = setInterval(nextSlide, 3800);
+  function showMacSlide(idx) {
+    macSlides.forEach((s, i) => s.classList.toggle('active', i === idx));
+    macDots.forEach((d, i) => d.classList.toggle('active', i === idx));
+    macCurrentSlide = idx;
+  }
 
-  dots.forEach(dot => {
+  macDots.forEach(dot => {
     dot.addEventListener('click', (e) => {
       e.stopPropagation();
-      clearInterval(slideTimer);
-      const target = parseInt(dot.getAttribute('data-target') || '1') - 1;
-      showSlide(target);
-      slideTimer = setInterval(nextSlide, 3800);
+      clearInterval(macSlideTimer);
+      const t = parseInt(dot.getAttribute('data-target') || '1') - 1;
+      showMacSlide(t);
+      macSlideTimer = setInterval(() => {
+        macCurrentSlide = (macCurrentSlide + 1) % macSlides.length;
+        showMacSlide(macCurrentSlide);
+      }, 3600);
     });
   });
-}
 
-/* --- iPhone Duo: Safari URL Typing, Site Launch & Feed Scrolling Loop --- */
-function initIphoneSafariSimulator() {
-  const typedUrl = document.getElementById('safari-typed-url');
-  const loadingLine = document.getElementById('safari-loading-line');
-  const webContent = document.getElementById('safari-web-content');
-  const duoStage = document.getElementById('iphone-duo-container');
-
-  if (!typedUrl || !loadingLine || !webContent) return;
-
-  const urlText = 'god4xe.com';
-  let isTyping = false;
-
-  function runSafariCycle() {
-    if (isTyping) return;
-    isTyping = true;
-
-    // Reset initial search state
-    typedUrl.textContent = '';
-    loadingLine.style.transition = 'none';
-    loadingLine.style.width = '0%';
-    loadingLine.style.opacity = '1';
-    webContent.classList.remove('loaded');
-    webContent.scrollTop = 0;
-
-    // Trigger iPhone Duo unfold effect
-    if (duoStage) {
-      duoStage.classList.add('unfolded');
+  /* --- 2. iPhone Duo: Foldable Unfold, Safari Typing & In-App File Download --- */
+  function playIphoneDuoSequence() {
+    // Reset initial state: Folded in 3D, empty search, no download toast
+    duoDevice.classList.remove('duo-unfolded');
+    duoDevice.classList.add('duo-folded');
+    if (duoTypedUrl) duoTypedUrl.textContent = '';
+    if (duoLoadingBar) {
+      duoLoadingBar.style.transition = 'none';
+      duoLoadingBar.style.width = '0%';
+      duoLoadingBar.style.opacity = '1';
     }
+    if (duoViewport) {
+      duoViewport.classList.remove('loaded');
+      duoViewport.scrollTop = 0;
+    }
+    if (duoTap) duoTap.classList.remove('active', 'tapping');
+    if (duoBtnProgress) duoBtnProgress.style.width = '0%';
+    if (duoBtnText) duoBtnText.textContent = 'DOWNLOAD OB-52 VIP CONFIG';
+    if (duoBtnSub) duoBtnSub.textContent = 'VERIFIED DIRECT MIRROR (2.4 MB)';
+    if (duoToast) duoToast.classList.remove('active');
 
-    // Step 1: Type URL letter by letter
-    let charIdx = 0;
-    const typeInterval = setInterval(() => {
-      if (charIdx < urlText.length) {
-        typedUrl.textContent += urlText[charIdx];
-        charIdx++;
-      } else {
-        clearInterval(typeInterval);
+    // T+0.6s: Power On & 3D Unfold Motion
+    setTimeout(() => {
+      duoDevice.classList.remove('duo-folded');
+      duoDevice.classList.add('duo-unfolded');
 
-        // Step 2: Simulate Enter & Progress Bar Sweep
-        setTimeout(() => {
-          loadingLine.style.transition = 'width 0.75s cubic-bezier(0.16, 1, 0.3, 1)';
-          loadingLine.style.width = '100%';
+      // T+2.2s: Begin typing "god4xe.onrender.com" into Safari address bar
+      setTimeout(() => {
+        let charIndex = 0;
+        const typeTimer = setInterval(() => {
+          if (charIndex < targetUrl.length) {
+            if (duoTypedUrl) duoTypedUrl.textContent += targetUrl[charIndex];
+            charIndex++;
+          } else {
+            clearInterval(typeTimer);
 
-          setTimeout(() => {
-            loadingLine.style.opacity = '0';
-            webContent.classList.add('loaded');
-
-            // Step 3: Gentle auto-scroll through the loaded mobile site
+            // T+3.8s: Hit Go / Enter -> Blue loading bar sweeps across
             setTimeout(() => {
-              webContent.scrollTo({ top: 110, behavior: 'smooth' });
+              if (duoLoadingBar) {
+                duoLoadingBar.style.transition = 'width 0.75s cubic-bezier(0.16, 1, 0.3, 1)';
+                duoLoadingBar.style.width = '100%';
+              }
 
+              // T+4.6s: Loading complete -> GOD4XE website renders inside unfolded iPhone!
               setTimeout(() => {
-                webContent.scrollTo({ top: 0, behavior: 'smooth' });
+                if (duoLoadingBar) duoLoadingBar.style.opacity = '0';
+                if (duoViewport) duoViewport.classList.add('loaded');
 
-                // Step 4: Hold and repeat cycle seamlessly
+                // T+5.6s: In-App File Download Simulation Starts!
                 setTimeout(() => {
-                  isTyping = false;
-                  runSafariCycle();
-                }, 4200);
+                  // Show animated tap finger over the download button
+                  if (duoTap) duoTap.classList.add('active');
 
-              }, 2800);
+                  // Finger taps download button
+                  setTimeout(() => {
+                    if (duoTap) duoTap.classList.add('tapping');
 
-            }, 1200);
+                    if (duoBtnText) duoBtnText.textContent = 'CONNECTING MIRROR...';
+                    if (duoBtnSub) duoBtnSub.textContent = 'ENCRYPTED SSL PROTOCOL';
 
-          }, 800);
+                    // Progress bar fills on button: 0% -> 50% -> 100%
+                    setTimeout(() => {
+                      if (duoBtnText) duoBtnText.textContent = 'DOWNLOADING (2.4 MB)...';
+                      if (duoBtnProgress) {
+                        duoBtnProgress.style.transition = 'width 1.4s ease-in-out';
+                        duoBtnProgress.style.width = '100%';
+                      }
 
-        }, 350);
-      }
-    }, 110);
+                      // T+8.2s: Download finished -> iOS Dynamic Island Toast pops up!
+                      setTimeout(() => {
+                        if (duoBtnText) duoBtnText.textContent = '✓ DOWNLOAD COMPLETE!';
+                        if (duoBtnSub) duoBtnSub.textContent = '100% BAN-SAFE VERIFIED';
+                        if (duoTap) duoTap.classList.remove('active', 'tapping');
+
+                        if (duoToast) {
+                          duoToast.classList.add('active');
+                          if (duoToastStatus) duoToastStatus.textContent = 'DOWNLOAD FINISHED (2.4 MB)';
+                          if (duoToastBadge) duoToastBadge.textContent = '✓ VERIFIED';
+                        }
+
+                        // Hold celebration state, then prepare next smooth loop
+                        clearTimeout(sequenceLoopTimeout);
+                        sequenceLoopTimeout = setTimeout(() => {
+                          runFullShowcase();
+                        }, 5200);
+
+                      }, 1500);
+
+                    }, 650);
+
+                  }, 650);
+
+                }, 1000);
+
+              }, 800);
+
+            }, 300);
+          }
+        }, 95);
+
+      }, 1400);
+
+    }, 600);
   }
 
-  // Run cycle after short delay
-  setTimeout(runSafariCycle, 600);
-}
+  function runFullShowcase() {
+    isSequenceRunning = true;
+    playMacbookOpenSequence();
+    playIphoneDuoSequence();
+  }
 
+  // Initial trigger
+  runFullShowcase();
+
+  // Replay control button
+  if (replayBtn) {
+    replayBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      clearTimeout(sequenceLoopTimeout);
+      clearInterval(macSlideTimer);
+      runFullShowcase();
+    });
+  }
+
+  // 3D Mouse Parallax Tracking on Desktop
+  const isTouch = window.matchMedia('(pointer: coarse)').matches || ('ontouchstart' in window);
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!isTouch && !prefersReduced && window.innerWidth > 1024) {
+    stage.addEventListener('mousemove', (e) => {
+      const rect = stage.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+
+      const macDevice = document.getElementById('macbook-showcase');
+      if (macDevice && macLid.classList.contains('mac-lid-opened')) {
+        macDevice.style.transform = `perspective(1200px) rotateY(${x * 10 - 4}deg) rotateX(${-y * 8 + 3}deg) translateY(-5px)`;
+      }
+      if (duoStage && duoDevice.classList.contains('duo-unfolded')) {
+        duoStage.style.transform = `perspective(1200px) rotateY(${x * 12 - 8}deg) rotateX(${-y * 8 + 4}deg) translateZ(15px)`;
+      }
+    });
+
+    stage.addEventListener('mouseleave', () => {
+      const macDevice = document.getElementById('macbook-showcase');
+      if (macDevice) macDevice.style.transform = '';
+      if (duoStage) duoStage.style.transform = '';
+    });
+  }
+}
 
 /* --------------------------------------------------------------------------
    INTERACTIVE ARTICLE SLIDING DRAWER SYSTEM (SPLIT-VIEW DESKTOP & MOBILE SHEET)

@@ -1169,24 +1169,55 @@ body.preview-hud-open {
 }
 
 /* ==========================================================================
-   3D MULTI-DEVICE SHOWCASE: MACBOOK PRO & IPHONE DUO (Live Simulator)
+   3D MULTI-DEVICE SHOWCASE: MACBOOK PRO (PHYSICAL UNLATCH) & IPHONE DUO FOLDABLE
    ========================================================================== */
+.showcase-control-pills {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.btn-replay-showcase {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0, 242, 254, 0.12);
+  border: 1px solid var(--neon-cyan);
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 0.45rem 1.15rem;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  box-shadow: 0 0 15px rgba(0, 242, 254, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-replay-showcase:hover {
+  background: var(--neon-cyan);
+  color: #05070f;
+  box-shadow: 0 0 25px var(--neon-cyan);
+  transform: scale(1.03);
+}
+
 .hero-devices-showcase {
   position: relative;
   width: 100%;
-  max-width: 980px;
-  min-height: 400px;
+  max-width: 1040px;
+  min-height: 420px;
   margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 3.5rem;
-  perspective: 1200px;
+  perspective: 1400px;
   transform-style: preserve-3d;
   box-sizing: border-box;
 }
 
-/* Ambient Underglow */
+/* Ambient Ground Glow */
 .devices-ambient-glow {
   position: absolute;
   bottom: -20px;
@@ -1194,32 +1225,79 @@ body.preview-hud-open {
   transform: translateX(-50%);
   width: 90%;
   height: 180px;
-  background: radial-gradient(ellipse at center, rgba(0, 242, 254, 0.22) 0%, rgba(112, 0, 255, 0.15) 45%, transparent 75%);
+  background: radial-gradient(ellipse at center, rgba(0, 242, 254, 0.25) 0%, rgba(112, 0, 255, 0.18) 45%, transparent 75%);
   filter: blur(40px);
   pointer-events: none;
   z-index: 0;
   animation: pulse-ambient-glow 3.5s infinite alternate ease-in-out;
 }
 
-@keyframes pulse-ambient-glow {
-  0% { opacity: 0.6; transform: translateX(-50%) scale(0.92); }
-  100% { opacity: 1; transform: translateX(-50%) scale(1.1); }
-}
-
 /* --------------------------------------------------------------------------
-   MACBOOK PRO 16-INCH 3D CHASSIS & LIVE WEBSITE PRESENTATION
+   1. MACBOOK PRO 16-INCH 3D CHASSIS (Physical Open & Power-On Sequence)
    -------------------------------------------------------------------------- */
-.macbook-device {
-  width: 480px;
+.macbook-stage-wrap {
   position: relative;
-  z-index: 2;
-  transform: perspective(1200px) rotateY(-6deg) rotateX(4deg) translateY(-5px);
+  width: 480px;
+  perspective: 1200px;
   transform-style: preserve-3d;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  filter: drop-shadow(0 25px 40px rgba(0, 0, 0, 0.9));
   flex-shrink: 0;
 }
 
+.macbook-device {
+  width: 100%;
+  position: relative;
+  z-index: 2;
+  transform-style: preserve-3d;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: drop-shadow(0 25px 45px rgba(0, 0, 0, 0.95));
+}
+
+.mac-open-hand-hint {
+  position: absolute;
+  top: -38px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.mac-open-hand-hint.active {
+  opacity: 1;
+}
+
+.hand-gesture {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 242, 254, 0.22);
+  border: 1px solid var(--neon-cyan);
+  border-radius: var(--radius-full);
+  padding: 4px 12px;
+  box-shadow: 0 0 16px rgba(0, 242, 254, 0.45);
+}
+
+.hand-lift-arrow {
+  color: var(--neon-cyan);
+  font-weight: 900;
+  animation: lift-arrow 0.8s infinite alternate ease-in-out;
+}
+
+@keyframes lift-arrow {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-4px); }
+}
+
+.hand-label {
+  font-family: var(--font-heading);
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: #fff;
+}
+
+/* MacBook Lid with 3D Hinge */
 .macbook-lid {
   width: 100%;
   height: 295px;
@@ -1230,6 +1308,17 @@ body.preview-hud-open {
   box-shadow: 0 0 30px rgba(0, 242, 254, 0.2), inset 0 0 15px rgba(0, 0, 0, 0.9);
   position: relative;
   box-sizing: border-box;
+  transform-origin: bottom center;
+  transform-style: preserve-3d;
+  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.macbook-lid.mac-lid-closed {
+  transform: rotateX(-80deg) translateY(15px);
+}
+
+.macbook-lid.mac-lid-opened {
+  transform: rotateX(0deg) translateY(0);
 }
 
 .macbook-notch {
@@ -1267,7 +1356,58 @@ body.preview-hud-open {
   flex-direction: column;
 }
 
-/* Safari / Chrome Browser Window Topbar */
+/* Power-On Boot Screen */
+.mac-boot-screen {
+  position: absolute;
+  inset: 0;
+  background: #020408;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transition: opacity 0.6s ease;
+}
+
+.mac-boot-screen.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mac-apple-boot-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.boot-logo {
+  font-size: 2.2rem;
+  filter: drop-shadow(0 0 15px var(--neon-cyan));
+  animation: boot-pulse 1.5s infinite alternate ease-in-out;
+}
+
+@keyframes boot-pulse {
+  0% { transform: scale(0.92); opacity: 0.8; }
+  100% { transform: scale(1.08); opacity: 1; filter: drop-shadow(0 0 25px var(--neon-cyan)); }
+}
+
+.boot-bar {
+  width: 90px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.boot-progress {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--neon-cyan), #ffffff);
+  box-shadow: 0 0 8px var(--neon-cyan);
+}
+
 .mac-browser-topbar {
   display: flex;
   align-items: center;
@@ -1277,6 +1417,12 @@ body.preview-hud-open {
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   flex-shrink: 0;
   z-index: 10;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.mac-browser-topbar.active {
+  opacity: 1;
 }
 
 .mac-traffic-dots {
@@ -1340,7 +1486,7 @@ body.preview-hud-open {
   margin-left: 4px;
 }
 
-/* Live Slideshow Stage inside MacBook */
+/* MacBook Live Presentation Slides */
 .macbook-live-stage {
   flex: 1;
   position: relative;
@@ -1470,7 +1616,7 @@ body.preview-hud-open {
   color: var(--neon-cyan);
 }
 
-/* Slide 2: Arena Preview */
+/* MacBook Slide 2: Arena Preview */
 .mac-arena-preview {
   position: relative;
   z-index: 2;
@@ -1537,7 +1683,7 @@ body.preview-hud-open {
   background: linear-gradient(90deg, var(--neon-cyan), #10b981);
 }
 
-/* Slide 3: Sensitivity Preview */
+/* MacBook Slide 3: Sensitivity Preview */
 .mac-sens-preview {
   position: relative;
   z-index: 2;
@@ -1642,11 +1788,56 @@ body.preview-hud-open {
 
 .macbook-base {
   width: 100%;
-  height: 14px;
+  height: 16px;
   background: linear-gradient(to bottom, #1e293b, #0f172a);
   border-radius: 0 0 16px 16px;
   position: relative;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.9);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.95);
+  box-sizing: border-box;
+}
+
+.macbook-keyboard-deck {
+  position: absolute;
+  top: 1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 78%;
+  height: 9px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0.7;
+}
+
+.mac-keyboard-rows {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.key-row {
+  display: block;
+  width: 100%;
+  height: 1.5px;
+  background: rgba(0, 242, 254, 0.3);
+  box-shadow: 0 0 4px rgba(0, 242, 254, 0.4);
+}
+
+.key-row-space {
+  display: block;
+  width: 35%;
+  height: 1.5px;
+  background: rgba(0, 242, 254, 0.5);
+  margin: 0 auto;
+}
+
+.mac-trackpad {
+  width: 44px;
+  height: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1px;
+  margin-top: 1px;
 }
 
 .macbook-indent {
@@ -1661,185 +1852,225 @@ body.preview-hud-open {
 }
 
 /* --------------------------------------------------------------------------
-   IPHONE DUO 3D STAGE & SAFARI SEARCH / LAUNCH ANIMATION
+   2. IPHONE DUO (APPLE FOLDABLE DUAL-SCREEN PHONE WITH UNFOLD & IN-APP DOWNLOAD)
    -------------------------------------------------------------------------- */
-.iphone-duo-stage {
+.iphone-duo-foldable-wrap {
   position: relative;
-  width: 270px;
+  width: 370px;
   height: 340px;
-  perspective: 1000px;
+  perspective: 1200px;
   transform-style: preserve-3d;
   flex-shrink: 0;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Base iPhone Chassis */
-.iphone-device {
-  position: absolute;
-  top: 0;
-  width: 165px;
-  height: 330px;
-  transform-style: preserve-3d;
-  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-  filter: drop-shadow(0 25px 35px rgba(0, 0, 0, 0.95));
-}
-
-.iphone-bezel {
+.iphone-duo-device {
+  display: flex;
   width: 100%;
   height: 100%;
-  background: #080c18;
-  border-radius: 32px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: drop-shadow(0 25px 45px rgba(0, 0, 0, 0.95));
+}
+
+/* Central Titanium Hinge Spine */
+.duo-hinge-spine {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 100%;
+  background: linear-gradient(90deg, #1e293b, #475569, #0f172a);
+  border-radius: 4px;
+  z-index: 30;
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.8), 0 0 10px rgba(0, 242, 254, 0.3);
+}
+
+.hinge-metal-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 4px;
+  height: 90%;
+  background: linear-gradient(to bottom, #00f2fe, #8b5cf6, #00f2fe);
+  border-radius: 2px;
+  opacity: 0.8;
+}
+
+/* Left & Right Foldable Wings */
+.duo-wing {
+  flex: 1;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 1.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.duo-wing-left {
+  transform-origin: right center;
+}
+
+.duo-wing-right {
+  transform-origin: left center;
+}
+
+/* Folded State: Wings fold inward like a real book */
+.iphone-duo-device.duo-folded .duo-wing-left {
+  transform: rotateY(80deg) translateZ(5px);
+}
+
+.iphone-duo-device.duo-folded .duo-wing-right {
+  transform: rotateY(-80deg) translateZ(5px);
+}
+
+/* Unfolded State: Flat expansive dual screen */
+.iphone-duo-device.duo-unfolded .duo-wing-left {
+  transform: rotateY(0deg) translateZ(0);
+}
+
+.iphone-duo-device.duo-unfolded .duo-wing-right {
+  transform: rotateY(0deg) translateZ(0);
+}
+
+.duo-wing-bezel {
+  width: 100%;
+  height: 100%;
+  background: #080c16;
   padding: 6px;
-  border: 2px solid rgba(0, 242, 254, 0.45);
-  box-shadow: 0 0 25px rgba(0, 242, 254, 0.25), inset 0 0 10px rgba(0, 0, 0, 0.9);
+  border: 2px solid rgba(0, 242, 254, 0.4);
+  box-shadow: 0 0 25px rgba(0, 242, 254, 0.2), inset 0 0 10px rgba(0, 0, 0, 0.9);
   position: relative;
   box-sizing: border-box;
 }
 
-.iphone-island-wrap {
-  position: absolute;
-  top: 9px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 20;
+.duo-wing-left .duo-wing-bezel {
+  border-radius: 28px 6px 6px 28px;
+  border-right: none;
 }
 
-.iphone-island {
-  width: 44px;
-  height: 10px;
-  background: #020408;
-  border-radius: 20px;
-  border: 1px solid rgba(0, 242, 254, 0.3);
+.duo-wing-right .duo-wing-bezel {
+  border-radius: 6px 28px 28px 6px;
+  border-left: none;
 }
 
-.iphone-screen {
+.duo-inner-screen {
   width: 100%;
   height: 100%;
   background: #04060d;
-  border-radius: 26px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  padding: 20px 8px 8px;
+  padding: 16px 8px 8px;
   position: relative;
   box-sizing: border-box;
 }
 
-.iphone-status-bar {
+.duo-wing-left .duo-inner-screen {
+  border-radius: 22px 4px 4px 22px;
+}
+
+.duo-wing-right .duo-inner-screen {
+  border-radius: 4px 22px 22px 4px;
+}
+
+.duo-screen-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-family: var(--font-heading);
-  font-size: 0.54rem;
+  font-size: 0.52rem;
   color: var(--text-dim);
   margin-bottom: 5px;
 }
 
-.status-pill {
-  color: var(--neon-cyan);
+.duo-island {
+  width: 36px;
+  height: 9px;
+  background: #020408;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 242, 254, 0.3);
 }
 
-/* Companion iPhone 2 (Angled Behind) */
-.iphone-companion {
-  left: -15px;
-  top: 10px;
-  z-index: 1;
-  transform: rotateY(16deg) rotateX(6deg) translateZ(-35px) scale(0.92);
-  opacity: 0.85;
-}
-
-.iphone-duo-stage.unfolded .iphone-companion {
-  transform: rotateY(18deg) rotateX(6deg) translateZ(-30px) translateX(-30px) scale(0.92);
-  opacity: 0.95;
-}
-
-.iphone-companion-body {
+/* Left Wing Telemetry */
+.duo-left-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 8px 4px;
+  padding: 6px 4px;
   text-align: center;
 }
 
-.ic-badge {
+.duo-telemetry-badge {
   font-family: var(--font-heading);
-  font-size: 0.48rem;
+  font-size: 0.46rem;
   font-weight: 800;
-  color: #ff9f43;
+  color: var(--neon-cyan);
   letter-spacing: 1px;
 }
 
-.ic-title {
-  font-family: var(--font-display);
-  font-size: 0.76rem;
-  font-weight: 900;
-  color: #fff;
-  margin: 2px 0;
-}
-
-.ic-radar {
+.duo-radar-compass {
   position: relative;
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background: rgba(0, 242, 254, 0.1);
-  border: 1px solid var(--neon-cyan);
+  border: 1.5px solid var(--neon-cyan);
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 6px auto;
+  box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
 }
 
-.ic-radar-icon {
-  font-size: 1.1rem;
+.duo-radar-icon {
+  font-size: 1.25rem;
 }
 
-.ic-radar-ping {
+.duo-radar-sweep {
   position: absolute;
-  inset: -4px;
+  inset: -3px;
   border-radius: 50%;
-  border: 1px solid var(--neon-cyan);
-  animation: radar-ping 1.8s infinite;
+  border: 1.5px solid var(--neon-cyan);
+  animation: radar-ping 1.6s infinite;
 }
 
-.ic-stat span {
+.duo-telemetry-stats {
+  display: flex;
+  justify-content: space-around;
+  background: rgba(14, 22, 38, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 4px;
+}
+
+.dt-stat span {
   display: block;
-  font-size: 0.48rem;
+  font-size: 0.44rem;
   color: var(--text-dim);
 }
 
-.ic-stat strong {
+.dt-stat strong {
   font-family: var(--font-heading);
-  font-size: 0.72rem;
-  color: var(--neon-cyan);
+  font-size: 0.65rem;
+  color: #fff;
 }
 
-.ic-btn {
+.duo-status-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   font-family: var(--font-heading);
-  font-size: 0.55rem;
+  font-size: 0.48rem;
   font-weight: 800;
-  color: #05070f;
-  background: var(--neon-cyan);
-  padding: 4px 0;
-  border-radius: 4px;
-  box-shadow: 0 0 8px var(--neon-cyan);
+  color: var(--neon-emerald);
 }
 
-/* Primary Foreground iPhone 1 */
-.iphone-primary {
-  right: -10px;
-  top: 0;
-  z-index: 3;
-  transform: rotateY(-8deg) rotateX(4deg) translateZ(30px);
-}
-
-.iphone-duo-stage.unfolded .iphone-primary {
-  transform: rotateY(-8deg) rotateX(4deg) translateZ(35px) translateX(20px);
-}
-
-/* Safari Browser Inside iPhone */
-.iphone-safari-container {
+/* Right Wing Safari App */
+.duo-safari-app {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -1847,266 +2078,199 @@ body.preview-hud-open {
   position: relative;
 }
 
-.safari-search-bar {
+.duo-safari-bar {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 8px;
+  padding: 4px 7px;
   background: rgba(18, 26, 44, 0.95);
-  border: 1px solid rgba(0, 242, 254, 0.3);
+  border: 1px solid rgba(0, 242, 254, 0.35);
   border-radius: 12px;
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
-  margin-bottom: 6px;
+  margin-bottom: 5px;
 }
 
-.safari-search-icon {
-  color: var(--text-dim);
-  flex-shrink: 0;
-}
-
-.safari-url-display {
-  flex: 1;
-  font-family: var(--font-heading);
-  font-size: 0.58rem;
-  color: #fff;
-  letter-spacing: 0.5px;
+/* iOS Dynamic Island Download Toast */
+.duo-download-toast {
+  position: absolute;
+  top: 32px;
+  left: 6px;
+  right: 6px;
+  background: rgba(6, 12, 24, 0.96);
+  border: 1.5px solid #10b981;
+  border-radius: 10px;
+  padding: 5px 8px;
   display: flex;
   align-items: center;
-  white-space: nowrap;
+  gap: 6px;
+  z-index: 60;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.9), 0 0 15px rgba(16, 185, 129, 0.5);
+  transform: translateY(-50px);
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.duo-download-toast.active {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.toast-icon {
+  font-size: 1rem;
+}
+
+.toast-info {
+  flex: 1;
+  text-align: left;
+}
+
+.toast-info strong {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: 0.52rem;
+  color: #fff;
+}
+
+.toast-info span {
+  font-size: 0.44rem;
+  color: #10b981;
+}
+
+.toast-badge {
+  font-family: var(--font-heading);
+  font-size: 0.48rem;
+  font-weight: 800;
+  color: #05070f;
+  background: #10b981;
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+
+/* In-Mobile Download Button with Progress */
+.m-action-download-box {
+  position: relative;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(0, 242, 254, 0.25), rgba(112, 0, 255, 0.3));
+  border: 1.5px solid var(--neon-cyan);
   overflow: hidden;
+  box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
+  cursor: pointer;
 }
 
-.safari-typed-text {
+.m-dl-btn-inner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  position: relative;
+  z-index: 3;
+}
+
+.m-dl-icon {
+  font-size: 0.85rem;
+}
+
+.m-dl-texts {
+  flex: 1;
+  text-align: left;
+}
+
+.m-dl-texts strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 0.56rem;
+  font-weight: 900;
+  color: #fff;
+}
+
+.m-dl-texts span {
+  font-size: 0.42rem;
   color: var(--neon-cyan);
-  font-weight: 700;
 }
 
-.safari-cursor {
+.m-dl-arrow {
   color: var(--neon-cyan);
-  animation: cursor-blink 0.8s infinite;
-  margin-left: 1px;
+  font-weight: 900;
+  font-size: 0.75rem;
+  animation: arrow-bounce 1.2s infinite;
 }
 
-@keyframes cursor-blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
-
-.safari-reload-icon {
-  font-size: 0.65rem;
-  color: var(--text-dim);
-  line-height: 1;
-}
-
-.safari-loading-bar {
+.m-dl-progress-bar {
   position: absolute;
-  bottom: 0;
+  top: 0;
   left: 0;
-  height: 2px;
+  height: 100%;
   width: 0%;
-  background: linear-gradient(90deg, var(--neon-cyan), #8b5cf6);
-  box-shadow: 0 0 6px var(--neon-cyan);
+  background: linear-gradient(90deg, rgba(0, 242, 254, 0.4), rgba(16, 185, 129, 0.5));
+  z-index: 2;
 }
 
-/* Mobile Web Content Viewport inside Safari */
-.safari-web-viewport {
+/* Finger Tap Pointer */
+.duo-tap-finger {
+  position: absolute;
+  right: 18px;
+  top: 130px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  z-index: 45;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+}
+
+.duo-tap-finger.active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.duo-tap-finger.tapping {
+  transform: scale(0.85);
+}
+
+.tap-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--neon-cyan);
+  box-shadow: 0 0 10px var(--neon-cyan);
+}
+
+.tap-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--neon-cyan);
+  animation: radar-ping 1.2s infinite;
+}
+
+/* Viewport for Loaded Site inside iPhone Duo */
+.duo-website-viewport {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
   opacity: 0;
-  transform: translateY(10px);
+  transform: translateY(8px);
   transition: opacity 0.4s ease, transform 0.4s ease;
-  scroll-behavior: smooth;
-  padding-bottom: 12px;
+  padding-bottom: 10px;
+  position: relative;
 }
 
-.safari-web-viewport::-webkit-scrollbar {
+.duo-website-viewport::-webkit-scrollbar {
   display: none;
 }
 
-.safari-web-viewport.loaded {
+.duo-website-viewport.loaded {
   opacity: 1;
   transform: translateY(0);
-}
-
-.m-site-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 4px 0 6px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  margin-bottom: 6px;
-}
-
-.m-brand {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.m-logo-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--neon-cyan);
-  box-shadow: 0 0 6px var(--neon-cyan);
-}
-
-.m-brand-name {
-  font-family: var(--font-display);
-  font-size: 0.68rem;
-  font-weight: 900;
-  color: #fff;
-  letter-spacing: 0.5px;
-}
-
-.m-user-pill {
-  font-family: var(--font-heading);
-  font-size: 0.52rem;
-  color: var(--neon-cyan);
-  background: rgba(0, 242, 254, 0.1);
-  padding: 2px 5px;
-  border-radius: 10px;
-}
-
-.m-hero-badge {
-  display: inline-block;
-  font-family: var(--font-heading);
-  font-size: 0.48rem;
-  font-weight: 800;
-  color: var(--neon-cyan);
-  background: rgba(0, 242, 254, 0.1);
-  border: 1px solid rgba(0, 242, 254, 0.3);
-  padding: 1px 5px;
-  border-radius: 8px;
-  margin-bottom: 3px;
-}
-
-.m-hero-title {
-  font-family: var(--font-display);
-  font-size: 0.72rem;
-  font-weight: 900;
-  color: #fff;
-  margin: 2px 0;
-  line-height: 1.2;
-}
-
-.m-hero-sub {
-  font-size: 0.5rem;
-  color: var(--text-dim);
-  line-height: 1.3;
-  margin-bottom: 6px;
-}
-
-.m-radar-card {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(14, 22, 38, 0.75);
-  border: 1px solid rgba(0, 242, 254, 0.2);
-  border-radius: 6px;
-  padding: 5px;
-  margin-bottom: 6px;
-}
-
-.m-radar-circle {
-  position: relative;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: rgba(0, 242, 254, 0.12);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.m-radar-dot {
-  font-size: 0.75rem;
-}
-
-.m-radar-pulse {
-  position: absolute;
-  inset: -2px;
-  border-radius: 50%;
-  border: 1px solid var(--neon-cyan);
-  animation: radar-ping 1.5s infinite;
-}
-
-.m-radar-info strong {
-  display: block;
-  font-family: var(--font-heading);
-  font-size: 0.52rem;
-  color: #fff;
-}
-
-.m-radar-info span {
-  font-size: 0.46rem;
-  color: var(--neon-cyan);
-}
-
-.m-sliders {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-bottom: 8px;
-}
-
-.m-slider-row {
-  display: flex;
-  justify-content: space-between;
-  font-family: var(--font-heading);
-  font-size: 0.5rem;
-  color: var(--text-dim);
-}
-
-.m-slider-row strong {
-  color: #fff;
-}
-
-.m-slider-track {
-  width: 100%;
-  height: 2px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 1px;
-  overflow: hidden;
-}
-
-.m-slider-fill {
-  height: 100%;
-  background: var(--neon-cyan);
-}
-
-.m-action-btn {
-  text-align: center;
-  background: linear-gradient(90deg, var(--neon-cyan), #8b5cf6);
-  color: #05070f;
-  font-family: var(--font-display);
-  font-size: 0.52rem;
-  font-weight: 900;
-  padding: 5px 0;
-  border-radius: 12px;
-  box-shadow: 0 0 10px rgba(0, 242, 254, 0.4);
-}
-
-.iphone-home-indicator {
-  width: 44px;
-  height: 3px;
-  background: rgba(255, 255, 255, 0.35);
-  border-radius: 2px;
-  margin: 5px auto 0;
-  flex-shrink: 0;
-}
-
-.screen-glare {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, transparent 45%);
-  pointer-events: none;
 }
 /* ==========================================================================
    ESPORTS TOURNAMENT CARDS & ANNOUNCEMENTS (v1.3.6)
@@ -3617,22 +3781,34 @@ body.preview-hud-open {
 
   .hero-devices-showcase {
     flex-direction: column !important;
-    gap: 2.5rem !important;
+    gap: 3rem !important;
     min-height: auto !important;
   }
 
-  .macbook-device {
+  .macbook-stage-wrap {
     width: 100% !important;
     max-width: 380px !important;
-    transform: none !important;
+    margin: 0 auto !important;
   }
 
-  .iphone-duo-stage {
+  .macbook-lid {
+    height: 235px !important;
+  }
+
+  .macbook-screen {
+    height: 215px !important;
+  }
+
+  .iphone-duo-foldable-wrap {
     width: 100% !important;
-    max-width: 300px !important;
+    max-width: 340px !important;
     height: 330px !important;
     margin: 0 auto !important;
-    transform: none !important;
+  }
+
+  .btn-replay-showcase {
+    font-size: 0.64rem !important;
+    padding: 0.35rem 0.85rem !important;
   }
 
   .hero-dimensional-section {
