@@ -5,9 +5,9 @@
   
   <!-- Arena Notice Marquee Ticker -->
   {% if arena_notice %}
-  <div style="background: rgba(168, 85, 247, 0.12); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 8px; padding: 0.6rem 1rem; margin-top: 1rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; box-shadow: 0 0 15px rgba(168, 85, 247, 0.15);">
-    <span class="badge" style="background: var(--neon-purple); color: #fff; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">NOTICE</span>
-    <marquee style="color: #f3e8ff; font-weight: 600; font-size: 0.9rem;" scrollamount="6">{{ arena_notice }}</marquee>
+  <div class="arena-notice-bar cyber-card">
+    <span class="badge badge-cyan">NOTICE</span>
+    <marquee class="arena-notice-marquee" scrollamount="6">{{ arena_notice }}</marquee>
   </div>
   {% endif %}
 
@@ -16,10 +16,11 @@
     <div class="hero-grid">
       <div class="hero-text-col">
         <div class="hero-badge">
-          <span class="pulse-dot"></span> LIVE CONTENT UPDATE
+          <span class="pulse-dot"></span>
+          <span class="badge-text">LIVE TOURNAMENT ENGINE // OB-52 READY</span>
         </div>
         <h1 class="hero-title">
-          {{ settings.get('hero_headline', 'DOMINATE THE LOBBY WITH PRO CONFIGS & GUIDES') }}
+          {{ settings.get('hero_headline', 'DOMINATE THE ARENA WITH PRO ESPORTS CONFIGS') }}
         </h1>
         <p class="hero-desc">
           {{ settings.get('site_description') or 'Official gaming hub featuring battle-tested sensitivity configs, patch updates, daily Free Fire tournaments, and official Android app downloads.' }}
@@ -34,10 +35,10 @@
           (settings.get('desc_link_5_title', ''), settings.get('desc_link_5_url', '')),
           (settings.get('desc_link_6_title', ''), settings.get('desc_link_6_url', ''))
         ] %}
-        <div class="hero-custom-links" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.6rem; margin-bottom: 1.25rem;">
+        <div class="hero-custom-links">
           {% for title, url in custom_desc_links %}
             {% if title and url %}
-            <a href="{{ url }}" target="_blank" rel="noopener noreferrer" style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #e9d5ff; padding: 0.35rem 0.8rem; border-radius: 6px; text-decoration: none; font-size: 0.82rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.35rem; transition: all 0.2s;">
+            <a href="{{ url }}" target="_blank" rel="noopener noreferrer" class="hero-custom-link-pill">
               <span>🔗</span> {{ title }}
             </a>
             {% endif %}
@@ -45,18 +46,18 @@
         </div>
 
         <!-- Fast Action Buttons: Esports, Announcements, App & Login -->
-        <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.5rem;">
-          <a href="/esports" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.65rem 1.25rem; font-weight: 700; border-radius: 8px; text-decoration: none;">
+        <div class="hero-action-buttons">
+          <a href="/esports" class="btn btn-primary hero-btn-main">
             <span>🏆</span> Esports Arena
           </a>
-          <a href="/announcements" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.65rem 1.25rem; font-weight: 600; border-radius: 8px; text-decoration: none; border: 1px solid var(--border-subtle);">
-            <span>📢</span> Announcements
+          <a href="/announcements" class="btn btn-secondary">
+            <span>📢</span> Notices
           </a>
-          <a href="/download-app" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.65rem 1.25rem; font-weight: 600; border-radius: 8px; text-decoration: none; background: rgba(168, 85, 247, 0.15); border: 1px solid var(--neon-purple); color: #c084fc;">
+          <a href="/download-app" class="btn btn-secondary hero-btn-apk">
             <span>📱</span> Download APK
           </a>
           {% if not current_user %}
-          <a href="/login" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.65rem 1.25rem; font-weight: 600; border-radius: 8px; text-decoration: none;">
+          <a href="/login" class="btn btn-secondary">
             <span>🔑</span> Player Login
           </a>
           {% endif %}
@@ -64,15 +65,37 @@
 
         <!-- Search Form -->
         <form action="/search" method="GET" class="hero-search-box">
-          <input type="text" name="q" placeholder="Search sensitivity, OB updates, configs..." required>
-          <button type="submit" class="btn btn-primary">Find Guide</button>
+          <div class="hero-search-inner">
+            <svg class="hero-search-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input type="text" name="q" placeholder="Search sensitivity, OB updates, DPI configs..." required class="hero-search-input">
+            <button type="submit" class="btn btn-primary hero-search-btn">
+              <span>Find Guide</span>
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            </button>
+          </div>
         </form>
+
+        <!-- Hero Quick Stats Ticker -->
+        <div class="hero-stats-row">
+          <div class="hero-stat-card">
+            <div class="stat-number">98.4%</div>
+            <div class="stat-label">HEADSHOT ACCURACY</div>
+          </div>
+          <div class="hero-stat-card">
+            <div class="stat-number">120 FPS</div>
+            <div class="stat-label">SMOOTH CALIBRATION</div>
+          </div>
+          <div class="hero-stat-card">
+            <div class="stat-number">100%</div>
+            <div class="stat-label">BAN-SAFE VERIFIED</div>
+          </div>
+        </div>
       </div>
 
       <!-- Featured YouTube Video or Post Highlight -->
       <div class="hero-media-col">
         {% if featured_video %}
-        <div class="featured-video-card cyber-card">
+        <div class="featured-video-card cyber-card" data-track-youtube="1">
           <div class="video-responsive-wrapper">
             <iframe 
               src="https://www.youtube-nocookie.com/embed/{{ featured_video.youtube_id }}" 
@@ -98,848 +121,97 @@
             <a href="/post/{{ featured_post.slug }}" class="btn btn-primary btn-sm">Read Now</a>
           </div>
         </div>
+        {% else %}
+        <!-- Default Dual Device 3D Presentation if no featured video -->
+        <div class="hero-devices-showcase" id="hero-devices-stage">
+          <div class="devices-ambient-glow"></div>
+          <div class="macbook-device">
+            <div class="macbook-lid">
+              <div class="macbook-notch"><span class="macbook-camera"></span></div>
+              <div class="macbook-screen">
+                <div class="macbook-screen-content">
+                  <div class="macbook-terminal">
+                    <div class="terminal-bar">
+                      <div class="terminal-dots">
+                        <span class="t-dot dot-red"></span>
+                        <span class="t-dot dot-yellow"></span>
+                        <span class="t-dot dot-green"></span>
+                      </div>
+                      <span class="t-title">GOD4XE_HUB // v3.0_CYBER</span>
+                      <span class="t-status">● LIVE</span>
+                    </div>
+                    <div class="terminal-body">
+                      <div class="terminal-hero-banner">
+                        <div class="t-tag">VIP ESPORTS ENGINE</div>
+                        <div class="t-head">HEADSHOT SENSITIVITY OB52</div>
+                        <div class="t-meta">FPS: 120 | RECOIL: 0% | DPI: 800</div>
+                      </div>
+                      <div class="terminal-grid">
+                        <div class="t-stat-box">
+                          <div class="t-stat-label">HEADSHOT RATE</div>
+                          <div class="t-stat-val">98.4%</div>
+                        </div>
+                        <div class="t-stat-box">
+                          <div class="t-stat-label">TOURNAMENTS</div>
+                          <div class="t-stat-val">68 WON</div>
+                        </div>
+                        <div class="t-stat-box">
+                          <div class="t-stat-label">ACTIVE PLAYERS</div>
+                          <div class="t-stat-val">250K+</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="screen-glare"></div>
+              </div>
+            </div>
+            <div class="macbook-base"><div class="macbook-indent"></div></div>
+          </div>
+          <div class="iphone-device">
+            <div class="iphone-bezel">
+              <div class="iphone-island-wrap"><div class="iphone-island"></div></div>
+              <div class="iphone-screen">
+                <div class="iphone-status-bar"><span>9:41</span><span class="status-pill">5G // VIP</span></div>
+                <div class="iphone-app-content">
+                  <div class="iphone-app-header">
+                    <div class="iphone-app-title">GOD4XE</div>
+                    <span class="iphone-vip-badge">PRO</span>
+                  </div>
+                  <div class="iphone-radar-box">
+                    <div class="radar-circle"><span class="radar-icon">🎯</span></div>
+                    <div class="radar-text">Auto Aim Radar Active</div>
+                  </div>
+                  <div class="iphone-sliders">
+                    <div class="iphone-slider-item">
+                      <div class="slider-info"><span>General</span><span>98%</span></div>
+                      <div class="slider-track"><div class="slider-fill" style="width: 98%;"></div></div>
+                    </div>
+                    <div class="iphone-slider-item">
+                      <div class="slider-info"><span>Red Dot</span><span>95%</span></div>
+                      <div class="slider-track"><div class="slider-fill" style="width: 95%;"></div></div>
+                    </div>
+                    <div class="iphone-slider-item">
+                      <div class="slider-info"><span>2x Scope</span><span>92%</span></div>
+                      <div class="slider-track"><div class="slider-fill" style="width: 92%;"></div></div>
+                    </div>
+                  </div>
+                  <div class="iphone-quick-btn"><span>⚡ SYNC CONFIG</span></div>
+                </div>
+                <div class="iphone-home-indicator"></div>
+                <div class="screen-glare"></div>
+              </div>
+            </div>
+          </div>
+        </div>
         {% endif %}
       </div>
     </div>
   </section>
 
-  
-<style>
-/* 3D Device Showcase Guaranteed Inline Styling (Bypasses all mobile browser cache) */
-.device-showcase-section {
-  position: relative;
-  width: 100%;
-  max-width: 100%;
-  margin: 1.5rem 0 3.5rem;
-}
-
-.device-showcase-header {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  text-align: center !important;
-  margin-bottom: 2rem !important;
-  width: 100% !important;
-}
-
-.device-badge {
-  background: rgba(168, 85, 247, 0.15);
-  color: #c084fc;
-  border: 1px solid rgba(168, 85, 247, 0.35);
-  padding: 0.35rem 0.9rem;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  display: inline-block;
-}
-
-.device-showcase-title {
-  margin-top: 0.75rem;
-  font-size: 2.1rem;
-  font-weight: 900;
-  letter-spacing: 1px;
-  text-align: center;
-  color: #fff;
-}
-
-.device-showcase-subtitle {
-  max-width: 620px;
-  margin: 0.5rem auto 0;
-  color: #94a3b8;
-  font-size: 0.95rem;
-  line-height: 1.6;
-  text-align: center;
-}
-
-.devices-stage-container {
-  width: 100%;
-  max-width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 1rem 0 2rem;
-  position: relative;
-}
-
-.hero-devices-showcase {
-  position: relative;
-  width: 100%;
-  max-width: 860px;
-  height: 440px;
-  margin: 0 auto;
-  perspective: 1400px;
-  perspective-origin: 50% 50%;
-  transform-style: preserve-3d;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.devices-ambient-glow {
-  position: absolute;
-  bottom: -20px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 720px;
-  height: 160px;
-  background: radial-gradient(ellipse at center, rgba(168, 85, 247, 0.45) 0%, rgba(217, 70, 239, 0.22) 45%, transparent 75%);
-  filter: blur(36px);
-  pointer-events: none;
-  animation: pulse-ambient-glow 4.5s ease-in-out infinite alternate;
-  z-index: 0;
-}
-
-.macbook-device {
-  position: absolute;
-  width: 580px;
-  height: 360px;
-  left: 30px;
-  top: 25px;
-  z-index: 1;
-  transform-style: preserve-3d;
-  transform: rotateY(-7deg) rotateX(5deg);
-  animation: float-macbook 6s ease-in-out infinite alternate;
-  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.macbook-lid {
-  background: #0d061c;
-  border: 2.5px solid rgba(168, 85, 247, 0.45);
-  border-radius: 14px 14px 2px 2px;
-  padding: 10px 10px 14px;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(168, 85, 247, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  position: relative;
-  overflow: hidden;
-}
-
-.macbook-notch {
-  position: absolute;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 76px;
-  height: 12px;
-  background: #000;
-  border-bottom-left-radius: 6px;
-  border-bottom-right-radius: 6px;
-  z-index: 6;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.macbook-camera {
-  width: 4px;
-  height: 4px;
-  background: #1e293b;
-  border-radius: 50%;
-  box-shadow: 0 0 3px #38bdf8;
-}
-
-.macbook-screen {
-  width: 100%;
-  height: 305px;
-  background: #070312;
-  border-radius: 8px;
-  overflow: hidden;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  border: 1px solid rgba(168, 85, 247, 0.2);
-}
-
-.macbook-screen-content {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.macbook-terminal {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  background: radial-gradient(circle at 50% 20%, rgba(126, 34, 206, 0.25) 0%, #07020e 75%);
-}
-
-.terminal-bar {
-  height: 30px;
-  background: rgba(18, 9, 36, 0.95);
-  border-bottom: 1px solid rgba(168, 85, 247, 0.25);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 12px;
-  font-size: 0.75rem;
-  font-family: monospace;
-}
-
-.terminal-dots {
-  display: flex;
-  gap: 6px;
-}
-
-.t-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.dot-red { background: #ef4444; }
-.dot-yellow { background: #f59e0b; }
-.dot-green { background: #10b981; }
-
-.t-title {
-  color: #c084fc;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-}
-
-.t-status {
-  color: #10b981;
-  font-weight: 700;
-  font-size: 0.7rem;
-}
-
-.terminal-body {
-  padding: 16px 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  flex-grow: 1;
-  justify-content: space-between;
-}
-
-.terminal-hero-banner {
-  background: rgba(168, 85, 247, 0.12);
-  border: 1px solid rgba(168, 85, 247, 0.3);
-  border-radius: 8px;
-  padding: 14px 16px;
-}
-
-.t-tag {
-  font-size: 0.7rem;
-  font-weight: 800;
-  color: #ff4d4d;
-  letter-spacing: 1px;
-  margin-bottom: 5px;
-}
-
-.t-head {
-  font-size: 1.15rem;
-  font-weight: 900;
-  color: #fff;
-  letter-spacing: 0.5px;
-  line-height: 1.3;
-}
-
-.t-meta {
-  font-size: 0.75rem;
-  color: #c084fc;
-  font-family: monospace;
-  margin-top: 6px;
-}
-
-.terminal-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
-
-.t-stat-box {
-  background: rgba(10, 5, 20, 0.7);
-  border: 1px solid rgba(168, 85, 247, 0.2);
-  border-radius: 8px;
-  padding: 10px 8px;
-  text-align: center;
-}
-
-.t-stat-label {
-  font-size: 0.65rem;
-  color: #94a3b8;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.t-stat-val {
-  font-size: 1.15rem;
-  font-weight: 900;
-  color: #fff;
-  margin-top: 3px;
-}
-
-.macbook-base {
-  height: 14px;
-  background: linear-gradient(180deg, #1f113a 0%, #0d061c 100%);
-  border: 1.5px solid rgba(168, 85, 247, 0.4);
-  border-top: none;
-  border-radius: 0 0 18px 18px;
-  margin: 0 -24px;
-  position: relative;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.95);
-}
-
-.macbook-indent {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80px;
-  height: 5px;
-  background: rgba(168, 85, 247, 0.35);
-  border-radius: 0 0 5px 5px;
-}
-
-.iphone-device {
-  position: absolute;
-  width: 200px;
-  height: 385px;
-  right: 40px;
-  bottom: 12px;
-  z-index: 3;
-  transform-style: preserve-3d;
-  transform: rotateY(-14deg) rotateX(6deg) translateZ(48px);
-  animation: float-iphone 5s ease-in-out infinite alternate;
-  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.iphone-bezel {
-  width: 100%;
-  height: 100%;
-  background: #090314;
-  border: 3.5px solid rgba(192, 132, 252, 0.65);
-  border-radius: 38px;
-  padding: 8px;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95), 0 0 40px rgba(217, 70, 239, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  position: relative;
-  overflow: hidden;
-}
-
-.iphone-island-wrap {
-  position: absolute;
-  top: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 8;
-}
-
-.iphone-island {
-  width: 56px;
-  height: 13px;
-  background: #000;
-  border-radius: 20px;
-  border: 0.5px solid rgba(255, 255, 255, 0.1);
-}
-
-.iphone-screen {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(165deg, #110626 0%, #06020c 100%);
-  border-radius: 30px;
-  overflow: hidden;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  border: 1px solid rgba(168, 85, 247, 0.2);
-  padding: 26px 12px 12px;
-}
-
-.iphone-status-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 4px 8px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: #fff;
-  border-bottom: 1px solid rgba(168, 85, 247, 0.15);
-}
-
-.status-pill {
-  font-size: 0.6rem;
-  background: rgba(168, 85, 247, 0.2);
-  padding: 1px 5px;
-  border-radius: 4px;
-  color: #c084fc;
-}
-
-.iphone-app-content {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding-top: 10px;
-  flex-grow: 1;
-}
-
-.iphone-app-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.iphone-app-title {
-  font-size: 0.95rem;
-  font-weight: 900;
-  letter-spacing: 1px;
-  color: #fff;
-}
-
-.iphone-vip-badge {
-  font-size: 0.6rem;
-  font-weight: 800;
-  background: #ff4d4d;
-  color: #fff;
-  padding: 2px 6px;
-  border-radius: 4px;
-  letter-spacing: 0.5px;
-}
-
-.iphone-radar-box {
-  background: rgba(168, 85, 247, 0.1);
-  border: 1px solid rgba(168, 85, 247, 0.25);
-  border-radius: 8px;
-  padding: 9px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.radar-circle {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: rgba(168, 85, 247, 0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.85rem;
-  box-shadow: 0 0 12px #a855f7;
-  animation: radar-pulse 2s infinite;
-}
-
-@keyframes radar-pulse {
-  0% { transform: scale(0.95); opacity: 0.8; }
-  50% { transform: scale(1.1); opacity: 1; }
-  100% { transform: scale(0.95); opacity: 0.8; }
-}
-
-.radar-text {
-  font-size: 0.7rem;
-  color: #fff;
-  font-weight: 700;
-}
-
-.iphone-sliders {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  background: rgba(8, 4, 18, 0.85);
-  border: 1px solid rgba(168, 85, 247, 0.18);
-  border-radius: 8px;
-  padding: 10px;
-}
-
-.iphone-slider-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.slider-info {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.65rem;
-  color: #94a3b8;
-  font-weight: 600;
-}
-
-.slider-info span:last-child {
-  color: #c084fc;
-  font-weight: 700;
-}
-
-.slider-track {
-  width: 100%;
-  height: 5px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.slider-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #a855f7, #c084fc);
-  border-radius: 3px;
-}
-
-.iphone-quick-btn {
-  background: linear-gradient(135deg, #a855f7, #d946ef);
-  color: #fff;
-  border-radius: 8px;
-  padding: 8px 0;
-  text-align: center;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-  box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.iphone-quick-btn:hover {
-  transform: scale(1.03);
-}
-
-.iphone-home-indicator {
-  width: 48px;
-  height: 3.5px;
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: 2px;
-  margin: 6px auto 0;
-}
-
-.screen-glare {
-  position: absolute;
-  top: -50%;
-  left: -120%;
-  width: 60%;
-  height: 250%;
-  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.07) 50%, transparent 100%);
-  transform: rotate(32deg);
-  pointer-events: none;
-  animation: sweep-glare 6.5s ease-in-out infinite;
-}
-
-@keyframes sweep-glare {
-  0%, 65% { left: -120%; }
-  100% { left: 220%; }
-}
-
-@media (max-width: 1024px) {
-  .hero-devices-showcase {
-    max-width: 680px;
-    height: 380px;
-  }
-  .devices-ambient-glow {
-    width: 580px;
-    height: 120px;
-  }
-  .macbook-device {
-    width: 470px;
-    height: 300px;
-    left: 20px;
-    top: 20px;
-  }
-  .macbook-screen {
-    height: 250px;
-  }
-  .iphone-device {
-    width: 170px;
-    height: 330px;
-    right: 25px;
-  }
-}
-
-@media (max-width: 768px) {
-  .device-showcase-title {
-    font-size: 1.5rem !important;
-  }
-  .device-showcase-subtitle {
-    font-size: 0.85rem !important;
-  }
-  .hero-devices-showcase {
-    width: 100% !important;
-    max-width: 360px !important;
-    height: 260px !important;
-    margin: 1rem auto 0 !important;
-    perspective: 800px !important;
-  }
-  .devices-ambient-glow {
-    width: 290px !important;
-    height: 80px !important;
-    bottom: -10px !important;
-  }
-  .macbook-device {
-    width: 280px !important;
-    height: 185px !important;
-    left: 0px !important;
-    top: 15px !important;
-    animation: float-macbook 5s ease-in-out infinite alternate !important;
-  }
-  .macbook-screen {
-    height: 150px !important;
-  }
-  .macbook-lid {
-    padding: 6px 6px 10px !important;
-  }
-  .macbook-notch {
-    width: 46px !important;
-    height: 8px !important;
-  }
-  .terminal-bar {
-    height: 22px !important;
-    padding: 0 8px !important;
-    font-size: 0.6rem !important;
-  }
-  .terminal-body {
-    padding: 6px 8px !important;
-    gap: 6px !important;
-  }
-  .terminal-hero-banner {
-    padding: 6px 8px !important;
-  }
-  .t-tag {
-    font-size: 0.55rem !important;
-    margin-bottom: 2px !important;
-  }
-  .t-head {
-    font-size: 0.72rem !important;
-  }
-  .t-meta {
-    font-size: 0.55rem !important;
-    margin-top: 2px !important;
-  }
-  .t-stat-box {
-    padding: 4px !important;
-  }
-  .t-stat-label {
-    font-size: 0.5rem !important;
-  }
-  .t-stat-val {
-    font-size: 0.75rem !important;
-  }
-  .macbook-base {
-    height: 10px !important;
-    margin: 0 -14px !important;
-  }
-  .macbook-indent {
-    width: 45px !important;
-    height: 3px !important;
-  }
-  .iphone-device {
-    width: 125px !important;
-    height: 235px !important;
-    right: 5px !important;
-    bottom: 5px !important;
-    animation: float-iphone 4.5s ease-in-out infinite alternate !important;
-  }
-  .iphone-bezel {
-    border-radius: 26px !important;
-    padding: 5px !important;
-    border-width: 2.5px !important;
-  }
-  .iphone-screen {
-    border-radius: 20px !important;
-    padding: 16px 6px 6px !important;
-  }
-  .iphone-island {
-    width: 38px !important;
-    height: 8px !important;
-  }
-  .iphone-status-bar {
-    padding: 0 2px 4px !important;
-    font-size: 0.55rem !important;
-  }
-  .iphone-app-content {
-    gap: 6px !important;
-    padding-top: 4px !important;
-  }
-  .iphone-app-title {
-    font-size: 0.7rem !important;
-  }
-  .iphone-vip-badge {
-    font-size: 0.5rem !important;
-    padding: 1px 4px !important;
-  }
-  .iphone-radar-box {
-    padding: 5px !important;
-    gap: 6px !important;
-  }
-  .radar-circle {
-    width: 20px !important;
-    height: 20px !important;
-    font-size: 0.65rem !important;
-  }
-  .radar-text {
-    font-size: 0.52rem !important;
-  }
-  .iphone-sliders {
-    gap: 4px !important;
-    padding: 6px !important;
-  }
-  .slider-info {
-    font-size: 0.52rem !important;
-  }
-  .slider-track {
-    height: 3px !important;
-  }
-  .iphone-quick-btn {
-    font-size: 0.55rem !important;
-    padding: 4px 0 !important;
-  }
-  .iphone-home-indicator {
-    width: 36px !important;
-    height: 2.5px !important;
-    margin: 3px auto 0 !important;
-  }
-}
-
-@media (max-width: 400px) {
-  .device-showcase-title {
-    font-size: 1.3rem !important;
-  }
-  .hero-devices-showcase {
-    max-width: 310px !important;
-    height: 230px !important;
-  }
-  .macbook-device {
-    width: 245px !important;
-    height: 165px !important;
-    left: 0 !important;
-  }
-  .macbook-screen {
-    height: 130px !important;
-  }
-  .iphone-device {
-    width: 110px !important;
-    height: 205px !important;
-    right: 0px !important;
-  }
-  .iphone-bezel {
-    border-radius: 22px !important;
-    padding: 4px !important;
-  }
-  .iphone-screen {
-    border-radius: 17px !important;
-  }
-}
-</style>
-  <!-- 3D Dual Device Showcase Section: MacBook Pro + Smartphone (iPhone Pro) -->
-  <section class="device-showcase-section">
-    <div class="device-showcase-header">
-      <span class="device-badge">⚡ MULTI-DEVICE GAMING HUB</span>
-      <h2 class="device-showcase-title">
-        SEAMLESS ON <span class="gradient-text">MACBOOK &amp; MOBILE</span>
-      </h2>
-      <p class="device-showcase-subtitle">
-        Sync battle-tested sensitivity configs, live tournament lobbies, and real-time cloud updates across web and mobile.
-      </p>
-    </div>
-
-    <div class="devices-stage-container">
-      <div class="hero-devices-showcase" id="hero-devices-stage">
-        
-        <!-- Ambient Ground Neon Glow -->
-        <div class="devices-ambient-glow"></div>
-
-        <!-- MacBook Pro Device -->
-        <div class="macbook-device">
-          <div class="macbook-lid">
-            <div class="macbook-notch">
-              <span class="macbook-camera"></span>
-            </div>
-            <div class="macbook-screen">
-              <div class="macbook-screen-content">
-                <div class="macbook-terminal">
-                  <div class="terminal-bar">
-                    <div class="terminal-dots">
-                      <span class="t-dot dot-red"></span>
-                      <span class="t-dot dot-yellow"></span>
-                      <span class="t-dot dot-green"></span>
-                    </div>
-                    <span class="t-title">GOD4XE_DESKTOP // v2.5_PRO</span>
-                    <span class="t-status">● LIVE 120 FPS</span>
-                  </div>
-                  <div class="terminal-body">
-                    <div class="terminal-hero-banner">
-                      <div class="t-tag">VIP ESPORTS ENGINE</div>
-                      <div class="t-head">FREE FIRE OB50 HEADSHOT ENGINE</div>
-                      <div class="t-meta">RES: 2560x1600 | DPI: 800 | LATENCY: 2ms</div>
-                    </div>
-                    <div class="terminal-grid">
-                      <div class="t-stat-box">
-                        <div class="t-stat-label">HEADSHOT RATE</div>
-                        <div class="t-stat-val">96.8%</div>
-                      </div>
-                      <div class="t-stat-box">
-                        <div class="t-stat-label">TOURNAMENTS</div>
-                        <div class="t-stat-val">58 WON</div>
-                      </div>
-                      <div class="t-stat-box">
-                        <div class="t-stat-label">PRO SQUADS</div>
-                        <div class="t-stat-val">2,400+</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="screen-glare"></div>
-            </div>
-          </div>
-          <!-- MacBook Aluminum Base Deck -->
-          <div class="macbook-base">
-            <div class="macbook-indent"></div>
-          </div>
-        </div>
-
-        <!-- Smartphone / iPhone Pro Device -->
-        <div class="iphone-device">
-          <div class="iphone-bezel">
-            <!-- Dynamic Island -->
-            <div class="iphone-island-wrap">
-              <div class="iphone-island"></div>
-            </div>
-            <div class="iphone-screen">
-              <div class="iphone-status-bar">
-                <span>9:41</span>
-                <span class="status-pill">5G</span>
-              </div>
-              <div class="iphone-app-content">
-                <div class="iphone-app-header">
-                  <div class="iphone-app-title">GOD4XE</div>
-                  <span class="iphone-vip-badge">VIP</span>
-                </div>
-                <div class="iphone-radar-box">
-                  <div class="radar-circle">
-                    <span class="radar-icon">🎯</span>
-                  </div>
-                  <div class="radar-text">Auto Aim Radar Active</div>
-                </div>
-                <div class="iphone-sliders">
-                  <div class="iphone-slider-item">
-                    <div class="slider-info"><span>General</span><span>98%</span></div>
-                    <div class="slider-track"><div class="slider-fill" style="width: 98%;"></div></div>
-                  </div>
-                  <div class="iphone-slider-item">
-                    <div class="slider-info"><span>Red Dot</span><span>95%</span></div>
-                    <div class="slider-track"><div class="slider-fill" style="width: 95%;"></div></div>
-                  </div>
-                  <div class="iphone-slider-item">
-                    <div class="slider-info"><span>2x Scope</span><span>92%</span></div>
-                    <div class="slider-track"><div class="slider-fill" style="width: 92%;"></div></div>
-                  </div>
-                </div>
-                <div class="iphone-quick-btn">
-                  <span>⚡ SYNC CONFIG</span>
-                </div>
-              </div>
-              <div class="iphone-home-indicator"></div>
-              <div class="screen-glare"></div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- Esports Tournaments Section -->
+  <!-- Esports Tournaments Section (Preserved from v1.3.6) -->
   {% if esports_tournaments %}
-  <section style="margin-bottom: 3.5rem;">
+  <section style="margin-bottom: 4rem;">
     <div class="section-header">
       <h2 class="section-title">
         <span class="title-bar"></span> 🏆 FREE FIRE ESPORTS ARENA
@@ -947,35 +219,33 @@
       <a href="/esports" class="btn btn-secondary btn-sm">View All Matches &rarr;</a>
     </div>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem;">
+    <div class="tournaments-cards-grid">
       {% for t in esports_tournaments %}
-      <div class="cyber-card" style="padding: 1.25rem; border-radius: 12px; background: rgba(15, 7, 28, 0.75); border: 1px solid rgba(168, 85, 247, 0.3); display: flex; flex-direction: column; justify-content: space-between;">
-        <div>
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-            <span class="badge" style="{% if t.status == 'LIVE' %}background: #ef4444;{% elif t.status == 'UPCOMING' %}background: #10b981;{% else %}background: #6b7280;{% endif %} color: #fff; font-size: 0.75rem;">
-              {{ t.status }}
-            </span>
-            <span style="font-size: 0.8rem; color: #c084fc; font-weight: 600;">{{ t.mode }} • {{ t.map_name }}</span>
+      <div class="tournament-match-card cyber-card">
+        <div class="t-match-header">
+          <span class="badge {% if t.status == 'LIVE' %}badge-live{% elif t.status == 'UPCOMING' %}badge-upcoming{% else %}badge-ended{% endif %}">
+            {{ t.status }}
+          </span>
+          <span class="t-match-mode-map">{{ t.mode }} • {{ t.map_name }}</span>
+        </div>
+        <h3 class="t-match-title">{{ t.title }}</h3>
+        
+        <div class="t-match-stats-row">
+          <div class="t-match-stat">
+            <span class="t-stat-dim-label">PRIZE POOL</span>
+            <strong class="t-stat-prize">💎 {{ t.prize_amount_diamonds }}</strong>
           </div>
-          <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem;">{{ t.title }}</h3>
-          
-          <div style="display: flex; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 0.6rem 0.8rem; border-radius: 6px; margin-bottom: 0.75rem; font-size: 0.85rem;">
-            <div>
-              <span style="color: var(--text-muted); display: block; font-size: 0.7rem;">PRIZE POOL</span>
-              <strong style="color: #fbbf24;">💎 {{ t.prize_amount_diamonds }}</strong>
-            </div>
-            <div style="text-align: right;">
-              <span style="color: var(--text-muted); display: block; font-size: 0.7rem;">ENTRY</span>
-              <strong style="color: {% if t.entry_type == 'FREE' %}#10b981{% else %}#c084fc{% endif %};">
-                {% if t.entry_type == 'FREE' %}FREE{% else %}💎 {{ t.entry_fee_diamonds }}{% endif %}
-              </strong>
-            </div>
+          <div class="t-match-stat" style="text-align: right;">
+            <span class="t-stat-dim-label">ENTRY FEE</span>
+            <strong class="t-stat-entry {% if t.entry_type == 'FREE' %}text-free{% else %}text-diamonds{% endif %}">
+              {% if t.entry_type == 'FREE' %}FREE{% else %}💎 {{ t.entry_fee_diamonds }}{% endif %}
+            </strong>
           </div>
         </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
-          <span style="font-size: 0.8rem; color: var(--text-muted);">Slots: {{ t.joined_players }}/{{ t.max_slots }}</span>
-          <a href="/tournaments/{{ t.id }}" class="btn btn-primary btn-sm" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Enter Match</a>
+        <div class="t-match-footer">
+          <span class="t-match-slots">Slots: <strong>{{ t.joined_players }}</strong>/{{ t.max_slots }}</span>
+          <a href="/tournaments/{{ t.id }}" class="btn btn-primary btn-sm">Enter Match &rarr;</a>
         </div>
       </div>
       {% endfor %}
@@ -983,27 +253,27 @@
   </section>
   {% endif %}
 
-  <!-- Announcements Spotlight Section -->
+  <!-- Announcements Spotlight Section (Preserved from v1.3.6) -->
   {% if announcements %}
-  <section style="margin-bottom: 3.5rem;">
+  <section style="margin-bottom: 4rem;">
     <div class="section-header">
       <h2 class="section-title">
-        <span class="title-bar"></span> 📢 OFFICIAL ANNOUNCEMENTS & NEWS
+        <span class="title-bar bar-accent"></span> 📢 OFFICIAL ANNOUNCEMENTS & NEWS
       </h2>
       <a href="/announcements" class="btn btn-secondary btn-sm">All Broadcasts &rarr;</a>
     </div>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem;">
+    <div class="announcements-cards-grid">
       {% for a in announcements %}
-      <div class="cyber-card" style="padding: 1.25rem; border-radius: 12px; background: rgba(15, 7, 28, 0.65); border: 1px solid rgba(168, 85, 247, 0.2);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-          <span class="badge" style="{% if a.type == 'EVENT' %}background: rgba(168,85,247,0.2); color: #c084fc;{% elif a.type == 'WARNING' %}background: rgba(245,158,11,0.2); color: #fcd34d;{% else %}background: rgba(59,130,246,0.2); color: #93c5fd;{% endif %} font-size: 0.75rem;">
+      <div class="announcement-item-card cyber-card">
+        <div class="ann-header">
+          <span class="badge {% if a.type == 'EVENT' %}badge-event{% elif a.type == 'WARNING' %}badge-warn{% else %}badge-info{% endif %}">
             {{ a.type }}
           </span>
-          <span style="color: var(--text-muted); font-size: 0.75rem;">{{ a.created_at[:10] if a.created_at else '' }}</span>
+          <span class="ann-date">{{ a.created_at[:10] if a.created_at else '' }}</span>
         </div>
-        <h3 style="font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 0.4rem;">{{ a.title }}</h3>
-        <p style="color: #d1d5db; font-size: 0.88rem; line-height: 1.5; margin: 0;">
+        <h3 class="ann-title">{{ a.title }}</h3>
+        <p class="ann-desc">
           {{ a.message[:130] if a.message else '' }}...
         </p>
       </div>
@@ -1014,26 +284,47 @@
 
   <!-- Dynamic Sections Rail -->
   <section class="sections-rail-wrapper">
+    <div class="section-rail-header">
+      <span class="title-bar"></span>
+      <h3 class="section-rail-title">TACTICAL CATEGORIES</h3>
+    </div>
     <div class="section-rail">
       {% for sec in nav_sections %}
       <a href="/section/{{ sec.slug }}" class="section-chip cyber-card">
         <div class="chip-icon">{{ sec.icon }}</div>
         <div class="chip-name">{{ sec.name }}</div>
+        <div class="chip-sub">Browse Section &rarr;</div>
       </a>
       {% endfor %}
     </div>
   </section>
 
   <!-- Safe Homepage Top Ad Placement -->
-  {% if ads and ads.is_enabled and ads.client_id and ads.slot_home_top %}\n  <div class=\"ad-slot-wrapper\">\n    <span class=\"ad-label\">Sponsored Advertisement</span>\n    <div class=\"ad-container-responsive\">\n      <ins class=\"adsbygoogle\"\n           style=\"display:block\"\n           data-ad-client=\"{{ ads.client_id }}\"\n           data-ad-slot=\"{{ ads.slot_home_top }}\"\n           data-ad-format=\"auto\"\n           data-full-width-responsive=\"true\"></ins>\n      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>\n    </div>\n  </div>\n  {% endif %}
+  {% if ads and ads.is_enabled and ads.client_id and ads.slot_home_top %}
+  <div class="ad-slot-wrapper">
+    <span class="ad-label">Sponsored Advertisement</span>
+    <div class="ad-container-responsive">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="{{ ads.client_id }}"
+           data-ad-slot="{{ ads.slot_home_top }}"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+  </div>
+  {% endif %}
 
   <!-- Latest Posts Section -->
-  <section style="margin-bottom: 3.5rem;">
+  <section style="margin-bottom: 4rem;">
     <div class="section-header">
       <h2 class="section-title">
         <span class="title-bar"></span> LATEST ARTICLES & CONFIGS
       </h2>
-      <a href="/search" class="btn btn-secondary btn-sm">View All Guides &rarr;</a>
+      <a href="/search" class="btn btn-secondary btn-sm">
+        <span>View All Guides</span>
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+      </a>
     </div>
 
     {% if posts %}
@@ -1044,16 +335,18 @@
           {% if post.thumbnail_url %}
           <img src="{{ post.thumbnail_url }}" alt="{{ post.title }}" class="post-thumb-img" loading="lazy">
           {% else %}
-          <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #1f113d, #0d0722); display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">🎮</div>
+          <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #0d1627, #070b14); display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">🎮</div>
           {% endif %}
           {% if post.section_name %}
           <span class="post-badge">{{ post.section_name }}</span>
           {% endif %}
+          <div class="thumb-gradient-overlay"></div>
         </a>
 
         <div class="post-content-box">
           <div class="post-meta-row">
             <span>📅 {{ post.published_at[:10] }}</span>
+            <span class="meta-dot">•</span>
             <span>👁️ {{ post.view_count }} views</span>
           </div>
 
@@ -1067,11 +360,11 @@
 
           <div class="post-card-footer">
             <a href="/post/{{ post.slug }}" class="read-more-link">
-              Read Guide
+              <span>Read Guide</span>
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
             </a>
             {% if post.download_url %}
-            <span class="badge badge-success" style="font-size: 0.7rem;">Download Available</span>
+            <span class="badge badge-success" style="font-size: 0.72rem;">Download Available</span>
             {% endif %}
           </div>
         </div>
@@ -1079,8 +372,8 @@
       {% endfor %}
     </div>
     {% else %}
-    <div class="cyber-card" style="padding: 3rem; text-align: center; color: var(--text-muted);">
-      <div style="font-size: 3rem; margin-bottom: 1rem;">🎮</div>
+    <div class="cyber-card empty-card">
+      <div class="empty-icon">🎮</div>
       <h3>No Posts Published Yet</h3>
       <p>Content will appear here as soon as published via the admin panel.</p>
     </div>
@@ -1089,10 +382,10 @@
 
   <!-- Popular Posts Section -->
   {% if popular_posts %}
-  <section style="margin-bottom: 3.5rem;">
+  <section style="margin-bottom: 4rem;">
     <div class="section-header">
       <h2 class="section-title">
-        <span class="title-bar"></span> COMMUNITY FAVORITES
+        <span class="title-bar bar-accent"></span> COMMUNITY FAVORITES
       </h2>
     </div>
 
@@ -1106,13 +399,15 @@
           <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #1f113d, #0d0722); display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">🔥</div>
           {% endif %}
           {% if post.section_name %}
-          <span class="post-badge">{{ post.section_name }}</span>
+          <span class="post-badge badge-accent">{{ post.section_name }}</span>
           {% endif %}
+          <div class="thumb-gradient-overlay"></div>
         </a>
 
         <div class="post-content-box">
           <div class="post-meta-row">
-            <span>🔥 Popular</span>
+            <span class="tag-hot">🔥 Popular</span>
+            <span class="meta-dot">•</span>
             <span>👁️ {{ post.view_count }} views</span>
           </div>
 
@@ -1125,7 +420,10 @@
           </p>
 
           <div class="post-card-footer">
-            <a href="/post/{{ post.slug }}" class="read-more-link">Get Details &rarr;</a>
+            <a href="/post/{{ post.slug }}" class="read-more-link link-accent">
+              <span>Get Details</span>
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </a>
           </div>
         </div>
       </article>

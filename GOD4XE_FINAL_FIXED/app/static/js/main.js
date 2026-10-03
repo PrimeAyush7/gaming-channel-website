@@ -1,21 +1,23 @@
 /**
- * GOD4XE GAMING - Core Interactive Script
- * - Smooth Desktop Cursor Glow
- * - Mobile Navigation Drawer
- * - Card Lighting Interaction
+ * GOD4XE GAMING - Core Interactive & Motion Script
+ * - Smooth Dual-Core Desktop Cursor Glow (Cyan + Violet Glow)
+ * - Mobile Navigation Drawer (Sleek Glassmorphic Sheet)
+ * - 3D Card Tilt & Dynamic Specular Lighting Reaction
+ * - Device Showcase 3D Parallax Tilt
  * - First-party Download & YouTube Click Analytics
  */
 
 document.addEventListener('DOMContentLoaded', () => {
   initCursorGlow();
   initMobileNav();
-  initCardLighting();
+  initCardMotionAndLighting();
   initAnalyticsTracking();
   initDeviceShowcaseParallax();
 });
 
 /* --------------------------------------------------------------------------
    CURSOR LIGHTING (DESKTOP)
+   Dual-tone Cyber Neon Ambiance (Electric Cyan + Cyber Violet)
    -------------------------------------------------------------------------- */
 function initCursorGlow() {
   const isTouch = window.matchMedia('(pointer: coarse)').matches;
@@ -36,11 +38,18 @@ function initCursorGlow() {
   let mouseY = window.innerHeight / 2;
   let currentX = mouseX;
   let currentY = mouseY;
+  let isMoving = false;
+  let fadeTimeout = null;
 
   document.addEventListener('mousemove', (e) => {
     mouseX = e.clientX;
     mouseY = e.clientY;
     glowEl.style.opacity = '1';
+    isMoving = true;
+    clearTimeout(fadeTimeout);
+    fadeTimeout = setTimeout(() => {
+      isMoving = false;
+    }, 2500);
   }, { passive: true });
 
   document.addEventListener('mouseleave', () => {
@@ -48,9 +57,9 @@ function initCursorGlow() {
   });
 
   function animateCursor() {
-    // Smooth interpolation (lerp)
-    currentX += (mouseX - currentX) * 0.15;
-    currentY += (mouseY - currentY) * 0.15;
+    // Ultra smooth lerp interpolation
+    currentX += (mouseX - currentX) * 0.16;
+    currentY += (mouseY - currentY) * 0.16;
     
     glowEl.style.left = `${currentX}px`;
     glowEl.style.top = `${currentY}px`;
@@ -61,29 +70,51 @@ function initCursorGlow() {
 }
 
 /* --------------------------------------------------------------------------
-   CARD LIGHTING REACTION
+   CARD MOTION & LIGHTING REACTION
+   3D Micro-Tilt & Dynamic Specular Highlight
    -------------------------------------------------------------------------- */
-function initCardLighting() {
+function initCardMotionAndLighting() {
   const cards = document.querySelectorAll('.cyber-card');
   if (!cards.length) return;
+
+  const isTouch = window.matchMedia('(pointer: coarse)').matches;
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   cards.forEach(card => {
     card.addEventListener('mousemove', (e) => {
       const rect = card.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
+      
       card.style.setProperty('--card-mouse-x', `${x}px`);
       card.style.setProperty('--card-mouse-y', `${y}px`);
+
+      if (!isTouch && !prefersReduced && !card.classList.contains('no-tilt')) {
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const rotateX = ((y - centerY) / centerY) * -5;
+        const rotateY = ((x - centerX) / centerX) * 5;
+        
+        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-4px)`;
+      }
     }, { passive: true });
+
+    card.addEventListener('mouseleave', () => {
+      if (!isTouch && !prefersReduced && !card.classList.contains('no-tilt')) {
+        card.style.transform = '';
+      }
+    });
   });
 }
 
 /* --------------------------------------------------------------------------
    MOBILE NAVIGATION DRAWER
+   Smooth Backdrop, Close Button, Outside Click, & Keyboard Escape
    -------------------------------------------------------------------------- */
 function initMobileNav() {
   const toggleBtn = document.getElementById('mobile-nav-toggle');
   const drawer = document.getElementById('mobile-drawer');
+  const closeBtn = document.getElementById('mobile-drawer-close');
   const header = document.querySelector('.site-header');
 
   if (!toggleBtn || !drawer) return;
@@ -94,38 +125,55 @@ function initMobileNav() {
     }
   }
 
+  function openDrawer() {
+    updateDrawerPosition();
+    drawer.classList.add('open');
+    toggleBtn.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('drawer-open');
+  }
+
+  function closeDrawer() {
+    drawer.classList.remove('open');
+    toggleBtn.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('drawer-open');
+  }
+
   toggleBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    updateDrawerPosition();
-    const isOpen = drawer.classList.contains('open');
-    if (isOpen) {
-      drawer.classList.remove('open');
-      toggleBtn.setAttribute('aria-expanded', 'false');
+    if (drawer.classList.contains('open')) {
+      closeDrawer();
     } else {
-      drawer.classList.add('open');
-      toggleBtn.setAttribute('aria-expanded', 'true');
+      openDrawer();
     }
   });
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeDrawer();
+    });
+  }
 
   window.addEventListener('resize', () => {
     if (drawer.classList.contains('open')) {
       updateDrawerPosition();
+    }
+    if (window.innerWidth > 768 && drawer.classList.contains('open')) {
+      closeDrawer();
     }
   }, { passive: true });
 
   // Close on outside click
   document.addEventListener('click', (e) => {
     if (drawer.classList.contains('open') && !drawer.contains(e.target) && e.target !== toggleBtn) {
-      drawer.classList.remove('open');
-      toggleBtn.setAttribute('aria-expanded', 'false');
+      closeDrawer();
     }
   });
 
   // Close on Escape key
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && drawer.classList.contains('open')) {
-      drawer.classList.remove('open');
-      toggleBtn.setAttribute('aria-expanded', 'false');
+      closeDrawer();
     }
   });
 }
@@ -140,7 +188,11 @@ function initAnalyticsTracking() {
     btn.addEventListener('click', () => {
       const postId = btn.getAttribute('data-post-id');
       if (postId) {
-        navigator.sendBeacon(`/api/track/download/${postId}`, new FormData());
+        try {
+          navigator.sendBeacon(`/api/track/download/${postId}`, new FormData());
+        } catch (err) {
+          // Non-blocking fallback
+        }
       }
     });
   });
@@ -150,11 +202,14 @@ function initAnalyticsTracking() {
   ytTriggers.forEach(trigger => {
     trigger.addEventListener('click', () => {
       const postId = trigger.getAttribute('data-post-id') || 0;
-      navigator.sendBeacon(`/api/track/youtube/${postId}`, new FormData());
+      try {
+        navigator.sendBeacon(`/api/track/youtube/${postId}`, new FormData());
+      } catch (err) {
+        // Non-blocking fallback
+      }
     });
   });
 }
-
 
 /* --------------------------------------------------------------------------
    3D DUAL DEVICE SHOWCASE PARALLAX INTERACTION
@@ -177,8 +232,8 @@ function initDeviceShowcaseParallax() {
     const y = (e.clientY - rect.top) / rect.height - 0.5;
 
     // Smooth interactive tilt
-    macbook.style.transform = `rotateY(${x * 14 - 8}deg) rotateX(${-y * 12 + 6}deg) translateY(-8px)`;
-    iphone.style.transform = `rotateY(${x * 18 - 18}deg) rotateX(${-y * 16 + 8}deg) translateZ(42px) translateY(-10px)`;
+    macbook.style.transform = `rotateY(${x * 14 - 6}deg) rotateX(${-y * 12 + 5}deg) translateY(-8px)`;
+    iphone.style.transform = `rotateY(${x * 18 - 15}deg) rotateX(${-y * 16 + 7}deg) translateZ(46px) translateY(-12px)`;
   });
 
   stage.addEventListener('mouseleave', () => {

@@ -5,18 +5,28 @@
 {% block content %}
 <div class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
   
-  <div class="cyber-card" style="padding: 2rem; margin-bottom: 2.5rem;">
-    <h1 style="font-size: 1.75rem; font-weight: 800; color: #fff; margin-bottom: 1rem;">
-      Search Database: <span style="color: var(--neon-violet);">"{{ query }}"</span>
+  <div class="search-hero-card cyber-card">
+    <div class="cat-hero-glow"></div>
+    <div class="search-hero-badge">
+      <span class="pulse-dot"></span> DATABASE QUERY
+    </div>
+    <h1 class="search-hero-title">
+      SEARCH RESULTS: <span class="gradient-text">"{{ query }}"</span>
     </h1>
-    <form action="/search" method="GET" style="display: flex; gap: 0.75rem; max-width: 600px;">
-      <input type="text" name="q" value="{{ query }}" placeholder="Search articles, configs, tags..." required class="form-control">
-      <button type="submit" class="btn btn-primary" style="white-space: nowrap;">Search</button>
+    <form action="/search" method="GET" class="search-page-form">
+      <div class="search-input-wrapper">
+        <svg class="search-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input type="text" name="q" value="{{ query }}" placeholder="Search articles, configs, tags..." required class="form-control search-page-input">
+      </div>
+      <button type="submit" class="btn btn-primary search-page-btn">
+        <span>Execute Search</span>
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+      </button>
     </form>
   </div>
 
   <div class="section-header">
-    <h2 class="section-title"><span class="title-bar"></span> Matching Records ({{ total }})</h2>
+    <h2 class="section-title"><span class="title-bar"></span> MATCHING RECORDS ({{ total }})</h2>
   </div>
 
   {% if posts %}
@@ -27,12 +37,14 @@
         {% if post.thumbnail_url %}
         <img src="{{ post.thumbnail_url }}" alt="{{ post.title }}" class="post-thumb-img" loading="lazy">
         {% else %}
-        <div style="width: 100%; height: 100%; background: #120924; display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">🎮</div>
+        <div style="width: 100%; height: 100%; background: #0c1424; display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">🎮</div>
         {% endif %}
+        <div class="thumb-gradient-overlay"></div>
       </a>
       <div class="post-content-box">
         <div class="post-meta-row">
           <span>📅 {{ post.published_at[:10] }}</span>
+          <span class="meta-dot">•</span>
           <span>👁️ {{ post.view_count }} views</span>
         </div>
         <h3 class="post-card-title">
@@ -40,17 +52,20 @@
         </h3>
         <p class="post-excerpt">{{ post.summary or (post.content[:130] ~ '...') }}</p>
         <div class="post-card-footer">
-          <a href="/post/{{ post.slug }}" class="read-more-link">Read Guide &rarr;</a>
+          <a href="/post/{{ post.slug }}" class="read-more-link">
+            <span>Read Guide</span>
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </a>
         </div>
       </div>
     </article>
     {% endfor %}
   </div>
   {% else %}
-  <div class="cyber-card" style="padding: 3.5rem 2rem; text-align: center; color: var(--text-muted);">
-    <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
-    <h3>No Results Found for "{{ query }}"</h3>
-    <p>Try searching for broader terms like "OB52", "config", "sensitivity", or browse by sections.</p>
+  <div class="cyber-card empty-card">
+    <div class="empty-icon">🔍</div>
+    <h3>No Results Found For "{{ query }}"</h3>
+    <p>Try searching for keywords like "OB52", "sensitivity", "DPI", "recoil", or browse by categories.</p>
   </div>
   {% endif %}
 

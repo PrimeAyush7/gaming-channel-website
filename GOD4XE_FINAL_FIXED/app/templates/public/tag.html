@@ -5,12 +5,17 @@
 {% block content %}
 <div class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
   
-  <div class="cyber-card" style="padding: 2rem; margin-bottom: 3rem; border-color: var(--neon-purple); display: flex; align-items: center; gap: 1.5rem;">
-    <div style="font-size: 2.5rem; color: var(--neon-violet);">#</div>
+  <div class="category-hero-card cyber-card tag-hero-card">
+    <div class="cat-hero-glow"></div>
+    <div class="tag-hash-icon">#</div>
     <div>
-      <h1 style="font-size: 1.85rem; font-weight: 800; color: #fff;">Tagged with "{{ tag.name }}"</h1>
-      <p style="color: var(--text-muted); font-size: 0.9rem;">Showing articles and configs matching this tag.</p>
+      <h1 class="cat-hero-title">Tagged with "{{ tag.name }}"</h1>
+      <p class="cat-hero-desc">Displaying all tactical guides, configs, and updates matching #{{ tag.name }}.</p>
     </div>
+  </div>
+
+  <div class="section-header">
+    <h2 class="section-title"><span class="title-bar"></span> MATCHING POSTS</h2>
   </div>
 
   {% if posts %}
@@ -21,12 +26,14 @@
         {% if post.thumbnail_url %}
         <img src="{{ post.thumbnail_url }}" alt="{{ post.title }}" class="post-thumb-img" loading="lazy">
         {% else %}
-        <div style="width: 100%; height: 100%; background: #120924; display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">🎮</div>
+        <div style="width: 100%; height: 100%; background: #0c1424; display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">🎮</div>
         {% endif %}
+        <div class="thumb-gradient-overlay"></div>
       </a>
       <div class="post-content-box">
         <div class="post-meta-row">
           <span>📅 {{ post.published_at[:10] }}</span>
+          <span class="meta-dot">•</span>
           <span>👁️ {{ post.view_count }} views</span>
         </div>
         <h3 class="post-card-title">
@@ -34,15 +41,23 @@
         </h3>
         <p class="post-excerpt">{{ post.summary or (post.content[:130] ~ '...') }}</p>
         <div class="post-card-footer">
-          <a href="/post/{{ post.slug }}" class="read-more-link">Read Guide &rarr;</a>
+          <a href="/post/{{ post.slug }}" class="read-more-link">
+            <span>Read Guide</span>
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </a>
+          {% if post.download_url %}
+          <span class="badge badge-success" style="font-size: 0.72rem;">Download</span>
+          {% endif %}
         </div>
       </div>
     </article>
     {% endfor %}
   </div>
   {% else %}
-  <div class="cyber-card" style="padding: 3rem; text-align: center; color: var(--text-muted);">
-    <p>No posts found for this tag.</p>
+  <div class="cyber-card empty-card">
+    <div class="empty-icon">#</div>
+    <h3>No Posts Found For This Tag</h3>
+    <p>Explore our categories or search for another term.</p>
   </div>
   {% endif %}
 
