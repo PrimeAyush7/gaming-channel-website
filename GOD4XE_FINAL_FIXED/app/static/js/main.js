@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initDeviceShowcaseParallax();
   initDimensionalWebGL();
   initDimensionalUI();
+  initArticleSlideDrawer();
 });
 
 /* --------------------------------------------------------------------------
@@ -530,5 +531,285 @@ function initDeviceShowcaseParallax() {
   stage.addEventListener('mouseleave', () => {
     macbook.style.transform = '';
     iphone.style.transform = '';
+  });
+}
+
+
+/* --------------------------------------------------------------------------
+   INTERACTIVE ARTICLE SLIDING DRAWER SYSTEM (SPLIT-VIEW DESKTOP & MOBILE SHEET)
+   -------------------------------------------------------------------------- */
+function initArticleSlideDrawer() {
+  const drawer = document.getElementById('article-slide-drawer');
+  const articlesWrapper = document.getElementById('articles-wrapper');
+  const contentArea = document.getElementById('drawer-content-area');
+  const closeBtn = document.getElementById('drawer-close-btn');
+  const fullpageLink = document.getElementById('drawer-fullpage-link');
+  const backdrop = document.getElementById('drawer-backdrop');
+
+  if (!drawer || !contentArea) return;
+
+  const postDrawerCache = {};
+  let currentSlug = null;
+
+  function closeArticleDrawer() {
+    if (articlesWrapper) {
+      articlesWrapper.classList.remove('drawer-active');
+    }
+    drawer.classList.remove('active');
+    drawer.setAttribute('aria-hidden', 'true');
+    if (backdrop) {
+      backdrop.classList.remove('active');
+      backdrop.setAttribute('aria-hidden', 'true');
+    }
+    document.querySelectorAll('.post-card.drawer-active-card').forEach(c => {
+      c.classList.remove('drawer-active-card');
+    });
+    document.body.classList.remove('drawer-open-lock');
+    currentSlug = null;
+  }
+
+  function openArticleDrawer(slug) {
+    if (!slug) return;
+    currentSlug = slug;
+
+    // Highlight active card in grid
+    document.querySelectorAll('.post-card').forEach(c => c.classList.remove('drawer-active-card'));
+    const targetCard = document.querySelector(`[data-slug="${slug}"]`) || document.getElementById(`post-card-${slug}`) || document.getElementById(`pop-card-${slug}`);
+    if (targetCard) {
+      targetCard.classList.add('drawer-active-card');
+    }
+
+    if (fullpageLink) {
+      fullpageLink.href = `/post/${encodeURIComponent(slug)}`;
+    }
+
+    if (articlesWrapper) {
+      articlesWrapper.classList.add('drawer-active');
+    }
+    drawer.classList.add('active');
+    drawer.setAttribute('aria-hidden', 'false');
+
+    if (window.innerWidth <= 1024 && backdrop) {
+      backdrop.classList.add('active');
+      backdrop.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('drawer-open-lock');
+    }
+
+    // Scroll drawer top into view smoothly
+    contentArea.scrollTop = 0;
+
+    if (postDrawerCache[slug]) {
+      renderDrawerContent(postDrawerCache[slug]);
+    } else {
+      contentArea.innerHTML = `
+        <div class="drawer-loading-box">
+          <div class="drawer-spinner"></div>
+          <div class="drawer-loading-title">INITIALIZING DATA TOPOLOGY...</div>
+          <p class="drawer-loading-sub">Fetching tournament configs, guide breakdown, and download mirrors.</p>
+        </div>
+      `;
+
+      fetch(`/api/post-drawer/${encodeURIComponent(slug)}`)
+        .then(res => {
+          if (!res.ok) throw new Error('Network response not ok');
+          return res.json();
+        })
+        .then(data => {
+          postDrawerCache[slug] = data;
+          if (currentSlug === slug) {
+            renderDrawerContent(data);
+          }
+        })
+        .catch(err => {
+          contentArea.innerHTML = `
+            <div class="drawer-error-box">
+              <span style="font-size: 2.5rem;">⚠️</span>
+              <h3>Failed to load guide</h3>
+              <p>Could not load the interactive article. You can view the full guide directly.</p>
+              <a href="/post/${encodeURIComponent(slug)}" class="btn btn-primary btn-sm">Open Full Page &rarr;</a>
+            </div>
+          `;
+        });
+    }
+  }
+
+  function renderDrawerContent(data) {
+    const extLinksHtml = (data.custom_links && data.custom_links.length > 0) ? `
+      <div class="drawer-ext-links-strip">
+        <div class="ext-links-box-header">
+          <span class="pulse-dot"></span>
+          <span class="ext-links-box-title">RECOMMENDED OFFICIAL CHANNELS &amp; SERVERS</span>
+        </div>
+        <div class="post-card-ext-links">
+          ${data.custom_links.map(l => `
+            <a href="${escapeHtml(l.url)}" target="_blank" rel="noopener noreferrer" class="post-ext-chip">
+              <span class="ext-chip-dot"></span>
+              <span class="ext-chip-text">${escapeHtml(l.title)}</span>
+              <svg class="ext-chip-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+            </a>
+          `).join('')}
+        </div>
+      </div>
+    ` : '';
+
+    const downloadBoxHtml = data.download_url ? `
+      <div class="download-card-container epic-download-box cyber-card" style="margin: 2rem 0;">
+        <div class="download-card-glow" aria-hidden="true"></div>
+        <div class="download-card-grid" aria-hidden="true"></div>
+        <div class="epic-download-header">
+          <span class="badge badge-cyan download-live-badge">
+            <span class="pulse-dot"></span> VERIFIED MIRROR ACTIVE
+          </span>
+          <span class="download-meta-views">🔒 BAN-SAFE VERIFIED</span>
+        </div>
+        <h3 class="download-title">${escapeHtml(data.download_label || 'OFFICIAL CONFIG / FILE DOWNLOAD')}</h3>
+        <p class="download-desc">Verified ban-safe configuration file. Click below to open secure server.</p>
+        <div class="download-button-wrapper">
+          <a href="${escapeHtml(data.download_url)}" target="_blank" rel="noopener noreferrer" class="btn-cyber-download-epic" data-track-download="1" data-post-id="${data.id}">
+            <span class="btn-shimmer-sweep" aria-hidden="true"></span>
+            <span class="btn-neon-aura" aria-hidden="true"></span>
+            <span class="btn-download-icon-box">
+              <svg class="download-arrow-svg" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+              </svg>
+              <span class="radar-ping" aria-hidden="true"></span>
+            </span>
+            <span class="btn-download-text-group">
+              <span class="btn-download-main-text">${escapeHtml(data.download_label || 'DOWNLOAD FILE NOW')}</span>
+              <span class="btn-download-sub-text">⚡ DIRECT SECURE MIRROR • FAST CLOUD DELIVERY</span>
+            </span>
+            <svg class="btn-external-arrow" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+            </svg>
+          </a>
+        </div>
+        <div class="download-trust-row">
+          <div class="trust-item"><span>🛡️</span> Safe Link Protection</div>
+          <div class="trust-item"><span>⚡</span> High Speed Cloud</div>
+          <div class="trust-item"><span>✅</span> Anti-Cheat Passed</div>
+        </div>
+      </div>
+    ` : '';
+
+    const videoHtml = data.youtube_video_id ? `
+      <div class="post-video-section" style="margin: 2rem 0 1rem;">
+        <h3 class="post-video-heading" style="font-size: 0.95rem; margin-bottom: 0.75rem;">
+          <svg width="20" height="20" fill="#ff0033" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+          <span>VIDEO SHOWCASE &amp; TUTORIAL</span>
+        </h3>
+        <div class="featured-video-card cyber-card" style="aspect-ratio: 16/9; overflow: hidden; border-radius: 8px;">
+          <iframe 
+            src="https://www.youtube-nocookie.com/embed/${escapeHtml(data.youtube_video_id)}" 
+            title="${escapeHtml(data.title)}" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen 
+            style="width: 100%; height: 100%; border: none;">
+          </iframe>
+        </div>
+      </div>
+    ` : '';
+
+    const relatedHtml = (data.related && data.related.length > 0) ? `
+      <div class="drawer-related-section" style="margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.08);">
+        <h4 style="font-family: var(--font-display); font-size: 0.95rem; font-weight: 800; color: #fff; margin-bottom: 1rem; letter-spacing: 0.5px;">
+          <span style="color: var(--neon-cyan);">//</span> RELATED GUIDES IN ARCHIVE
+        </h4>
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+          ${data.related.map(r => `
+            <div class="drawer-related-item cyber-card post-drawer-trigger" data-post-slug="${escapeHtml(r.slug)}" style="display: flex; align-items: center; gap: 0.85rem; padding: 0.65rem 0.85rem; cursor: pointer; border-radius: 8px;">
+              <span style="font-size: 1.2rem;">🎯</span>
+              <div style="flex: 1; min-width: 0;">
+                <div style="font-family: var(--font-display); font-size: 0.85rem; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(r.title)}</div>
+                <div style="font-size: 0.7rem; color: var(--neon-cyan); letter-spacing: 0.5px;">SWITCH GUIDE &rarr;</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : '';
+
+    contentArea.innerHTML = `
+      <div class="drawer-article-view">
+        ${data.thumbnail_url ? `
+        <div class="drawer-hero-banner">
+          <img src="${escapeHtml(data.thumbnail_url)}" alt="${escapeHtml(data.title)}" class="drawer-banner-img">
+          <div class="drawer-hero-overlay"></div>
+          ${data.section_name ? `<span class="post-badge">${escapeHtml(data.section_name)}</span>` : ''}
+        </div>
+        ` : ''}
+
+        <div class="drawer-meta-bar">
+          <span>📅 ${escapeHtml(data.published_at)}</span>
+          <span class="meta-dot">•</span>
+          <span>👁️ ${escapeHtml(data.view_count)} views</span>
+          ${data.download_count ? `<span class="meta-dot">•</span><span>📥 ${escapeHtml(data.download_count)} DLs</span>` : ''}
+        </div>
+
+        <h2 class="drawer-title">${escapeHtml(data.title)}</h2>
+
+        ${extLinksHtml}
+
+        <div class="drawer-body-text article-body-content">
+          ${data.formatted_content}
+        </div>
+
+        ${downloadBoxHtml}
+
+        ${videoHtml}
+
+        ${relatedHtml}
+      </div>
+    `;
+
+    // Re-attach triggers inside drawer for related posts
+    contentArea.querySelectorAll('.post-drawer-trigger').forEach(trigger => {
+      trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        const nextSlug = trigger.getAttribute('data-post-slug');
+        if (nextSlug) openArticleDrawer(nextSlug);
+      });
+    });
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  // Delegated click on all post drawer triggers
+  document.addEventListener('click', (e) => {
+    const trigger = e.target.closest('.post-drawer-trigger');
+    if (trigger) {
+      e.preventDefault();
+      const slug = trigger.getAttribute('data-post-slug');
+      if (slug) {
+        openArticleDrawer(slug);
+      }
+    }
+  });
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      closeArticleDrawer();
+    });
+  }
+
+  if (backdrop) {
+    backdrop.addEventListener('click', (e) => {
+      e.preventDefault();
+      closeArticleDrawer();
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && drawer.classList.contains('active')) {
+      closeArticleDrawer();
+    }
   });
 }

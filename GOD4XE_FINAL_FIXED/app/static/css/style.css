@@ -3355,3 +3355,696 @@ body.preview-hud-open {
     transform-origin: center center !important;
   }
 }
+
+
+
+/* ==========================================================================
+   INTERACTIVE ARTICLE SLIDING DRAWER & SPLIT-VIEW (Point 1)
+   ========================================================================== */
+.articles-interactive-wrapper {
+  display: flex;
+  gap: 2rem;
+  position: relative;
+  width: 100%;
+  align-items: flex-start;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.posts-grid-container {
+  flex: 1 1 100%;
+  min-width: 0;
+  width: 100%;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* When drawer is active on Desktop: post grid shrinks gracefully and cards re-arrange into 2 clean columns! */
+.articles-interactive-wrapper.drawer-active .posts-grid-container {
+  flex: 1 1 54%;
+  max-width: 55%;
+}
+
+.articles-interactive-wrapper.drawer-active .posts-grid {
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)) !important;
+  gap: 1.25rem !important;
+}
+
+/* Active card highlight in grid */
+.post-card.drawer-active-card {
+  border-color: var(--neon-cyan) !important;
+  box-shadow: 0 0 25px rgba(0, 242, 254, 0.45), inset 0 0 15px rgba(0, 242, 254, 0.15) !important;
+  transform: translateY(-4px) scale(1.02) !important;
+}
+
+/* The Sliding Article Drawer (Right Column on Desktop, Native Sheet on Mobile) */
+.article-slide-drawer {
+  position: sticky;
+  top: 85px;
+  width: 0;
+  opacity: 0;
+  visibility: hidden;
+  overflow: hidden;
+  transform: translateX(40px);
+  transition: width 0.42s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.32s ease, transform 0.42s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.42s;
+  height: calc(100vh - 105px);
+  max-height: 860px;
+  z-index: 120;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.articles-interactive-wrapper.drawer-active .article-slide-drawer {
+  width: 45%;
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
+
+.drawer-inner {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0 !important;
+  border-radius: var(--radius-lg) !important;
+  border: 1.5px solid rgba(0, 242, 254, 0.4) !important;
+  background: rgba(6, 10, 20, 0.96) !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95), 0 0 40px rgba(0, 242, 254, 0.25) !important;
+  overflow: hidden;
+  position: relative;
+}
+
+.drawer-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  background: rgba(4, 7, 14, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.drawer-close-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  font-family: var(--font-heading);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 0.45rem 0.95rem;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.drawer-close-btn:hover {
+  background: #ef4444;
+  color: #fff;
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.6);
+  transform: scale(1.03);
+}
+
+.drawer-fullpage-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(0, 242, 254, 0.1);
+  border: 1px solid rgba(0, 242, 254, 0.35);
+  color: var(--neon-cyan);
+  font-family: var(--font-heading);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  padding: 0.45rem 0.9rem;
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.drawer-fullpage-btn:hover {
+  background: var(--neon-cyan);
+  color: #05070f;
+  box-shadow: 0 0 14px var(--neon-cyan);
+}
+
+.drawer-body-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1.5rem 1.65rem 3rem;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.drawer-body-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.drawer-body-scroll::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+.drawer-body-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 242, 254, 0.3);
+  border-radius: 3px;
+}
+.drawer-body-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--neon-cyan);
+}
+
+.drawer-hero-banner {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+  background: #0a1120;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.drawer-banner-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.drawer-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(6, 10, 20, 0.9) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.drawer-meta-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin-bottom: 0.65rem;
+}
+
+.drawer-title {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 800;
+  line-height: 1.25;
+  color: #fff;
+  margin-bottom: 1.15rem;
+  letter-spacing: 0.3px;
+}
+
+.drawer-loading-box,
+.drawer-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  text-align: center;
+  padding: 2rem;
+}
+
+.drawer-spinner {
+  width: 44px;
+  height: 44px;
+  border: 3px solid rgba(0, 242, 254, 0.15);
+  border-top-color: var(--neon-cyan);
+  border-radius: 50%;
+  animation: spin 0.85s linear infinite;
+  margin-bottom: 1.25rem;
+}
+
+.drawer-loading-title {
+  font-family: var(--font-heading);
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: var(--neon-cyan);
+  margin-bottom: 0.4rem;
+}
+
+.drawer-loading-sub {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  max-width: 320px;
+}
+
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 5, 10, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 110;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  pointer-events: none;
+}
+
+.drawer-backdrop.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* ==========================================================================
+   EXTERNAL LINKS STRIP (Point 3 - Custom Links under every post & in drawer)
+   ========================================================================== */
+.post-card-ext-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 0.85rem 0 1rem;
+  width: 100%;
+}
+
+.post-ext-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-full);
+  background: rgba(0, 242, 254, 0.08);
+  border: 1px solid rgba(0, 242, 254, 0.3);
+  color: var(--neon-cyan);
+  font-family: var(--font-heading);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-decoration: none;
+  transition: all 0.22s ease;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.post-ext-chip:hover {
+  background: rgba(0, 242, 254, 0.22);
+  border-color: var(--neon-cyan);
+  color: #fff;
+  box-shadow: 0 0 14px rgba(0, 242, 254, 0.45);
+  transform: translateY(-1.5px) scale(1.02);
+}
+
+.ext-chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--neon-cyan);
+  box-shadow: 0 0 8px var(--neon-cyan);
+  flex-shrink: 0;
+}
+
+.ext-chip-arrow {
+  color: var(--neon-cyan);
+  opacity: 0.75;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  flex-shrink: 0;
+}
+
+.post-ext-chip:hover .ext-chip-arrow {
+  opacity: 1;
+  transform: translate(1px, -1px);
+}
+
+/* Post Detail External Links Box in post.html */
+.post-detail-ext-links-box {
+  margin: 2.25rem 0;
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--radius-md);
+  background: rgba(10, 16, 30, 0.85);
+  border: 1.5px solid rgba(0, 242, 254, 0.35);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(0, 242, 254, 0.08);
+}
+
+.ext-links-box-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.95rem;
+}
+
+.ext-links-box-title {
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: var(--neon-cyan);
+  text-transform: uppercase;
+}
+
+.post-detail-links-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.post-ext-chip-large {
+  padding: 0.6rem 1rem;
+  font-size: 0.82rem;
+  border-radius: var(--radius-md);
+  background: rgba(14, 22, 42, 0.9);
+  justify-content: space-between;
+}
+
+/* ==========================================================================
+   EPIC ANIMATED CYBER DOWNLOAD BUTTON & BOX (Point 2 - "Mast Sa Animation")
+   ========================================================================== */
+.epic-download-box {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  padding: 2.25rem 2rem;
+  margin: 3rem 0;
+  background: linear-gradient(135deg, rgba(8, 14, 28, 0.98), rgba(5, 7, 15, 0.98));
+  border: 1.5px solid rgba(0, 242, 254, 0.45);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95), 0 0 35px rgba(0, 242, 254, 0.25);
+}
+
+.download-card-glow {
+  position: absolute;
+  top: -40%;
+  left: -20%;
+  width: 140%;
+  height: 180%;
+  background: radial-gradient(circle, rgba(0, 242, 254, 0.12) 0%, rgba(112, 0, 255, 0.08) 50%, transparent 75%);
+  pointer-events: none;
+  animation: neon-aura-pulse 4s infinite ease-in-out;
+}
+
+.download-card-grid {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 28px);
+  pointer-events: none;
+}
+
+.epic-download-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 2;
+}
+
+.download-live-badge {
+  font-family: var(--font-heading);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+}
+
+.download-meta-views {
+  font-family: var(--font-heading);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+
+.epic-download-box .download-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 3.5vw, 1.95rem);
+  font-weight: 900;
+  color: #fff;
+  margin-bottom: 0.65rem;
+  position: relative;
+  z-index: 2;
+  letter-spacing: 0.5px;
+}
+
+.epic-download-box .download-desc {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 1.85rem;
+  max-width: 680px;
+  position: relative;
+  z-index: 2;
+}
+
+.download-button-wrapper {
+  position: relative;
+  z-index: 5;
+  margin: 1.5rem 0 1.25rem;
+  width: 100%;
+}
+
+/* THE EPIC HIGH-VOLTAGE BUTTON */
+.btn-cyber-download-epic {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 580px;
+  min-height: 64px;
+  padding: 0.85rem 1.65rem;
+  background: linear-gradient(135deg, rgba(0, 242, 254, 0.22) 0%, rgba(112, 0, 255, 0.28) 50%, rgba(0, 242, 254, 0.18) 100%);
+  border: 2px solid var(--neon-cyan);
+  border-radius: var(--radius-full);
+  color: #ffffff !important;
+  text-decoration: none;
+  cursor: pointer;
+  overflow: hidden;
+  box-sizing: border-box;
+  box-shadow: 0 0 30px rgba(0, 242, 254, 0.45), 0 10px 25px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(0, 242, 254, 0.3);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: epic-btn-glow 3s infinite ease-in-out;
+}
+
+.btn-cyber-download-epic:hover {
+  transform: translateY(-4px) scale(1.025);
+  border-color: #fff;
+  background: linear-gradient(135deg, rgba(0, 242, 254, 0.38) 0%, rgba(112, 0, 255, 0.45) 50%, rgba(0, 242, 254, 0.32) 100%);
+  box-shadow: 0 0 50px rgba(0, 242, 254, 0.8), 0 0 90px rgba(112, 0, 255, 0.5), inset 0 0 30px rgba(255, 255, 255, 0.4);
+}
+
+.btn-cyber-download-epic:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+/* Light beam shimmer sliding across */
+.btn-shimmer-sweep {
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 70%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), rgba(0, 242, 254, 0.6), transparent);
+  transform: skewX(-25deg);
+  animation: btn-cyber-shimmer 2.6s infinite;
+  pointer-events: none;
+}
+
+@keyframes btn-cyber-shimmer {
+  0% { left: -120%; }
+  35% { left: 140%; }
+  100% { left: 140%; }
+}
+
+@keyframes epic-btn-glow {
+  0% { box-shadow: 0 0 25px rgba(0, 242, 254, 0.4), inset 0 0 15px rgba(0, 242, 254, 0.25); }
+  50% { box-shadow: 0 0 45px rgba(0, 242, 254, 0.7), 0 0 30px rgba(112, 0, 255, 0.4), inset 0 0 25px rgba(0, 242, 254, 0.45); }
+  100% { box-shadow: 0 0 25px rgba(0, 242, 254, 0.4), inset 0 0 15px rgba(0, 242, 254, 0.25); }
+}
+
+@keyframes neon-aura-pulse {
+  0% { transform: scale(0.96); opacity: 0.7; }
+  50% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(0.96); opacity: 0.7; }
+}
+
+.btn-download-icon-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1.5px solid var(--neon-cyan);
+  color: var(--neon-cyan);
+  flex-shrink: 0;
+  box-shadow: 0 0 15px rgba(0, 242, 254, 0.5);
+}
+
+.download-arrow-svg {
+  animation: arrow-bounce 1.5s infinite ease-in-out;
+}
+
+@keyframes arrow-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(3.5px); }
+}
+
+.radar-ping {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1.5px solid var(--neon-cyan);
+  opacity: 0;
+  animation: radar-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes radar-ping {
+  0% { transform: scale(0.85); opacity: 0.9; }
+  75%, 100% { transform: scale(1.65); opacity: 0; }
+}
+
+.btn-download-text-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  text-align: left;
+  padding: 0 1rem;
+}
+
+.btn-download-main-text {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+  color: #ffffff;
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+}
+
+.btn-download-sub-text {
+  font-family: var(--font-heading);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--neon-cyan);
+  margin-top: 2px;
+}
+
+.btn-external-arrow {
+  color: var(--neon-cyan);
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
+}
+
+.btn-cyber-download-epic:hover .btn-external-arrow {
+  transform: translateX(4px);
+  color: #fff;
+}
+
+.download-trust-row {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  font-family: var(--font-heading);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: var(--text-dim);
+  margin-top: 1.25rem;
+  position: relative;
+  z-index: 2;
+}
+
+.trust-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* Post Detail Layout Enhancement */
+.post-detail-container {
+  padding-top: 1rem;
+}
+
+.post-article-container {
+  padding: 2.25rem 2.25rem 3rem !important;
+  background: rgba(8, 14, 26, 0.96) !important;
+  border-radius: var(--radius-lg) !important;
+  border: 1px solid var(--border-subtle) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 25px rgba(0, 242, 254, 0.12) !important;
+}
+
+.post-header-badge-row {
+  margin-bottom: 0.75rem;
+}
+
+/* ==========================================================================
+   RESPONSIVE ADJUSTMENTS FOR SLIDE DRAWER & BUTTONS (Point 4 - Mobile Fix)
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .articles-interactive-wrapper.drawer-active .posts-grid-container {
+    max-width: 100% !important;
+    flex: 1 1 100% !important;
+  }
+
+  .article-slide-drawer {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    max-width: 520px !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    z-index: 99999 !important;
+    transform: translateX(100%) !important;
+    box-shadow: -15px 0 50px rgba(0, 0, 0, 0.95), 0 0 40px rgba(0, 242, 254, 0.25) !important;
+  }
+
+  .articles-interactive-wrapper.drawer-active .article-slide-drawer {
+    transform: translateX(0) !important;
+    width: 100vw !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .article-slide-drawer {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+  
+  .drawer-inner {
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+  }
+
+  .drawer-header-bar {
+    padding: 0.85rem 1rem !important;
+  }
+
+  .drawer-body-scroll {
+    padding: 1.25rem 1rem 3.5rem !important;
+  }
+
+  .btn-cyber-download-epic {
+    max-width: 100% !important;
+    padding: 0.75rem 1.15rem !important;
+    min-height: 58px !important;
+  }
+
+  .btn-download-main-text {
+    font-size: 0.92rem !important;
+  }
+
+  .btn-download-sub-text {
+    font-size: 0.62rem !important;
+  }
+
+  .post-detail-links-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .post-article-container {
+    padding: 1.5rem 1rem 2.5rem !important;
+  }
+}

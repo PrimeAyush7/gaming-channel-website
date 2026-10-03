@@ -1,6 +1,15 @@
 {% extends "public/base.html" %}
 
 {% block content %}
+{% set custom_desc_links = [
+  (settings.get('desc_link_1_title', ''), settings.get('desc_link_1_url', '')),
+  (settings.get('desc_link_2_title', ''), settings.get('desc_link_2_url', '')),
+  (settings.get('desc_link_3_title', ''), settings.get('desc_link_3_url', '')),
+  (settings.get('desc_link_4_title', ''), settings.get('desc_link_4_url', '')),
+  (settings.get('desc_link_5_title', ''), settings.get('desc_link_5_url', '')),
+  (settings.get('desc_link_6_title', ''), settings.get('desc_link_6_url', ''))
+] %}
+
 <div class="container">
   
   <!-- Arena Notice Marquee Ticker -->
@@ -51,14 +60,6 @@
         </p>
 
         <!-- Custom Description Links (Configured in Admin Settings) -->
-        {% set custom_desc_links = [
-          (settings.get('desc_link_1_title', ''), settings.get('desc_link_1_url', '')),
-          (settings.get('desc_link_2_title', ''), settings.get('desc_link_2_url', '')),
-          (settings.get('desc_link_3_title', ''), settings.get('desc_link_3_url', '')),
-          (settings.get('desc_link_4_title', ''), settings.get('desc_link_4_url', '')),
-          (settings.get('desc_link_5_title', ''), settings.get('desc_link_5_url', '')),
-          (settings.get('desc_link_6_title', ''), settings.get('desc_link_6_url', ''))
-        ] %}
         <div class="hero-custom-links gsap-reveal-text">
           {% for title, url in custom_desc_links %}
             {% if title and url %}
@@ -138,12 +139,12 @@
         </div>
         {% elif featured_post and featured_post.thumbnail_url %}
         <div class="featured-video-card cyber-card">
-          <a href="/post/{{ featured_post.slug }}" class="video-responsive-wrapper" style="display: block;">
+          <a href="/post/{{ featured_post.slug }}" class="video-responsive-wrapper post-drawer-trigger" data-post-slug="{{ featured_post.slug }}" style="display: block;">
             <img src="{{ featured_post.thumbnail_url }}" alt="{{ featured_post.title }}" style="width: 100%; height: 100%; object-fit: cover;">
           </a>
           <div class="video-card-footer">
             <div class="video-card-title">{{ featured_post.title }}</div>
-            <a href="/post/{{ featured_post.slug }}" class="btn btn-primary btn-sm">Read Now</a>
+            <button type="button" class="btn btn-primary btn-sm post-drawer-trigger" data-post-slug="{{ featured_post.slug }}">Read Now</button>
           </div>
         </div>
         {% else %}
@@ -406,8 +407,8 @@
   </div>
   {% endif %}
 
-  <!-- Latest Posts Section -->
-  <section style="margin-bottom: 4rem;">
+  <!-- LATEST ARTICLES & CONFIGS: INTERACTIVE SPLIT-VIEW & SLIDING DRAWER -->
+  <section class="articles-section" style="margin-bottom: 4rem;">
     <div class="section-header">
       <h2 class="section-title">
         <span class="title-bar"></span> LATEST ARTICLES & CONFIGS
@@ -419,48 +420,98 @@
     </div>
 
     {% if posts %}
-    <div class="posts-grid">
-      {% for post in posts %}
-      <article class="post-card cyber-card">
-        <a href="/post/{{ post.slug }}" class="post-thumb-link">
-          {% if post.thumbnail_url %}
-          <img src="{{ post.thumbnail_url }}" alt="{{ post.title }}" class="post-thumb-img" loading="lazy">
-          {% else %}
-          <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #0d1627, #070b14); display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">🎮</div>
-          {% endif %}
-          {% if post.section_name %}
-          <span class="post-badge">{{ post.section_name }}</span>
-          {% endif %}
-          <div class="thumb-gradient-overlay"></div>
-        </a>
+    <!-- Interactive Container: Posts on Left, Slide-In Full Guide Drawer on Right -->
+    <div class="articles-interactive-wrapper" id="articles-wrapper">
+      
+      <!-- Main Posts Column (Auto-rearranges dynamically when drawer opens!) -->
+      <div class="posts-grid-container" id="posts-main-col">
+        <div class="posts-grid" id="main-posts-grid">
+          {% for post in posts %}
+          <article class="post-card cyber-card" id="post-card-{{ post.slug }}" data-slug="{{ post.slug }}">
+            <a href="/post/{{ post.slug }}" class="post-thumb-link post-drawer-trigger" data-post-slug="{{ post.slug }}">
+              {% if post.thumbnail_url %}
+              <img src="{{ post.thumbnail_url }}" alt="{{ post.title }}" class="post-thumb-img" loading="lazy">
+              {% else %}
+              <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #0d1627, #070b14); display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">🎮</div>
+              {% endif %}
+              {% if post.section_name %}
+              <span class="post-badge">{{ post.section_name }}</span>
+              {% endif %}
+              <div class="thumb-gradient-overlay"></div>
+            </a>
 
-        <div class="post-content-box">
-          <div class="post-meta-row">
-            <span>📅 {{ post.published_at[:10] }}</span>
-            <span class="meta-dot">•</span>
-            <span>👁️ {{ post.view_count }} views</span>
+            <div class="post-content-box">
+              <div class="post-meta-row">
+                <span>📅 {{ post.published_at[:10] }}</span>
+                <span class="meta-dot">•</span>
+                <span>👁️ {{ post.view_count }} views</span>
+              </div>
+
+              <h3 class="post-card-title">
+                <a href="/post/{{ post.slug }}" class="post-drawer-trigger" data-post-slug="{{ post.slug }}">{{ post.title }}</a>
+              </h3>
+
+              <p class="post-excerpt">
+                {{ post.summary or (post.content[:130] ~ '...') }}
+              </p>
+
+              <!-- External Links Strip Under Every Post (Requested in Point 3) -->
+              {% if custom_desc_links %}
+              <div class="post-card-ext-links">
+                {% for title, url in custom_desc_links %}
+                  {% if title and url %}
+                  <a href="{{ url }}" target="_blank" rel="noopener noreferrer" class="post-ext-chip">
+                    <span class="ext-chip-dot"></span>
+                    <span class="ext-chip-text">{{ title }}</span>
+                    <svg class="ext-chip-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+                  </a>
+                  {% endif %}
+                {% endfor %}
+              </div>
+              {% endif %}
+
+              <div class="post-card-footer">
+                <button type="button" class="read-more-link btn-read-guide post-drawer-trigger" data-post-slug="{{ post.slug }}">
+                  <span>Read Guide</span>
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                </button>
+                {% if post.download_url %}
+                <span class="badge badge-success" style="font-size: 0.72rem;">Download Available</span>
+                {% endif %}
+              </div>
+            </div>
+          </article>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Right-Side Sliding Article Drawer (Point 1) -->
+      <aside class="article-slide-drawer" id="article-slide-drawer" aria-hidden="true" role="dialog" aria-modal="true">
+        <div class="drawer-inner cyber-card">
+          <!-- Drawer Top Action Header -->
+          <div class="drawer-header-bar">
+            <button type="button" class="drawer-close-btn" id="drawer-close-btn" aria-label="Close guide">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              <span>CLOSE GUIDE</span>
+            </button>
+            <div class="drawer-header-actions">
+              <a href="#" target="_blank" class="drawer-fullpage-btn" id="drawer-fullpage-link" title="Open full guide in separate tab">
+                <span>FULL PAGE</span>
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+              </a>
+            </div>
           </div>
 
-          <h3 class="post-card-title">
-            <a href="/post/{{ post.slug }}">{{ post.title }}</a>
-          </h3>
-
-          <p class="post-excerpt">
-            {{ post.summary or (post.content[:130] ~ '...') }}
-          </p>
-
-          <div class="post-card-footer">
-            <a href="/post/{{ post.slug }}" class="read-more-link">
-              <span>Read Guide</span>
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-            </a>
-            {% if post.download_url %}
-            <span class="badge badge-success" style="font-size: 0.72rem;">Download Available</span>
-            {% endif %}
+          <!-- Drawer Scrollable Content Area -->
+          <div class="drawer-body-scroll" id="drawer-content-area">
+            <div class="drawer-placeholder">
+              <div class="drawer-spinner"></div>
+              <p>LOADING GUIDE...</p>
+            </div>
           </div>
         </div>
-      </article>
-      {% endfor %}
+      </aside>
+
     </div>
     {% else %}
     <div class="cyber-card empty-card">
@@ -482,8 +533,8 @@
 
     <div class="posts-grid">
       {% for post in popular_posts %}
-      <article class="post-card cyber-card">
-        <a href="/post/{{ post.slug }}" class="post-thumb-link">
+      <article class="post-card cyber-card" id="pop-card-{{ post.slug }}" data-slug="{{ post.slug }}">
+        <a href="/post/{{ post.slug }}" class="post-thumb-link post-drawer-trigger" data-post-slug="{{ post.slug }}">
           {% if post.thumbnail_url %}
           <img src="{{ post.thumbnail_url }}" alt="{{ post.title }}" class="post-thumb-img" loading="lazy">
           {% else %}
@@ -503,18 +554,33 @@
           </div>
 
           <h3 class="post-card-title">
-            <a href="/post/{{ post.slug }}">{{ post.title }}</a>
+            <a href="/post/{{ post.slug }}" class="post-drawer-trigger" data-post-slug="{{ post.slug }}">{{ post.title }}</a>
           </h3>
 
           <p class="post-excerpt">
             {{ post.summary or (post.content[:120] ~ '...') }}
           </p>
 
+          <!-- External Links Strip Under Popular Post (Point 3) -->
+          {% if custom_desc_links %}
+          <div class="post-card-ext-links">
+            {% for title, url in custom_desc_links %}
+              {% if title and url %}
+              <a href="{{ url }}" target="_blank" rel="noopener noreferrer" class="post-ext-chip">
+                <span class="ext-chip-dot"></span>
+                <span class="ext-chip-text">{{ title }}</span>
+                <svg class="ext-chip-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+              </a>
+              {% endif %}
+            {% endfor %}
+          </div>
+          {% endif %}
+
           <div class="post-card-footer">
-            <a href="/post/{{ post.slug }}" class="read-more-link link-accent">
+            <button type="button" class="read-more-link link-accent btn-read-guide post-drawer-trigger" data-post-slug="{{ post.slug }}">
               <span>Get Details</span>
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-            </a>
+            </button>
           </div>
         </div>
       </article>
@@ -540,4 +606,8 @@
   {% endif %}
 
 </div>
+
+<!-- Drawer Mobile Backdrop -->
+<div class="drawer-backdrop" id="drawer-backdrop" aria-hidden="true"></div>
+
 {% endblock %}

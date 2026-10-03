@@ -3,6 +3,14 @@
 {% block title %}Search Results: {{ query }} - {{ settings.site_name }}{% endblock %}
 
 {% block content %}
+{% set custom_desc_links = [
+  (settings.get('desc_link_1_title', ''), settings.get('desc_link_1_url', '')),
+  (settings.get('desc_link_2_title', ''), settings.get('desc_link_2_url', '')),
+  (settings.get('desc_link_3_title', ''), settings.get('desc_link_3_url', '')),
+  (settings.get('desc_link_4_title', ''), settings.get('desc_link_4_url', '')),
+  (settings.get('desc_link_5_title', ''), settings.get('desc_link_5_url', '')),
+  (settings.get('desc_link_6_title', ''), settings.get('desc_link_6_url', ''))
+] %}
 <div class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
   
   <div class="search-hero-card cyber-card">
@@ -51,6 +59,19 @@
           <a href="/post/{{ post.slug }}">{{ post.title }}</a>
         </h3>
         <p class="post-excerpt">{{ post.summary or (post.content[:130] ~ '...') }}</p>
+        {% if custom_desc_links %}
+        <div class="post-card-ext-links">
+          {% for title, url in custom_desc_links %}
+            {% if title and url %}
+            <a href="{{ url }}" target="_blank" rel="noopener noreferrer" class="post-ext-chip">
+              <span class="ext-chip-dot"></span>
+              <span class="ext-chip-text">{{ title }}</span>
+              <svg class="ext-chip-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+            </a>
+            {% endif %}
+          {% endfor %}
+        </div>
+        {% endif %}
         <div class="post-card-footer">
           <a href="/post/{{ post.slug }}" class="read-more-link">
             <span>Read Guide</span>

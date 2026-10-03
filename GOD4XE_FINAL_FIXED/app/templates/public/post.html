@@ -9,12 +9,21 @@
 {% block og_image %}{{ post.thumbnail_url or settings.logo_url }}{% endblock %}
 
 {% block content %}
-<div class="container">
+{% set custom_desc_links = [
+  (settings.get('desc_link_1_title', ''), settings.get('desc_link_1_url', '')),
+  (settings.get('desc_link_2_title', ''), settings.get('desc_link_2_url', '')),
+  (settings.get('desc_link_3_title', ''), settings.get('desc_link_3_url', '')),
+  (settings.get('desc_link_4_title', ''), settings.get('desc_link_4_url', '')),
+  (settings.get('desc_link_5_title', ''), settings.get('desc_link_5_url', '')),
+  (settings.get('desc_link_6_title', ''), settings.get('desc_link_6_url', ''))
+] %}
+
+<div class="container post-detail-container">
   
   <div class="post-detail-layout">
     
-    <!-- Main Article Column -->
-    <article class="post-article-container">
+    <!-- Main Article Column (Front Page Cyber UI) -->
+    <article class="post-article-container cyber-card">
       
       <!-- Breadcrumbs -->
       <nav class="breadcrumbs" aria-label="Breadcrumb">
@@ -26,6 +35,14 @@
         {% endif %}
         <span class="bc-current">{{ post.title }}</span>
       </nav>
+
+      <!-- Category / OB-52 Badges -->
+      <div class="post-header-badge-row">
+        <span class="hero-badge" style="margin-bottom: 0.75rem;">
+          <span class="pulse-dot"></span>
+          <span class="badge-text">DIMENSIONAL GUIDE // OB-52 CALIBRATED</span>
+        </span>
+      </div>
 
       <h1 class="article-headline">{{ post.title }}</h1>
 
@@ -91,7 +108,7 @@
       <div class="post-video-section">
         <h3 class="post-video-heading">
           <svg width="24" height="24" fill="#ff0033" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-          <span>VIDEO SHOWCASE & TUTORIAL</span>
+          <span>VIDEO SHOWCASE &amp; TUTORIAL</span>
         </h3>
         <div class="featured-video-card cyber-card" data-track-youtube="1" data-post-id="{{ post.id }}">
           <div class="video-responsive-wrapper">
@@ -106,26 +123,81 @@
       </div>
       {% endif %}
 
-      <!-- PROMINENT VERIFIED EXTERNAL DOWNLOAD SECTION -->
-      {% if post.download_url %}
-      <div class="download-card-container">
-        <div class="download-card-glow"></div>
-        <div class="download-badge">✓ VERIFIED DIRECT DOWNLOAD MIRROR</div>
-        <h3 class="download-title">{{ post.download_label or 'DOWNLOAD OFFICIAL CONFIG / ASSET' }}</h3>
-        <p class="download-desc">Verified ban-safe configuration file. Click below to open the secure download server. No malicious redirects or popups.</p>
-        
-        <a href="{{ post.download_url }}" 
-           target="_blank" 
-           rel="noopener noreferrer" 
-           class="btn-download-cyber"
-           data-track-download="1" 
-           data-post-id="{{ post.id }}">
-          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-          <span>{{ post.download_label or 'DOWNLOAD FILE NOW' }}</span>
-        </a>
+      <!-- EXTERNAL LINKS STRIP UNDER POST (Requested in Point 3) -->
+      {% if custom_desc_links %}
+      <div class="post-detail-ext-links-box">
+        <div class="ext-links-box-header">
+          <span class="pulse-dot"></span>
+          <span class="ext-links-box-title">RECOMMENDED OFFICIAL CHANNELS &amp; SERVERS</span>
+        </div>
+        <div class="post-card-ext-links post-detail-links-grid">
+          {% for title, url in custom_desc_links %}
+            {% if title and url %}
+            <a href="{{ url }}" target="_blank" rel="noopener noreferrer" class="post-ext-chip post-ext-chip-large">
+              <span class="ext-chip-dot"></span>
+              <span class="ext-chip-text">{{ title }}</span>
+              <svg class="ext-chip-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+            </a>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
 
-        <div class="download-disclaimer">
-          🔒 Safe Link Protection Active. Opens in a separate secure browser tab.
+      <!-- PROMINENT EPIC ANIMATED CYBER DOWNLOAD SECTION (Requested in Point 2) -->
+      {% if post.download_url %}
+      <div class="download-card-container epic-download-box cyber-card">
+        <div class="download-card-glow" aria-hidden="true"></div>
+        <div class="download-card-grid" aria-hidden="true"></div>
+
+        <div class="epic-download-header">
+          <span class="badge badge-cyan download-live-badge">
+            <span class="pulse-dot"></span> VERIFIED DIRECT DOWNLOAD MIRROR
+          </span>
+          <span class="download-meta-views">🔒 BAN-SAFE VERIFIED // OB-52 VIP</span>
+        </div>
+
+        <h3 class="download-title">{{ post.download_label or 'DOWNLOAD OFFICIAL CONFIG / ASSET' }}</h3>
+        <p class="download-desc">
+          Verified ban-safe configuration file. Click below to open the secure download server. No malicious redirects or popups.
+        </p>
+        
+        <!-- THE EPIC ANIMATED CYBER DOWNLOAD BUTTON -->
+        <div class="download-button-wrapper">
+          <a href="{{ post.download_url }}" 
+             target="_blank" 
+             rel="noopener noreferrer" 
+             class="btn-cyber-download-epic"
+             data-track-download="1" 
+             data-post-id="{{ post.id }}">
+            
+            <!-- Shimmer Sweep Beam -->
+            <span class="btn-shimmer-sweep" aria-hidden="true"></span>
+            <!-- Neon Aura Ring -->
+            <span class="btn-neon-aura" aria-hidden="true"></span>
+
+            <span class="btn-download-icon-box">
+              <svg class="download-arrow-svg" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+              </svg>
+              <span class="radar-ping" aria-hidden="true"></span>
+            </span>
+
+            <span class="btn-download-text-group">
+              <span class="btn-download-main-text">{{ post.download_label or 'DOWNLOAD FILE NOW' }}</span>
+              <span class="btn-download-sub-text">⚡ DIRECT SECURE MIRROR • FAST CLOUD DELIVERY</span>
+            </span>
+
+            <svg class="btn-external-arrow" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+            </svg>
+          </a>
+        </div>
+
+        <div class="download-trust-row">
+          <div class="trust-item"><span class="trust-icon">🛡️</span> Safe Link Protection Active</div>
+          <div class="trust-item"><span class="trust-icon">⚡</span> High Speed Cloud Mirror</div>
+          <div class="trust-item"><span class="trust-icon">✅</span> Anti-Cheat Passed</div>
         </div>
       </div>
       {% endif %}

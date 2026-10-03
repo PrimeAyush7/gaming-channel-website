@@ -107,6 +107,55 @@ async def post_detail_view(request: Request, slug: str):
     })
     return templates.TemplateResponse(request=request, name="public/post.html", context=ctx)
 
+@router.get("/api/post-drawer/{slug}")
+async def post_drawer_json(request: Request, slug: str):
+    post = post_service.get_post_by_slug(slug, only_published=True)
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    try:
+        post_service.increment_post_view(post["id"])
+        analytics_service.record_event("post_view", target_id=post["id"], page_path=f"/post/{slug}")
+    except Exception:
+        pass
+
+    formatted_content = formatter.format_post_content(post.get("content") or "")
+    related = post_service.get_related_posts(post["id"], post.get("section_id"), limit=4)
+    
+    settings_dict = settings_service.get_settings_dict()
+    custom_links = []
+    for i in range(1, 7):
+        t = settings_dict.get(f"desc_link_{i}_title", "")
+        u = settings_dict.get(f"desc_link_{i}_url", "")
+        if t and u:
+            custom_links.append({"title": t, "url": u})
+
+    return {
+        "id": post["id"],
+        "title": post["title"],
+        "slug": post["slug"],
+        "summary": post.get("summary") or "",
+        "formatted_content": formatted_content,
+        "thumbnail_url": post.get("thumbnail_url") or "",
+        "section_name": post.get("section_name") or "",
+        "section_slug": post.get("section_slug") or "",
+        "published_at": post["published_at"][:10] if post.get("published_at") else "",
+        "view_count": post.get("view_count", 0),
+        "download_url": post.get("download_url") or "",
+        "download_label": post.get("download_label") or "DOWNLOAD FILE NOW",
+        "download_count": post.get("download_count", 0),
+        "youtube_video_id": post.get("youtube_video_id") or "",
+        "custom_links": custom_links,
+        "related": [
+            {
+                "title": r["title"],
+                "slug": r["slug"],
+                "thumbnail_url": r.get("thumbnail_url") or ""
+            }
+            for r in (related or [])
+        ]
+    }
+
 @router.get("/section/{slug}", response_class=HTMLResponse)
 async def section_archive_view(request: Request, slug: str, page: int = 1):
     ctx = get_common_context(request)
