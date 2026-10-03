@@ -139,12 +139,12 @@
         </div>
         {% elif featured_post and featured_post.thumbnail_url %}
         <div class="featured-video-card cyber-card">
-          <a href="/post/{{ featured_post.slug }}" class="video-responsive-wrapper post-drawer-trigger" data-post-slug="{{ featured_post.slug }}" style="display: block;">
+          <a href="/post/{{ featured_post.slug }}" class="video-responsive-wrapper" style="display: block;">
             <img src="{{ featured_post.thumbnail_url }}" alt="{{ featured_post.title }}" style="width: 100%; height: 100%; object-fit: cover;">
           </a>
           <div class="video-card-footer">
             <div class="video-card-title">{{ featured_post.title }}</div>
-            <button type="button" class="btn btn-primary btn-sm post-drawer-trigger" data-post-slug="{{ featured_post.slug }}">Read Now</button>
+            <a href="/post/{{ featured_post.slug }}" class="btn btn-primary btn-sm">Read Now</a>
           </div>
         </div>
         {% else %}
@@ -184,17 +184,16 @@
     </div>
   </section>
 
-  <!-- 3D APPLE HARDWARE SHOWCASE SECTION: MACBOOK PRO 16" (MACOS SEQUOIA) + IPHONE 16 PRO (IOS 18) -->
+  <!-- 3D APPLE HARDWARE SHOWCASE: MACBOOK PRO 16" (TOP) + IPHONE 16 PRO (BELOW) -->
   <section class="device-showcase-section" id="device-showcase-section">
     <div class="device-showcase-header">
-      <span class="download-badge"> APPLE-GRADE HARDWARE SIMULATOR</span>
+      <span class="download-badge"> HARDWARE SHOWCASE</span>
       <h2 class="device-showcase-title">
         SEAMLESS ON <span class="gradient-text">MACBOOK PRO &amp; IPHONE</span>
       </h2>
       <p class="device-showcase-subtitle">
-        Authentic macOS Sequoia &amp; iOS 18 simulator — watch MacBook physically unlatch and open, while iPhone Safari navigates to god4xe.onrender.com with live Dynamic Island VIP config download.
+        Direct live simulator — MacBook Pro on top and iPhone directly below, navigating god4xe.onrender.com simultaneously with live Dynamic Island VIP config download.
       </p>
-
     </div>
 
     <div class="devices-stage-container">
@@ -203,41 +202,21 @@
         <!-- Ambient Ground Apple Glow Aura -->
         <div class="devices-ambient-glow" aria-hidden="true"></div>
 
-        <!-- 1. MACBOOK PRO 16-INCH (GENUINE MACOS SEQUOIA EXPERIENCE) -->
+        <!-- 1. MACBOOK PRO 16-INCH (PERMANENTLY OPEN LAPTOP - ON TOP ON MOBILE) -->
         <div class="macbook-stage-wrap" id="macbook-stage">
           <div class="macbook-device macbook-3d" id="macbook-showcase">
-            
-            <!-- Opening Hands / Lifting Hint -->
-            <div class="mac-open-hand-hint" id="mac-hand-hint" aria-hidden="true">
-              <div class="hand-gesture">
-                <span class="hand-lift-arrow">↑</span>
-                <span class="hand-label">OPENING LID &amp; POWERING ON...</span>
-              </div>
-            </div>
 
-            <!-- MacBook Display Lid (Pivots open in 3D) -->
-            <div class="macbook-lid" id="macbook-lid">
+            <!-- MacBook Display Lid (Always Open & Active) -->
+            <div class="macbook-lid mac-lid-opened" id="macbook-lid">
               <div class="macbook-notch">
                 <span class="macbook-camera"></span>
-                <span class="macbook-cam-indicator" id="mac-cam-light"></span>
+                <span class="macbook-cam-indicator active" id="mac-cam-light"></span>
               </div>
               
-              <!-- Screen Display -->
+              <!-- Screen Display: Direct macOS Sequoia Desktop -->
               <div class="macbook-screen" id="macbook-screen">
                 
-                <!-- 1A: Apple Boot Screen (Pure Black with Apple Logo & White Progress Bar) -->
-                <div class="mac-boot-screen" id="mac-boot">
-                  <div class="mac-apple-boot-box">
-                    <svg class="mac-apple-logo" width="46" height="46" viewBox="0 0 170 170" fill="currentColor">
-                      <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.08-7.55-7.85-11.59-14.34-5.35-8.52-9.74-18.06-13.18-28.61-3.44-10.55-5.16-20.73-5.16-29.54 0-14.24 3.73-25.77 11.19-34.58 7.46-8.81 16.78-13.32 27.97-13.55 4.58 0 9.84 1.25 15.78 3.76 5.94 2.51 9.79 3.82 11.55 3.92 1.45 0 5.37-1.35 11.75-4.04 6.38-2.69 11.83-3.92 16.36-3.7 12.18.55 22.18 5.09 29.98 13.62-10.66 6.42-15.88 15.25-15.66 26.5.22 8.71 3.59 15.93 10.12 21.65 6.53 5.72 14.15 9.04 22.86 9.97-2.39 7.18-5.46 14.7-9.22 22.56zM119.22 33.3c0-7.39 2.67-14.28 8.01-20.67 5.34-6.39 12-10.66 19.97-12.82.22 1.3.33 2.51.33 3.63 0 7.39-2.73 14.42-8.19 21.09-5.46 6.67-12.16 10.77-20.12 12.31z"/>
-                    </svg>
-                    <div class="mac-apple-boot-bar">
-                      <div class="mac-apple-boot-fill" id="mac-boot-fill"></div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- 1B: macOS Sequoia Desktop Canvas -->
+                <!-- macOS Sequoia Desktop Canvas (Direct View - No Boot Screen) -->
                 <div class="mac-desktop-canvas" id="mac-desktop">
                   
                   <!-- macOS Menu Bar -->
@@ -263,7 +242,7 @@
                   </div>
 
                   <!-- macOS Safari Application Window -->
-                  <div class="macos-safari-window" id="mac-safari-app">
+                  <div class="macos-safari-window active" id="mac-safari-app">
                     
                     <!-- Window Titlebar with Traffic Lights -->
                     <div class="macos-window-titlebar">
@@ -281,7 +260,7 @@
                       <div class="macos-safari-omnibar">
                         <svg class="macos-lock-icon" width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
                         <div class="macos-omnibar-text">
-                          <span id="mac-typed-url"></span><span class="macos-cursor">|</span>
+                          <span id="mac-typed-url">https://god4xe.onrender.com</span><span class="macos-cursor">|</span>
                         </div>
                         <span class="macos-reload-btn">↻</span>
                         <div class="macos-page-progress" id="mac-loading-progress"></div>
@@ -294,7 +273,7 @@
                     </div>
 
                     <!-- Safari Web Page Viewport -->
-                    <div class="macos-webview-viewport" id="mac-webview">
+                    <div class="macos-webview-viewport loaded" id="mac-webview">
                       <div class="mac-site-content" id="mac-site-scroll">
                         <!-- Clean GOD4XE Hero Banner inside macOS -->
                         <div class="ms-hero">
@@ -351,7 +330,7 @@
               </div>
             </div>
 
-            <!-- MacBook Base Chassis with Trackpad -->
+            <!-- MacBook Base Chassis with Keyboard Deck & Trackpad -->
             <div class="macbook-base">
               <div class="macbook-keyboard-deck">
                 <div class="mac-keyboard-rows">
@@ -367,25 +346,13 @@
           </div>
         </div>
 
-        <!-- 2. IPHONE 16 PRO (GENUINE SEAMLESS RETINA DISPLAY & AUTHENTIC IOS 18 WORKFLOW) -->
+        <!-- 2. IPHONE 16 PRO (POSITIONED DIRECTLY BELOW MACBOOK ON MOBILE) -->
         <div class="iphone-seamless-stage-wrap" id="iphone-stage">
           <div class="iphone-pro-device" id="iphone-device">
             
             <div class="iphone-titanium-bezel">
-              <div class="iphone-retina-screen" id="iphone-screen">
+              <div class="iphone-retina-screen ios-awake" id="iphone-screen">
                 
-                <!-- iPhone Apple Boot Screen (Synchronized with Mac) -->
-                <div class="ios-boot-screen" id="ios-boot">
-                  <div class="ios-apple-boot-box">
-                    <svg class="ios-apple-logo" width="38" height="38" viewBox="0 0 170 170" fill="currentColor">
-                      <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.08-7.55-7.85-11.59-14.34-5.35-8.52-9.74-18.06-13.18-28.61-3.44-10.55-5.16-20.73-5.16-29.54 0-14.24 3.73-25.77 11.19-34.58 7.46-8.81 16.78-13.32 27.97-13.55 4.58 0 9.84 1.25 15.78 3.76 5.94 2.51 9.79 3.82 11.55 3.92 1.45 0 5.37-1.35 11.75-4.04 6.38-2.69 11.83-3.92 16.36-3.7 12.18.55 22.18 5.09 29.98 13.62-10.66 6.42-15.88 15.25-15.66 26.5.22 8.71 3.59 15.93 10.12 21.65 6.53 5.72 14.15 9.04 22.86 9.97-2.39 7.18-5.46 14.7-9.22 22.56zM119.22 33.3c0-7.39 2.67-14.28 8.01-20.67 5.34-6.39 12-10.66 19.97-12.82.22 1.3.33 2.51.33 3.63 0 7.39-2.73 14.42-8.19 21.09-5.46 6.67-12.16 10.77-20.12 12.31z"/>
-                    </svg>
-                    <div class="ios-apple-boot-bar">
-                      <div class="ios-apple-boot-fill" id="ios-boot-fill"></div>
-                    </div>
-                  </div>
-                </div>
-
                 <!-- iOS 18 Ambient Fluid Wallpaper -->
                 <div class="ios-ambient-wallpaper"></div>
 
@@ -426,14 +393,14 @@
                     <span class="ios-aa-btn">aA</span>
                     <div class="ios-capsule-url">
                       <svg class="ios-lock-icon" width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
-                      <span class="ios-typed-domain" id="ios-typed-url"></span><span class="ios-cursor">|</span>
+                      <span class="ios-typed-domain" id="ios-typed-url">god4xe.onrender.com</span><span class="ios-cursor">|</span>
                     </div>
                     <span class="ios-reload-btn">↻</span>
                     <div class="ios-capsule-progress" id="ios-loading-bar"></div>
                   </div>
 
                   <!-- Loaded Mobile Website inside iPhone -->
-                  <div class="ios-website-viewport" id="ios-webview">
+                  <div class="ios-website-viewport loaded" id="ios-webview">
                     <div class="ios-site-header">
                       <div class="ios-site-brand">
                         <span class="is-dot"></span>
@@ -644,7 +611,7 @@
         <div class="posts-grid" id="main-posts-grid">
           {% for post in posts %}
           <article class="post-card cyber-card" id="post-card-{{ post.slug }}" data-slug="{{ post.slug }}">
-            <a href="/post/{{ post.slug }}" class="post-thumb-link post-drawer-trigger" data-post-slug="{{ post.slug }}">
+            <a href="/post/{{ post.slug }}" class="post-thumb-link">
               {% if post.thumbnail_url %}
               <img src="{{ post.thumbnail_url }}" alt="{{ post.title }}" class="post-thumb-img" loading="lazy">
               {% else %}
@@ -664,7 +631,7 @@
               </div>
 
               <h3 class="post-card-title">
-                <a href="/post/{{ post.slug }}" class="post-drawer-trigger" data-post-slug="{{ post.slug }}">{{ post.title }}</a>
+                <a href="/post/{{ post.slug }}">{{ post.title }}</a>
               </h3>
 
               <p class="post-excerpt">
@@ -687,10 +654,10 @@
               {% endif %}
 
               <div class="post-card-footer">
-                <button type="button" class="read-more-link btn-read-guide post-drawer-trigger" data-post-slug="{{ post.slug }}">
+                <a href="/post/{{ post.slug }}" class="read-more-link btn-read-guide">
                   <span>Read Guide</span>
                   <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                </button>
+                </a>
                 {% if post.download_url %}
                 <span class="badge badge-success" style="font-size: 0.72rem;">Download Available</span>
                 {% endif %}
@@ -700,33 +667,6 @@
           {% endfor %}
         </div>
       </div>
-
-      <!-- Right-Side Sliding Article Drawer (Point 1) -->
-      <aside class="article-slide-drawer" id="article-slide-drawer" aria-hidden="true" role="dialog" aria-modal="true">
-        <div class="drawer-inner cyber-card">
-          <!-- Drawer Top Action Header -->
-          <div class="drawer-header-bar">
-            <button type="button" class="drawer-close-btn" id="drawer-close-btn" aria-label="Close guide">
-              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-              <span>CLOSE GUIDE</span>
-            </button>
-            <div class="drawer-header-actions">
-              <a href="#" target="_blank" class="drawer-fullpage-btn" id="drawer-fullpage-link" title="Open full guide in separate tab">
-                <span>FULL PAGE</span>
-                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-              </a>
-            </div>
-          </div>
-
-          <!-- Drawer Scrollable Content Area -->
-          <div class="drawer-body-scroll" id="drawer-content-area">
-            <div class="drawer-placeholder">
-              <div class="drawer-spinner"></div>
-              <p>LOADING GUIDE...</p>
-            </div>
-          </div>
-        </div>
-      </aside>
 
     </div>
     {% else %}
@@ -750,7 +690,7 @@
     <div class="posts-grid">
       {% for post in popular_posts %}
       <article class="post-card cyber-card" id="pop-card-{{ post.slug }}" data-slug="{{ post.slug }}">
-        <a href="/post/{{ post.slug }}" class="post-thumb-link post-drawer-trigger" data-post-slug="{{ post.slug }}">
+        <a href="/post/{{ post.slug }}" class="post-thumb-link">
           {% if post.thumbnail_url %}
           <img src="{{ post.thumbnail_url }}" alt="{{ post.title }}" class="post-thumb-img" loading="lazy">
           {% else %}
@@ -770,7 +710,7 @@
           </div>
 
           <h3 class="post-card-title">
-            <a href="/post/{{ post.slug }}" class="post-drawer-trigger" data-post-slug="{{ post.slug }}">{{ post.title }}</a>
+            <a href="/post/{{ post.slug }}">{{ post.title }}</a>
           </h3>
 
           <p class="post-excerpt">
@@ -793,10 +733,10 @@
           {% endif %}
 
           <div class="post-card-footer">
-            <button type="button" class="read-more-link link-accent btn-read-guide post-drawer-trigger" data-post-slug="{{ post.slug }}">
+            <a href="/post/{{ post.slug }}" class="read-more-link link-accent btn-read-guide">
               <span>Get Details</span>
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-            </button>
+            </a>
           </div>
         </div>
       </article>

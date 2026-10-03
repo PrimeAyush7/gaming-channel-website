@@ -107,7 +107,7 @@ async def post_detail_view(request: Request, slug: str):
     })
     return templates.TemplateResponse(request=request, name="public/post.html", context=ctx)
 
-@router.get("/api/post-drawer/{slug}")
+@router.get("/api/post-drawer/{slug:path}")
 async def post_drawer_json(request: Request, slug: str):
     post = post_service.get_post_by_slug(slug, only_published=True)
     if not post:

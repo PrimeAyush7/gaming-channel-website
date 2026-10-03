@@ -1169,56 +1169,17 @@ body.preview-hud-open {
 }
 
 /* ==========================================================================
-   3D APPLE HARDWARE SHOWCASE: MACBOOK PRO 16" (MACOS) & IPHONE 16 PRO (IOS)
+   3D APPLE HARDWARE SHOWCASE: MACBOOK PRO 16" (TOP) + IPHONE 16 PRO (BELOW)
    ========================================================================== */
-.device-view-selector {
-  display: flex;
-  justify-content: center;
-  gap: 0.6rem;
-  margin-top: 1.25rem;
-  flex-wrap: wrap;
-}
-
-.dev-view-tab {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: rgba(14, 22, 38, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: var(--text-muted);
-  font-family: var(--font-heading);
-  font-size: 0.74rem;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-  padding: 0.4rem 1rem;
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(10px);
-}
-
-.dev-view-tab:hover {
-  color: #fff;
-  border-color: rgba(0, 242, 254, 0.4);
-}
-
-.dev-view-tab.active {
-  background: rgba(0, 242, 254, 0.15);
-  border-color: var(--neon-cyan);
-  color: #fff;
-  box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
-}
-
 .hero-devices-showcase {
   position: relative;
   width: 100%;
   max-width: 1060px;
-  min-height: 440px;
   margin: 1.5rem auto 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 3rem;
+  gap: 3.5rem;
   perspective: 1400px;
   transform-style: preserve-3d;
   box-sizing: border-box;
@@ -1239,23 +1200,6 @@ body.preview-hud-open {
   animation: pulse-ambient-glow 3.5s infinite alternate ease-in-out;
 }
 
-/* View Mode Toggles */
-.hero-devices-showcase.view-mode-mac .iphone-seamless-stage-wrap {
-  display: none !important;
-}
-.hero-devices-showcase.view-mode-mac .macbook-stage-wrap {
-  width: 620px !important;
-  max-width: 95vw !important;
-}
-
-.hero-devices-showcase.view-mode-iphone .macbook-stage-wrap {
-  display: none !important;
-}
-.hero-devices-showcase.view-mode-iphone .iphone-seamless-stage-wrap {
-  width: 320px !important;
-  height: 420px !important;
-}
-
 /* --------------------------------------------------------------------------
    1. MACBOOK PRO 16-INCH (Space Black Aluminum Chassis & macOS Sequoia)
    -------------------------------------------------------------------------- */
@@ -1265,7 +1209,6 @@ body.preview-hud-open {
   perspective: 1200px;
   transform-style: preserve-3d;
   flex-shrink: 0;
-  transition: all 0.4s ease;
 }
 
 .macbook-device {
@@ -1277,47 +1220,7 @@ body.preview-hud-open {
   filter: drop-shadow(0 25px 45px rgba(0, 0, 0, 0.95));
 }
 
-.mac-open-hand-hint {
-  position: absolute;
-  top: -38px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 50;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.4s ease;
-}
-
-.mac-open-hand-hint.active {
-  opacity: 1;
-}
-
-.hand-gesture {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(0, 242, 254, 0.22);
-  border: 1px solid var(--neon-cyan);
-  border-radius: var(--radius-full);
-  padding: 4px 12px;
-  box-shadow: 0 0 16px rgba(0, 242, 254, 0.45);
-}
-
-.hand-lift-arrow {
-  color: var(--neon-cyan);
-  font-weight: 900;
-  animation: lift-arrow 0.8s infinite alternate ease-in-out;
-}
-
-.hand-label {
-  font-family: var(--font-heading);
-  font-size: 0.64rem;
-  font-weight: 800;
-  letter-spacing: 0.8px;
-  color: #fff;
-}
-
-/* MacBook Display Lid (Smooth 3D Opening Hinge) */
+/* MacBook Display Lid (Direct Open Stance) */
 .macbook-lid {
   width: 100%;
   height: 310px;
@@ -1330,15 +1233,6 @@ body.preview-hud-open {
   box-sizing: border-box;
   transform-origin: bottom center;
   transform-style: preserve-3d;
-  transition: transform 1.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.macbook-lid.mac-lid-closed {
-  transform: rotateX(-80deg) translateY(18px);
-}
-
-.macbook-lid.mac-lid-opened {
-  transform: rotateX(0deg) translateY(0);
 }
 
 .macbook-notch {
@@ -1370,10 +1264,6 @@ body.preview-hud-open {
   height: 3px;
   border-radius: 50%;
   background: #10b981;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-.macbook-cam-indicator.active {
   opacity: 1;
   box-shadow: 0 0 4px #10b981;
 }
@@ -1390,52 +1280,7 @@ body.preview-hud-open {
   flex-direction: column;
 }
 
-/* 1A. Authentic Apple Boot Screen */
-.mac-boot-screen {
-  position: absolute;
-  inset: 0;
-  background: #000000;
-  z-index: 30;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 1;
-  transition: opacity 0.7s ease;
-}
-
-.mac-boot-screen.fade-out {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.mac-apple-boot-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-}
-
-.mac-apple-logo {
-  color: #ffffff;
-  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.4));
-}
-
-.mac-apple-boot-bar {
-  width: 95px;
-  height: 3px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.mac-apple-boot-fill {
-  width: 0%;
-  height: 100%;
-  background: #ffffff;
-  border-radius: 2px;
-}
-
-/* 1B. macOS Sequoia Desktop Canvas */
+/* macOS Sequoia Desktop Canvas (Direct Active View) */
 .mac-desktop-canvas {
   position: absolute;
   inset: 0;
@@ -1512,14 +1357,6 @@ body.preview-hud-open {
   flex-direction: column;
   overflow: hidden;
   position: relative;
-  opacity: 0;
-  transform: scale(0.96) translateY(10px);
-  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.macos-safari-window.active {
-  opacity: 1;
-  transform: scale(1) translateY(0);
 }
 
 .macos-window-titlebar {
@@ -1616,12 +1453,6 @@ body.preview-hud-open {
   overflow: hidden;
   background: #05070f;
   position: relative;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-}
-
-.macos-webview-viewport.loaded {
-  opacity: 1;
 }
 
 .mac-site-content {
@@ -1853,12 +1684,11 @@ body.preview-hud-open {
    -------------------------------------------------------------------------- */
 .iphone-seamless-stage-wrap {
   position: relative;
-  width: 250px;
-  height: 490px;
+  width: 240px;
+  height: 480px;
   perspective: 1200px;
   transform-style: preserve-3d;
   flex-shrink: 0;
-  transition: all 0.4s ease;
 }
 
 .iphone-pro-device {
@@ -1874,8 +1704,8 @@ body.preview-hud-open {
   height: 100%;
   background: #141721;
   padding: 6px;
-  border-radius: 34px;
-  border: 2px solid rgba(212, 196, 176, 0.4); /* Natural Titanium Hue */
+  border-radius: 36px;
+  border: 2px solid rgba(212, 196, 176, 0.45); /* Natural Titanium Hue */
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.8), inset 0 0 8px rgba(0, 0, 0, 0.9);
   position: relative;
   box-sizing: border-box;
@@ -1885,62 +1715,12 @@ body.preview-hud-open {
   width: 100%;
   height: 100%;
   background: #000;
-  border-radius: 28px;
+  border-radius: 30px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   position: relative;
-  opacity: 0.6;
-  transition: opacity 0.5s ease;
-}
-
-.iphone-retina-screen.ios-awake {
   opacity: 1;
-}
-
-/* iPhone Apple Boot Screen (Simultaneous with Mac) */
-.ios-boot-screen {
-  position: absolute;
-  inset: 0;
-  background: #000000;
-  z-index: 40;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 1;
-  transition: opacity 0.7s ease;
-}
-
-.ios-boot-screen.fade-out {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.ios-apple-boot-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-}
-
-.ios-apple-logo {
-  color: #ffffff;
-  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
-}
-
-.ios-apple-boot-bar {
-  width: 75px;
-  height: 2.5px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.ios-apple-boot-fill {
-  width: 0%;
-  height: 100%;
-  background: #ffffff;
-  border-radius: 2px;
 }
 
 /* iOS 18 Ambient Wallpaper */
@@ -2182,11 +1962,6 @@ body.preview-hud-open {
   overflow-y: auto;
   padding: 6px 12px 12px;
   position: relative;
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-.ios-website-viewport.loaded {
-  opacity: 1;
 }
 .ios-website-viewport::-webkit-scrollbar {
   display: none;
