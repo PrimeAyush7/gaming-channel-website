@@ -11,19 +11,43 @@
   </div>
   {% endif %}
 
-  <!-- Hero Section -->
-  <section class="hero-section">
-    <div class="hero-grid">
+  <!-- VANGUARD 3D DIMENSIONAL FIELD HERO SECTION (21st.dev Architecture) -->
+  <section class="hero-section hero-dimensional-section">
+    <!-- WebGL Canvas Container for 3D Shader & Orbiting Glass Spheres -->
+    <canvas id="webgl-canvas" class="hero-webgl-canvas"></canvas>
+
+    <!-- Technical Grid Overlay (Dark Mode) -->
+    <div class="hero-tech-grid" aria-hidden="true"></div>
+
+    <!-- Cinematic Grain Overlay (Dark Mode) -->
+    <div class="hero-cinematic-grain" aria-hidden="true"></div>
+
+    <div class="hero-grid hero-dimensional-grid">
       <div class="hero-text-col">
-        <div class="hero-badge">
+        <!-- Dimensional Core Badge -->
+        <div class="hero-badge gsap-reveal-text">
           <span class="pulse-dot"></span>
-          <span class="badge-text">LIVE TOURNAMENT ENGINE // OB-52 READY</span>
+          <span class="badge-text">DIMENSIONAL CORE v4.5 // OB-52 ARENA</span>
         </div>
-        <h1 class="hero-title">
-          {{ settings.get('hero_headline', 'DOMINATE THE ARENA WITH PRO ESPORTS CONFIGS') }}
+
+        <!-- Vanguard Precision Headline with Masked Word Animation -->
+        <h1 class="hero-title hero-dimensional-title">
+          <span class="masked-word-wrap"><span class="masked-word font-semibold">IMMERSIVE</span></span>
+          <span class="masked-word-wrap"><span class="masked-word font-semibold">CONFIGS,</span></span>
+          <br class="hidden-mobile">
+          <span class="masked-word-wrap"><span class="masked-word font-semibold">ENGINEERED</span></span>
+          <span class="masked-word-wrap"><span class="masked-word font-semibold">WITH</span></span>
+          <br class="hidden-mobile">
+          <span class="masked-word-wrap">
+            <span class="masked-word text-gradient-metallic font-semibold">ABSOLUTE</span>
+          </span>
+          <span class="masked-word-wrap">
+            <span class="masked-word text-gradient-aurora font-semibold">PRECISION.</span>
+          </span>
         </h1>
-        <p class="hero-desc">
-          {{ settings.get('site_description') or 'Official gaming hub featuring battle-tested sensitivity configs, patch updates, daily Free Fire tournaments, and official Android app downloads.' }}
+
+        <p class="hero-desc gsap-reveal-text">
+          {{ settings.get('site_description') or 'We build boundary-pushing, physics-enabled digital topologies that merge advanced WebGL with sleek brutalism, crafting the next frontier of immersive esports computing.' }}
         </p>
 
         <!-- Custom Description Links (Configured in Admin Settings) -->
@@ -35,7 +59,7 @@
           (settings.get('desc_link_5_title', ''), settings.get('desc_link_5_url', '')),
           (settings.get('desc_link_6_title', ''), settings.get('desc_link_6_url', ''))
         ] %}
-        <div class="hero-custom-links">
+        <div class="hero-custom-links gsap-reveal-text">
           {% for title, url in custom_desc_links %}
             {% if title and url %}
             <a href="{{ url }}" target="_blank" rel="noopener noreferrer" class="hero-custom-link-pill">
@@ -45,26 +69,27 @@
           {% endfor %}
         </div>
 
-        <!-- Fast Action Buttons: Esports, Announcements, App & Login -->
-        <div class="hero-action-buttons">
-          <a href="/esports" class="btn btn-primary hero-btn-main">
-            <span>🏆</span> Esports Arena
+        <!-- Vanguard Action Buttons: Primary White Pill + Glass Secondary + Quick Links -->
+        <div class="hero-action-buttons gsap-reveal-text">
+          <a href="/esports" class="btn btn-dimensional-primary">
+            <span>Initialize Tournaments</span>
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
           </a>
-          <a href="/announcements" class="btn btn-secondary">
+          <a href="/download-app" class="btn btn-dimensional-secondary">
+            <span>📱 Launch Android App</span>
+          </a>
+          <a href="/announcements" class="btn btn-secondary btn-sm">
             <span>📢</span> Notices
           </a>
-          <a href="/download-app" class="btn btn-secondary hero-btn-apk">
-            <span>📱</span> Download APK
-          </a>
           {% if not current_user %}
-          <a href="/login" class="btn btn-secondary">
-            <span>🔑</span> Player Login
+          <a href="/login" class="btn btn-secondary btn-sm">
+            <span>🔑</span> Player Portal
           </a>
           {% endif %}
         </div>
 
         <!-- Search Form -->
-        <form action="/search" method="GET" class="hero-search-box">
+        <form action="/search" method="GET" class="hero-search-box gsap-reveal-text">
           <div class="hero-search-inner">
             <svg class="hero-search-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             <input type="text" name="q" placeholder="Search sensitivity, OB updates, DPI configs..." required class="hero-search-input">
@@ -76,7 +101,7 @@
         </form>
 
         <!-- Hero Quick Stats Ticker -->
-        <div class="hero-stats-row">
+        <div class="hero-stats-row gsap-reveal-text">
           <div class="hero-stat-card">
             <div class="stat-number">98.4%</div>
             <div class="stat-label">HEADSHOT ACCURACY</div>
@@ -93,7 +118,7 @@
       </div>
 
       <!-- Hero Media Col: Featured Video or Featured Post Highlight -->
-      <div class="hero-media-col">
+      <div class="hero-media-col gsap-reveal">
         {% if featured_video %}
         <div class="featured-video-card cyber-card" data-track-youtube="1">
           <div class="video-responsive-wrapper">
@@ -129,6 +154,31 @@
           <a href="/esports" class="btn btn-primary btn-sm">Enter Arena &rarr;</a>
         </div>
         {% endif %}
+      </div>
+    </div>
+
+    <!-- Vanguard Bottom Controls: Vector Tracker & Interactive Void/Aurora Theme Switcher -->
+    <div class="hero-bottom-indicators gsap-reveal">
+      <div class="vector-hud-display">
+        <div class="vector-label">
+          Vector // <span id="coord-display" class="vector-coords">0.0000, 0.0000</span>
+        </div>
+        
+        <!-- Custom 21st.dev Theme Toggle: Void <-> Aurora -->
+        <div class="theme-toggle-wrap" id="theme-toggle" role="switch" aria-checked="false" title="Toggle Void / Aurora Shaders">
+          <span class="theme-name theme-void">Void</span>
+          <div class="toggle-track" id="toggle-track">
+            <div class="toggle-thumb" id="toggle-thumb"></div>
+          </div>
+          <span class="theme-name theme-aurora">Aurora</span>
+        </div>
+      </div>
+
+      <div class="descend-indicator">
+        <span class="descend-label">Descend</span>
+        <div class="descend-track">
+          <div class="scroll-line"></div>
+        </div>
       </div>
     </div>
   </section>
