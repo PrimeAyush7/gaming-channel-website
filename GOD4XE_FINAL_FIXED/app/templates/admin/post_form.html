@@ -1,20 +1,6 @@
 {% extends "admin/base.html" %}
 
-{% block header_title %}{% if post %}Edit Post #{{ post.id }}{% else %}Create New Post{% endif %}<script>
-document.getElementById('thumbnail_file').addEventListener('change', function(e) {
-  if (this.files && this.files[0]) {
-    var file = this.files[0];
-    var reader = new FileReader();
-    reader.onload = function(evt) {
-      document.getElementById('thumb-preview-img').src = evt.target.result;
-      document.getElementById('thumb-preview-box').style.display = 'flex';
-      document.getElementById('thumb-status-text').innerText = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB ready to upload)';
-    };
-    reader.readAsDataURL(file);
-  }
-});
-</script>
-{% endblock %}
+{% block header_title %}{% if post %}Edit Post #{{ post.id }}{% else %}Create New Post{% endif %}{% endblock %}
 
 {% block content %}
 <div class="admin-card" style="max-width: 1000px;">

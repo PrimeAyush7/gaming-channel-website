@@ -78,6 +78,7 @@ CREATE TABLE IF NOT EXISTS media (
     mime_type VARCHAR(100) NOT NULL,
     file_size BIGINT NOT NULL,
     url TEXT NOT NULL,
+    file_data BYTEA,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -610,16 +610,18 @@ def upload_user_avatar(user_id: int, file_bytes: bytes, filename: str, content_t
     target_dir.mkdir(parents=True, exist_ok=True)
     target_path = target_dir / safe_filename
 
-    with open(target_path, "wb") as f:
-        f.write(file_bytes)
-
-    # Cloudinary persistence with automatic fallback to local disk
     try:
-        from app.services.media import upload_to_cloudinary
-        cloud_url = upload_to_cloudinary(file_bytes, safe_filename, folder="god4xe_avatars")
-    except Exception:
-        cloud_url = None
-    avatar_url = cloud_url if cloud_url else f"/static/uploads/{safe_filename}"
+        from app.services.media import save_media_file
+        rec, _ = save_media_file(safe_filename, file_bytes, f"image/{ext}")
+        if rec and rec.get("url"):
+            avatar_url = rec["url"]
+        else:
+            avatar_url = f"/static/uploads/{safe_filename}"
+    except Exception as e:
+        print(f"[AVATAR SAVE FALLBACK] {e}")
+        with open(target_path, "wb") as f:
+            f.write(file_bytes)
+        avatar_url = f"/static/uploads/{safe_filename}"
     
     with get_db() as conn:
         cursor = conn.cursor()

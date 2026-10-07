@@ -77,6 +77,42 @@ def get_dashboard_stats():
         """)
         top_posts = [dict_from_row(r) for r in cursor.fetchall()]
 
+        # APK / Esports Operations Stats
+        try:
+            cursor.execute("SELECT COUNT(*) FROM tournaments;")
+            r = cursor.fetchone()
+            total_tournaments = r[0] if r else 0
+        except Exception:
+            total_tournaments = 0
+
+        try:
+            cursor.execute("SELECT COUNT(*) FROM app_users;")
+            r = cursor.fetchone()
+            total_app_users = r[0] if r else 0
+        except Exception:
+            total_app_users = 0
+
+        try:
+            cursor.execute("SELECT COUNT(*) FROM diamond_orders WHERE status = 'PENDING';")
+            r = cursor.fetchone()
+            pending_deposits = r[0] if r else 0
+        except Exception:
+            pending_deposits = 0
+
+        try:
+            cursor.execute("SELECT COUNT(*) FROM withdrawal_requests WHERE status = 'PENDING';")
+            r = cursor.fetchone()
+            pending_withdrawals = r[0] if r else 0
+        except Exception:
+            pending_withdrawals = 0
+
+        try:
+            cursor.execute("SELECT COUNT(*) FROM match_disputes WHERE status = 'PENDING';")
+            r = cursor.fetchone()
+            pending_disputes = r[0] if r else 0
+        except Exception:
+            pending_disputes = 0
+
         return {
             "total_posts": total_posts,
             "published_posts": published_posts,
@@ -87,5 +123,10 @@ def get_dashboard_stats():
             "total_downloads": total_downloads,
             "youtube_clicks": youtube_clicks,
             "recent_events": recent_events,
-            "top_posts": top_posts
+            "top_posts": top_posts,
+            "total_tournaments": total_tournaments,
+            "total_app_users": total_app_users,
+            "pending_deposits": pending_deposits,
+            "pending_withdrawals": pending_withdrawals,
+            "pending_disputes": pending_disputes
         }

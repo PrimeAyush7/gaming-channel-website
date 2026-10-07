@@ -32,82 +32,125 @@
       <button id="admin-drawer-close" class="admin-drawer-close-btn" aria-label="Close navigation menu">&times;</button>
     </div>
 
-    <nav class="sidebar-nav">
-      <a href="/admin" class="sidebar-link {% if active_nav == 'dashboard' %}active{% endif %}">
-        <span class="icon">📊</span> Dashboard
-      </a>
-      
-      <a href="/admin/tournaments" class="sidebar-link {% if active_nav == 'tournaments' %}active{% endif %}">
-        <span class="icon">🏆</span> Tournaments & Matches
-      </a>
-      <a href="/admin/categories" class="sidebar-link {% if active_nav == 'categories' %}active{% endif %}">
-        <span class="icon">📂</span> Categories & Modes
-      </a>
-      <a href="/admin/guns" class="sidebar-link {% if active_nav == 'guns' %}active{% endif %}">
-        <span class="icon">🔫</span> Allowed Guns (Customs)
-      </a>
-      <a href="/admin/disputes" class="sidebar-link {% if active_nav == 'disputes' %}active{% endif %}">
-        <span class="icon">⚖️</span> Match Disputes
-      </a>
-      <a href="/admin/users" class="sidebar-link {% if active_nav == 'users' %}active{% endif %}">
-        <span class="icon">👥</span> App Players
-      </a>
-      <a href="/admin/avatars" class="sidebar-link {% if active_nav == 'avatars' %}active{% endif %}">
-        <span class="icon">🖼️</span> Avatar Moderation
-      </a>
-      {% if admin and (admin.role == 'SUPER_ADMIN' or admin.role == 'FINANCE_ADMIN') %}
-      <a href="/admin/deposits" class="sidebar-link {% if active_nav == 'deposits' %}active{% endif %}">
-        <span class="icon">💳</span> Deposit Requests
-      </a>
-      <a href="/admin/withdrawals" class="sidebar-link {% if active_nav == 'withdrawals' %}active{% endif %}">
-        <span class="icon">💸</span> Withdrawal Payouts
-      </a>
-      {% endif %}
-      <a href="/admin/updates" class="sidebar-link {% if active_nav == 'updates' %}active{% endif %}">
-        <span class="icon">📢</span> Latest Updates
-      </a>
-      <a href="/admin/announcements" class="sidebar-link {% if active_nav == 'announcements' %}active{% endif %}">
-        <span class="icon">📣</span> Notices & Marquee
-      </a>
-      <a href="/admin/tutorials" class="sidebar-link {% if active_nav == 'tutorials' %}active{% endif %}">
-        <span class="icon">📚</span> How to Play Guides
-      </a>
-      <a href="/admin/communities" class="sidebar-link {% if active_nav == 'communities' %}active{% endif %}">
-        <span class="icon">🌐</span> GOD4XE Communities
-      </a>
-      <a href="/admin/redeem" class="sidebar-link {% if active_nav == 'redeem' %}active{% endif %}">
-        <span class="icon">🎁</span> Redeem Codes
-      </a>
-      {% if admin and admin.role == 'SUPER_ADMIN' %}
-      <a href="/admin/admins" class="sidebar-link {% if active_nav == 'admins' %}active{% endif %}">
-        <span class="icon">👥</span> Admin Accounts & RBAC
-      </a>
-      <a href="/admin/audit-logs" class="sidebar-link {% if active_nav == 'audit_logs' %}active{% endif %}">
-        <span class="icon">📜</span> Audit Logs
-      </a>
-      {% endif %}
+    <!-- Segmented Navigation Filter (Website vs APK Controls) -->
+    <div class="sidebar-mode-filter" id="sidebar-mode-filter">
+      <button type="button" class="mode-btn active" data-mode="all" title="Show all system controls">
+        <span>🔲</span> All
+      </button>
+      <button type="button" class="mode-btn mode-web" data-mode="website" title="Website & Blog Portal Controls">
+        <span>🌐</span> Website
+      </button>
+      <button type="button" class="mode-btn mode-apk" data-mode="apk" title="Esports Gaming APK Controls">
+        <span>📱</span> APK App
+      </button>
+    </div>
 
-      <a href="/admin/posts" class="sidebar-link {% if active_nav == 'posts' %}active{% endif %}">
-        <span class="icon">📝</span> Posts / Articles
-      </a>
-      <a href="/admin/sections" class="sidebar-link {% if active_nav == 'sections' %}active{% endif %}">
-        <span class="icon">📁</span> Dynamic Sections
-      </a>
-      <a href="/admin/tags" class="sidebar-link {% if active_nav == 'tags' %}active{% endif %}">
-        <span class="icon">🏷️</span> Tags
-      </a>
-      <a href="/admin/media" class="sidebar-link {% if active_nav == 'media' %}active{% endif %}">
-        <span class="icon">🖼️</span> Media Library
-      </a>
-      <a href="/admin/youtube" class="sidebar-link {% if active_nav == 'youtube' %}active{% endif %}">
-        <span class="icon">▶️</span> YouTube Videos
-      </a>
-      <a href="/admin/ads" class="sidebar-link {% if active_nav == 'ads' %}active{% endif %}">
-        <span class="icon">💰</span> AdSense & Ads
-      </a>
-      <a href="/admin/settings" class="sidebar-link {% if active_nav == 'settings' %}active{% endif %}">
-        <span class="icon">⚙️</span> Site Settings & SEO
-      </a>
+    <nav class="sidebar-nav">
+      
+      <!-- ============================================== -->
+      <!-- 🌐 WEBSITE & PORTAL CONTROLS -->
+      <!-- ============================================== -->
+      <div class="nav-section nav-group-website">
+        <div class="nav-section-header">
+          <span class="nav-section-title">🌐 Website Controls</span>
+          <span class="nav-section-badge badge-web">PORTAL</span>
+        </div>
+        
+        <a href="/admin/posts" class="sidebar-link {% if active_nav == 'posts' %}active{% endif %}">
+          <span class="icon">📝</span> Posts & Guides
+        </a>
+        <a href="/admin/sections" class="sidebar-link {% if active_nav == 'sections' %}active{% endif %}">
+          <span class="icon">📁</span> Dynamic Sections
+        </a>
+        <a href="/admin/tags" class="sidebar-link {% if active_nav == 'tags' %}active{% endif %}">
+          <span class="icon">🏷️</span> Tags Management
+        </a>
+        <a href="/admin/media" class="sidebar-link {% if active_nav == 'media' %}active{% endif %}">
+          <span class="icon">🖼️</span> Media Library
+        </a>
+        <a href="/admin/youtube" class="sidebar-link {% if active_nav == 'youtube' %}active{% endif %}">
+          <span class="icon">▶️</span> YouTube Videos
+        </a>
+        <a href="/admin/ads" class="sidebar-link {% if active_nav == 'ads' %}active{% endif %}">
+          <span class="icon">💰</span> AdSense & Ads
+        </a>
+        <a href="/admin/settings" class="sidebar-link {% if active_nav == 'settings' %}active{% endif %}">
+          <span class="icon">⚙️</span> Site Settings & SEO
+        </a>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- 📱 ESPORTS APK APP CONTROLS -->
+      <!-- ============================================== -->
+      <div class="nav-section nav-group-apk">
+        <div class="nav-section-header">
+          <span class="nav-section-title">📱 Esports APK Controls</span>
+          <span class="nav-section-badge badge-apk">APK APP</span>
+        </div>
+        
+        <a href="/admin/tournaments" class="sidebar-link {% if active_nav == 'tournaments' %}active{% endif %}">
+          <span class="icon">🏆</span> Tournaments & Matches
+        </a>
+        <a href="/admin/categories" class="sidebar-link {% if active_nav == 'categories' %}active{% endif %}">
+          <span class="icon">📂</span> Categories & Modes
+        </a>
+        <a href="/admin/guns" class="sidebar-link {% if active_nav == 'guns' %}active{% endif %}">
+          <span class="icon">🔫</span> Allowed Guns (Customs)
+        </a>
+        <a href="/admin/disputes" class="sidebar-link {% if active_nav == 'disputes' %}active{% endif %}">
+          <span class="icon">⚖️</span> Match Disputes
+        </a>
+        <a href="/admin/users" class="sidebar-link {% if active_nav == 'users' %}active{% endif %}">
+          <span class="icon">👥</span> App Players
+        </a>
+        <a href="/admin/avatars" class="sidebar-link {% if active_nav == 'avatars' %}active{% endif %}">
+          <span class="icon">🖼️</span> Avatar Moderation
+        </a>
+        {% if admin and (admin.role == 'SUPER_ADMIN' or admin.role == 'FINANCE_ADMIN') %}
+        <a href="/admin/deposits" class="sidebar-link {% if active_nav == 'deposits' %}active{% endif %}">
+          <span class="icon">💳</span> Deposit Requests
+        </a>
+        <a href="/admin/withdrawals" class="sidebar-link {% if active_nav == 'withdrawals' %}active{% endif %}">
+          <span class="icon">💸</span> Withdrawal Payouts
+        </a>
+        {% endif %}
+        <a href="/admin/updates" class="sidebar-link {% if active_nav == 'updates' %}active{% endif %}">
+          <span class="icon">📢</span> App Updates & Versions
+        </a>
+        <a href="/admin/announcements" class="sidebar-link {% if active_nav == 'announcements' %}active{% endif %}">
+          <span class="icon">📣</span> Notices & Marquee
+        </a>
+        <a href="/admin/tutorials" class="sidebar-link {% if active_nav == 'tutorials' %}active{% endif %}">
+          <span class="icon">📚</span> How to Play Guides
+        </a>
+        <a href="/admin/communities" class="sidebar-link {% if active_nav == 'communities' %}active{% endif %}">
+          <span class="icon">🌐</span> GOD4XE Communities
+        </a>
+        <a href="/admin/redeem" class="sidebar-link {% if active_nav == 'redeem' %}active{% endif %}">
+          <span class="icon">🎁</span> Redeem Codes
+        </a>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- 🛡️ SYSTEM & CORE OVERVIEW -->
+      <!-- ============================================== -->
+      <div class="nav-section nav-group-system">
+        <div class="nav-section-header">
+          <span class="nav-section-title">🛡️ System & Core</span>
+        </div>
+        <a href="/admin" class="sidebar-link {% if active_nav == 'dashboard' %}active{% endif %}">
+          <span class="icon">📊</span> Dashboard Overview
+        </a>
+        {% if admin and admin.role == 'SUPER_ADMIN' %}
+        <a href="/admin/admins" class="sidebar-link {% if active_nav == 'admins' %}active{% endif %}">
+          <span class="icon">👥</span> Admin Accounts & RBAC
+        </a>
+        <a href="/admin/audit-logs" class="sidebar-link {% if active_nav == 'audit_logs' %}active{% endif %}">
+          <span class="icon">📜</span> Audit Logs
+        </a>
+        {% endif %}
+      </div>
+
     </nav>
 
     <div class="sidebar-footer">

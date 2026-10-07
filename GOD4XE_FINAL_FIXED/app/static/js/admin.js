@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initConfirmDeletes();
   initEditorShortcuts();
   initAdminDrawer();
+  initSidebarFilter();
 });
 
 function initAdminDrawer() {
@@ -157,6 +158,54 @@ function initEditorShortcuts() {
       else if (cmd === 'quote') insertFormat('\n> ', '\n');
       else if (cmd === 'code') insertFormat('`', '`');
       else if (cmd === 'link') insertFormat('[', '](https://)');
+    });
+  });
+}
+
+
+function initSidebarFilter() {
+  const filterWrap = document.getElementById('sidebar-mode-filter');
+  if (!filterWrap) return;
+
+  const buttons = filterWrap.querySelectorAll('.mode-btn');
+  const webSection = document.querySelector('.nav-group-website');
+  const apkSection = document.querySelector('.nav-group-apk');
+
+  function applyMode(mode) {
+    buttons.forEach(b => {
+      b.classList.toggle('active', b.getAttribute('data-mode') === mode);
+    });
+    localStorage.setItem('god4xe_admin_mode', mode);
+
+    if (mode === 'website') {
+      if (webSection) webSection.classList.remove('hidden-by-filter');
+      if (apkSection) apkSection.classList.add('hidden-by-filter');
+    } else if (mode === 'apk') {
+      if (webSection) webSection.classList.add('hidden-by-filter');
+      if (apkSection) apkSection.classList.remove('hidden-by-filter');
+    } else {
+      if (webSection) webSection.classList.remove('hidden-by-filter');
+      if (apkSection) apkSection.classList.remove('hidden-by-filter');
+    }
+  }
+
+  let savedMode = localStorage.getItem('god4xe_admin_mode') || 'all';
+  const currentPath = window.location.pathname;
+  const webPaths = ['/admin/posts', '/admin/sections', '/admin/tags', '/admin/media', '/admin/youtube', '/admin/ads', '/admin/settings'];
+  const apkPaths = ['/admin/tournaments', '/admin/categories', '/admin/guns', '/admin/disputes', '/admin/users', '/admin/avatars', '/admin/deposits', '/admin/withdrawals', '/admin/updates', '/admin/announcements', '/admin/tutorials', '/admin/communities', '/admin/redeem'];
+
+  // If user navigated to an APK page while in website mode, auto-switch to apk mode (and vice versa)
+  if (savedMode === 'website' && apkPaths.some(p => currentPath.startsWith(p))) {
+    savedMode = 'apk';
+  } else if (savedMode === 'apk' && webPaths.some(p => currentPath.startsWith(p))) {
+    savedMode = 'website';
+  }
+
+  applyMode(savedMode);
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      applyMode(btn.getAttribute('data-mode'));
     });
   });
 }

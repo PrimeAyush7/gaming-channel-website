@@ -279,120 +279,187 @@
 }
 </style>
 
-<!-- Quick Action Navigation Bar on Mobile/Tablet -->
-<div class="dash-quick-links">
-  <a href="/admin/tournaments" class="dash-chip">🏆 Tournaments</a>
-  <a href="/admin/posts" class="dash-chip">📝 Posts & Guides</a>
-  <a href="/admin/deposits" class="dash-chip">💳 Deposits</a>
-  <a href="/admin/withdrawals" class="dash-chip">💸 Withdrawals</a>
-  <a href="/admin/settings" class="dash-chip">⚙️ Site Settings & Rates</a>
-</div>
-
-<!-- Stats Grid -->
-<div class="stats-grid">
-  <div class="stat-card">
-    <div class="stat-icon-wrapper">📝</div>
-    <div>
-      <div class="stat-value">{{ stats.published_posts }}</div>
-      <div class="stat-label">Published ({{ stats.draft_posts }} Drafts)</div>
-    </div>
-  </div>
-
-  <div class="stat-card">
-    <div class="stat-icon-wrapper">📁</div>
-    <div>
-      <div class="stat-value">{{ stats.total_sections }}</div>
-      <div class="stat-label">Active Sections</div>
-    </div>
-  </div>
-
-  <div class="stat-card">
-    <div class="stat-icon-wrapper">👁️</div>
-    <div>
-      <div class="stat-value">{{ stats.total_post_views }}</div>
-      <div class="stat-label">Total Post Views</div>
-    </div>
-  </div>
-
-  <div class="stat-card">
-    <div class="stat-icon-wrapper" style="color: #34d399; background: rgba(16, 185, 129, 0.15);">📥</div>
-    <div>
-      <div class="stat-value">{{ stats.total_downloads }}</div>
-      <div class="stat-label">Download Clicks</div>
-    </div>
-  </div>
-
-  <div class="stat-card">
-    <div class="stat-icon-wrapper" style="color: #f43f5e; background: rgba(244, 63, 94, 0.15);">▶️</div>
-    <div>
-      <div class="stat-value">{{ stats.youtube_clicks }}</div>
-      <div class="stat-label">YouTube Clicks</div>
-    </div>
-  </div>
-</div>
-
-<div class="dashboard-two-col-grid">
+<!-- Two-Side Quick Action Panels (Website Controls vs APK Controls) -->
+<div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem;">
   
-  <!-- Top Performing Content -->
-  <div class="admin-card">
-    <div class="admin-card-header">
-      <div class="admin-card-title">🔥 Top Viewed Posts</div>
-      <a href="/admin/posts" class="btn-sm btn-edit">Manage Posts</a>
+  <!-- Side 1: 🌐 Website Controls Quick Actions -->
+  <div style="background: rgba(0, 242, 254, 0.04); border: 1px solid rgba(0, 242, 254, 0.25); border-radius: 12px; padding: 1rem 1.25rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+      <div style="font-family: var(--font-heading); font-size: 0.85rem; font-weight: 800; color: var(--neon-cyan); letter-spacing: 1px; display: flex; align-items: center; gap: 0.4rem;">
+        <span>🌐</span> WEBSITE CONTROLS
+      </div>
+      <a href="/" target="_blank" style="font-size: 0.75rem; color: #cbd5e1; text-decoration: underline;">
+        👁️ Open Live Website ↗
+      </a>
     </div>
-
-    <div class="table-responsive">
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>Post Title</th>
-            <th>Views</th>
-            <th>Downloads</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for post in stats.top_posts %}
-          <tr>
-            <td>
-              <a href="/post/{{ post.slug }}" target="_blank" class="dash-post-title" title="{{ post.title }}">
-                {{ post.title }}
-              </a>
-            </td>
-            <td><span class="badge badge-purple">{{ post.view_count }}</span></td>
-            <td><span class="badge badge-success">{{ post.download_count }}</span></td>
-            <td>
-              <a href="/admin/posts/edit/{{ post.id }}" class="btn-sm btn-edit">Edit</a>
-            </td>
-          </tr>
-          {% else %}
-          <tr>
-            <td colspan="4" style="text-align: center; color: var(--admin-dim); padding: 1.5rem;">No posts published yet.</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div class="dash-quick-links" style="margin-bottom: 0;">
+      <a href="/admin/posts/new" class="dash-chip" style="background: rgba(0, 242, 254, 0.15); border-color: var(--neon-cyan); color: #fff;">
+        📝 + Write New Post
+      </a>
+      <a href="/admin/posts" class="dash-chip">📋 All Posts ({{ stats.total_posts }})</a>
+      <a href="/admin/sections" class="dash-chip">📁 Sections ({{ stats.total_sections }})</a>
+      <a href="/admin/tags" class="dash-chip">🏷️ Tags ({{ stats.total_tags }})</a>
+      <a href="/admin/media" class="dash-chip">🖼️ Media Library</a>
+      <a href="/admin/youtube" class="dash-chip">▶️ YouTube Videos</a>
+      <a href="/admin/ads" class="dash-chip">💰 AdSense & Ads</a>
+      <a href="/admin/settings" class="dash-chip">⚙️ Site Settings & SEO</a>
     </div>
   </div>
 
-  <!-- Recent Activity Feed -->
-  <div class="admin-card">
-    <div class="admin-card-header">
-      <div class="admin-card-title">⚡ Recent System Activity</div>
+  <!-- Side 2: 📱 Esports APK Controls Quick Actions -->
+  <div style="background: rgba(168, 85, 247, 0.04); border: 1px solid rgba(168, 85, 247, 0.25); border-radius: 12px; padding: 1rem 1.25rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+      <div style="font-family: var(--font-heading); font-size: 0.85rem; font-weight: 800; color: #c084fc; letter-spacing: 1px; display: flex; align-items: center; gap: 0.4rem;">
+        <span>📱</span> ESPORTS APK CONTROLS
+      </div>
+      <span style="font-size: 0.75rem; color: var(--admin-muted);">Gaming App & Tournaments Operations</span>
+    </div>
+    <div class="dash-quick-links" style="margin-bottom: 0;">
+      <a href="/admin/tournaments/new" class="dash-chip" style="background: rgba(168, 85, 247, 0.18); border-color: var(--neon-purple); color: #fff;">
+        🏆 + Create Match
+      </a>
+      <a href="/admin/tournaments" class="dash-chip">🏆 Matches ({{ stats.total_tournaments }})</a>
+      <a href="/admin/users" class="dash-chip">👥 App Players ({{ stats.total_app_users }})</a>
+      <a href="/admin/deposits" class="dash-chip" style="{% if stats.pending_deposits > 0 %}border-color: #f59e0b; color: #fef08a;{% endif %}">
+        💳 Deposits {% if stats.pending_deposits > 0 %}<span style="background: #f59e0b; color: #000; border-radius: 10px; padding: 0.1rem 0.4rem; font-size: 0.68rem; margin-left: 0.25rem;">{{ stats.pending_deposits }} PENDING</span>{% endif %}
+      </a>
+      <a href="/admin/withdrawals" class="dash-chip" style="{% if stats.pending_withdrawals > 0 %}border-color: #10b981; color: #a7f3d0;{% endif %}">
+        💸 Payouts {% if stats.pending_withdrawals > 0 %}<span style="background: #10b981; color: #000; border-radius: 10px; padding: 0.1rem 0.4rem; font-size: 0.68rem; margin-left: 0.25rem;">{{ stats.pending_withdrawals }} PENDING</span>{% endif %}
+      </a>
+      <a href="/admin/disputes" class="dash-chip" style="{% if stats.pending_disputes > 0 %}border-color: #ef4444; color: #fca5a5;{% endif %}">
+        ⚖️ Disputes {% if stats.pending_disputes > 0 %}<span style="background: #ef4444; color: #fff; border-radius: 10px; padding: 0.1rem 0.4rem; font-size: 0.68rem; margin-left: 0.25rem;">{{ stats.pending_disputes }} ACTIVE</span>{% endif %}
+      </a>
+      <a href="/admin/updates" class="dash-chip">📢 App Updates</a>
+      <a href="/admin/announcements" class="dash-chip">📣 In-App Notices</a>
+    </div>
+  </div>
+
+</div>
+
+<!-- Split Overview Grid: Website Performance (Left) vs APK App Operations (Right) -->
+<div class="dashboard-split-grid">
+  
+  <!-- LEFT SIDE: 🌐 Website Performance & Content -->
+  <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+    
+    <div class="admin-card" style="margin-bottom: 0; border-top: 3px solid var(--neon-cyan);">
+      <div class="dash-panel-header">
+        <div class="dash-panel-title" style="color: var(--neon-cyan);">
+          <span>🌐</span> Website Performance
+        </div>
+        <a href="/admin/posts" class="btn-sm btn-edit">Manage Posts</a>
+      </div>
+
+      <!-- Website Stats Sub-grid -->
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem; margin-bottom: 1.25rem;">
+        <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--admin-border); border-radius: 8px; padding: 0.85rem;">
+          <div style="font-size: 1.4rem; font-weight: 800; color: #fff;">{{ stats.published_posts }}</div>
+          <div style="font-size: 0.72rem; color: var(--admin-muted);">Live Posts ({{ stats.draft_posts }} Drafts)</div>
+        </div>
+        <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--admin-border); border-radius: 8px; padding: 0.85rem;">
+          <div style="font-size: 1.4rem; font-weight: 800; color: #fff;">{{ stats.total_post_views }}</div>
+          <div style="font-size: 0.72rem; color: var(--admin-muted);">Total Article Views</div>
+        </div>
+        <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--admin-border); border-radius: 8px; padding: 0.85rem;">
+          <div style="font-size: 1.4rem; font-weight: 800; color: #34d399;">{{ stats.total_downloads }}</div>
+          <div style="font-size: 0.72rem; color: var(--admin-muted);">VIP Download Clicks</div>
+        </div>
+        <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--admin-border); border-radius: 8px; padding: 0.85rem;">
+          <div style="font-size: 1.4rem; font-weight: 800; color: #f43f5e;">{{ stats.youtube_clicks }}</div>
+          <div style="font-size: 0.72rem; color: var(--admin-muted);">YouTube Plays</div>
+        </div>
+      </div>
+
+      <!-- Top Viewed Guides & Configs -->
+      <div style="font-size: 0.85rem; font-weight: 700; color: #fff; margin-bottom: 0.65rem;">
+        🔥 Most Viewed Articles & Guides
+      </div>
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Views</th>
+              <th>Downloads</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for post in stats.top_posts %}
+            <tr>
+              <td>
+                <a href="/post/{{ post.slug }}" target="_blank" class="dash-post-title" title="{{ post.title }}">
+                  {{ post.title }}
+                </a>
+              </td>
+              <td><span class="badge badge-purple">{{ post.view_count }}</span></td>
+              <td><span class="badge badge-success">{{ post.download_count }}</span></td>
+              <td>
+                <a href="/admin/posts/edit/{{ post.id }}" class="btn-sm btn-edit">Edit</a>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="4" style="text-align: center; color: var(--admin-dim); padding: 1.25rem;">No posts published yet.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
 
-    <div class="activity-feed-container">
-      {% for event in stats.recent_events %}
-      <div class="activity-feed-item">
-        <div class="activity-feed-info">
-          <span class="badge badge-purple" style="font-size: 0.65rem; flex-shrink: 0;">{{ event.event_type }}</span>
-          <span class="activity-feed-path" title="{{ event.page_path or ('Post #' ~ event.target_id) }}">{{ event.page_path or ('Post #' ~ event.target_id) }}</span>
+  </div>
+
+  <!-- RIGHT SIDE: 📱 Esports APK Operations -->
+  <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+    
+    <div class="admin-card" style="margin-bottom: 0; border-top: 3px solid var(--neon-purple);">
+      <div class="dash-panel-header">
+        <div class="dash-panel-title" style="color: #c084fc;">
+          <span>📱</span> Esports APK Operations
         </div>
-        <div class="activity-feed-time">{{ event.created_at[:16] }}</div>
+        <a href="/admin/tournaments" class="btn-sm btn-edit">All Matches</a>
       </div>
-      {% else %}
-      <div style="color: var(--admin-dim); text-align: center; padding: 2rem;">No recent analytics events.</div>
-      {% endfor %}
+
+      <!-- APK Stats Sub-grid -->
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem; margin-bottom: 1.25rem;">
+        <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--admin-border); border-radius: 8px; padding: 0.85rem;">
+          <div style="font-size: 1.4rem; font-weight: 800; color: #fff;">{{ stats.total_app_users }}</div>
+          <div style="font-size: 0.72rem; color: var(--admin-muted);">Registered App Players</div>
+        </div>
+        <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--admin-border); border-radius: 8px; padding: 0.85rem;">
+          <div style="font-size: 1.4rem; font-weight: 800; color: #c084fc;">{{ stats.total_tournaments }}</div>
+          <div style="font-size: 0.72rem; color: var(--admin-muted);">Total Tournaments</div>
+        </div>
+        <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--admin-border); border-radius: 8px; padding: 0.85rem;">
+          <div style="font-size: 1.4rem; font-weight: 800; color: {% if stats.pending_deposits > 0 %}#f59e0b{% else %}#fff{% endif %};">{{ stats.pending_deposits }}</div>
+          <div style="font-size: 0.72rem; color: var(--admin-muted);">Pending Deposit Orders</div>
+        </div>
+        <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--admin-border); border-radius: 8px; padding: 0.85rem;">
+          <div style="font-size: 1.4rem; font-weight: 800; color: {% if stats.pending_withdrawals > 0 %}#10b981{% else %}#fff{% endif %};">{{ stats.pending_withdrawals }}</div>
+          <div style="font-size: 0.72rem; color: var(--admin-muted);">Pending Payout Requests</div>
+        </div>
+      </div>
+
+      <!-- Recent System Activity -->
+      <div style="font-size: 0.85rem; font-weight: 700; color: #fff; margin-bottom: 0.65rem;">
+        ⚡ Recent Activity & Audit Feed
+      </div>
+      <div class="activity-feed-container">
+        {% for event in stats.recent_events %}
+        <div class="activity-feed-item">
+          <div class="activity-feed-info">
+            <span class="badge badge-purple" style="font-size: 0.65rem; flex-shrink: 0;">{{ event.event_type }}</span>
+            <span class="activity-feed-path" title="{{ event.page_path or ('Post #' ~ event.target_id) }}">{{ event.page_path or ('Post #' ~ event.target_id) }}</span>
+          </div>
+          <div class="activity-feed-time">{{ event.created_at[:16] }}</div>
+        </div>
+        {% else %}
+        <div style="color: var(--admin-dim); text-align: center; padding: 1.5rem;">No recent analytics events.</div>
+        {% endfor %}
+      </div>
     </div>
+
   </div>
 
 </div>

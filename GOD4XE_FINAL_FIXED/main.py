@@ -51,6 +51,51 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         return response
 
 app.add_middleware(SecurityHeadersMiddleware)
+# Persistent Uploaded Media Serving with PostgreSQL DB Fallback (survives Render dyno restarts/idle wipes)
+@app.get("/static/uploads/{filename:path}")
+@app.get("/media/{filename:path}")
+async def serve_persistent_upload(filename: str):
+    from fastapi.responses import FileResponse, Response
+    from pathlib import Path
+    from app.config import UPLOAD_DIR
+    import mimetypes
+
+    clean_filename = Path(filename).name
+    target_path = UPLOAD_DIR / clean_filename
+
+    # 1. Local disk fast cache
+    if target_path.exists() and target_path.stat().st_size > 0:
+        mime_type, _ = mimetypes.guess_type(str(target_path))
+        if clean_filename.endswith(".svg"):
+            mime_type = "image/svg+xml"
+        return FileResponse(
+            str(target_path),
+            media_type=mime_type or "application/octet-stream",
+            headers={"Cache-Control": "public, max-age=31536000, immutable"}
+        )
+
+    # 2. Ephemeral disk wiped on Render restart: Fetch & restore from persistent PostgreSQL database
+    try:
+        from app.services.media import get_media_bytes_by_filename
+        record = get_media_bytes_by_filename(clean_filename)
+        if record and record.get("file_data"):
+            file_bytes = record["file_data"]
+            try:
+                target_path.parent.mkdir(parents=True, exist_ok=True)
+                with open(target_path, "wb") as f:
+                    f.write(file_bytes)
+            except Exception:
+                pass
+            return Response(
+                content=file_bytes,
+                media_type=record.get("mime_type") or "image/png",
+                headers={"Cache-Control": "public, max-age=31536000, immutable"}
+            )
+    except Exception as e:
+        print(f"[MEDIA DB RESTORE ERROR] {e}")
+
+    return Response(content="Image Not Found", status_code=404)
+
 app.mount("/static", StaticFiles(directory=str(APP_DIR / "static")), name="static")
 # templates imported from app.templating
 
