@@ -14,7 +14,9 @@ from app.services import (
     tournaments as tournament_service,
     content_features as content_features_service,
     users_auth as users_auth_service,
-    jwt_util
+    jwt_util,
+    ff_redeem_codes as ff_redeem_service,
+    leaderboard as leaderboard_service
 )
 
 router = APIRouter()
@@ -83,6 +85,34 @@ async def home_view(request: Request):
         "arena_notice": arena_notice,
     })
     return templates.TemplateResponse(request=request, name="public/home.html", context=ctx)
+
+
+@router.get("/sensitivity-calculator", response_class=HTMLResponse)
+async def sensitivity_calculator_view(request: Request):
+    ctx = get_common_context(request)
+    analytics_service.record_event("page_view", page_path="/sensitivity-calculator")
+    return templates.TemplateResponse(request=request, name="public/sensitivity_calculator.html", context=ctx)
+
+@router.get("/redeem-codes", response_class=HTMLResponse)
+async def redeem_codes_view(request: Request):
+    ctx = get_common_context(request)
+    codes = ff_redeem_service.get_active_codes(limit=30)
+    analytics_service.record_event("page_view", page_path="/redeem-codes")
+    ctx.update({"codes": codes})
+    return templates.TemplateResponse(request=request, name="public/redeem_codes.html", context=ctx)
+
+@router.post("/api/track/code-copy/{code_id}")
+async def track_code_copy(code_id: int):
+    ff_redeem_service.increment_copy_count(code_id)
+    return {"status": "ok"}
+
+@router.get("/leaderboard", response_class=HTMLResponse)
+async def leaderboard_view(request: Request):
+    ctx = get_common_context(request)
+    leaderboard_data = leaderboard_service.get_hall_of_fame_leaderboard(limit=15)
+    analytics_service.record_event("page_view", page_path="/leaderboard")
+    ctx.update({"leaderboard": leaderboard_data})
+    return templates.TemplateResponse(request=request, name="public/leaderboard.html", context=ctx)
 
 @router.get("/post/{slug}", response_class=HTMLResponse)
 async def post_detail_view(request: Request, slug: str):

@@ -17,6 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initAppleHardwareShowcase();
   initDimensionalWebGL();
   initDimensionalUI();
+  initDownloadTimerModal();
+  initPwaInstallBanner();
 });
 
 /* --------------------------------------------------------------------------
@@ -783,6 +785,144 @@ function initAppleHardwareShowcase() {
       const iphoneWrap = document.getElementById('iphone-stage');
       if (macDevice) macDevice.style.transform = '';
       if (iphoneWrap) iphoneWrap.style.transform = '';
+    });
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+   SMART MONETIZATION DOWNLOAD TIMER MODAL
+   - 10-second countdown with progress bar & high-CTR AdSense visibility
+   - Unlocks verified direct cloud mirror (MediaFire / Drive)
+   -------------------------------------------------------------------------- */
+function initDownloadTimerModal() {
+  const modal = document.getElementById('download-timer-modal');
+  const closeBtn = document.getElementById('download-modal-close');
+  const proceedBtn = document.getElementById('modal-proceed-download-btn');
+  const secDisplay = document.getElementById('timer-seconds-count');
+  const barFill = document.getElementById('timer-bar-fill');
+  const btnLabel = document.getElementById('modal-btn-label');
+  const titleDisplay = document.getElementById('modal-download-filename');
+
+  if (!modal || !proceedBtn) return;
+
+  let countdownInterval = null;
+
+  function closeModal() {
+    modal.style.display = 'none';
+    clearInterval(countdownInterval);
+    if (proceedBtn) {
+      proceedBtn.classList.add('disabled');
+      proceedBtn.href = '#';
+    }
+  }
+
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.style.display !== 'none') closeModal();
+  });
+
+  // Intercept all download triggers across the site
+  document.addEventListener('click', (e) => {
+    const trigger = e.target.closest('[data-track-download]');
+    if (!trigger) return;
+
+    const href = trigger.getAttribute('href');
+    if (!href || href === '#' || href.startsWith('javascript:')) return;
+
+    // Check if this was the already-unlocked proceed button inside the modal
+    if (trigger.id === 'modal-proceed-download-btn') {
+      const postId = trigger.getAttribute('data-post-id');
+      if (postId) {
+        try { navigator.sendBeacon(`/api/track/download/${postId}`, new FormData()); } catch (err) {}
+      }
+      setTimeout(closeModal, 400);
+      return;
+    }
+
+    // Intercept and open timer modal
+    e.preventDefault();
+    e.stopPropagation();
+
+    const postId = trigger.getAttribute('data-post-id') || '';
+    const label = trigger.getAttribute('title') || 'Free Fire OB-55 VIP Config File';
+
+    if (titleDisplay) titleDisplay.textContent = label;
+
+    proceedBtn.href = href;
+    proceedBtn.setAttribute('data-post-id', postId);
+    proceedBtn.classList.add('disabled');
+
+    // Show modal and start 10-second countdown
+    modal.style.display = 'flex';
+
+    let timeLeft = 10;
+    const totalTime = 10;
+
+    if (secDisplay) secDisplay.textContent = timeLeft;
+    if (barFill) barFill.style.width = '0%';
+    if (btnLabel) btnLabel.textContent = `⏳ Generating Link (${timeLeft}s)...`;
+
+    clearInterval(countdownInterval);
+    countdownInterval = setInterval(() => {
+      timeLeft -= 1;
+      const progressPercent = Math.min(100, Math.round(((totalTime - timeLeft) / totalTime) * 100));
+
+      if (secDisplay) secDisplay.textContent = Math.max(0, timeLeft);
+      if (barFill) barFill.style.width = `${progressPercent}%`;
+
+      if (timeLeft > 0) {
+        if (btnLabel) btnLabel.textContent = `⏳ Generating Link (${timeLeft}s)...`;
+      } else {
+        clearInterval(countdownInterval);
+        proceedBtn.classList.remove('disabled');
+        proceedBtn.classList.add('ready-pulse');
+        if (btnLabel) btnLabel.innerHTML = '🚀 PROCEED TO CLOUD DOWNLOAD (MediaFire / Drive) &rarr;';
+        if (secDisplay) secDisplay.textContent = '✓';
+      }
+    }, 1000);
+  });
+}
+
+/* --------------------------------------------------------------------------
+   PWA NATIVE MOBILE INSTALL BANNER
+   - Listens to beforeinstallprompt and enables 1-tap mobile installation
+   -------------------------------------------------------------------------- */
+function initPwaInstallBanner() {
+  const banner = document.getElementById('pwa-install-banner');
+  const installBtn = document.getElementById('pwa-install-btn');
+  const dismissBtn = document.getElementById('pwa-dismiss-btn');
+
+  if (!banner || !installBtn) return;
+
+  let deferredPrompt = null;
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (!localStorage.getItem('god4xe_pwa_dismissed')) {
+      banner.style.display = 'block';
+    }
+  });
+
+  installBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      banner.style.display = 'none';
+      localStorage.setItem('god4xe_pwa_dismissed', '1');
+    }
+  });
+
+  if (dismissBtn) {
+    dismissBtn.addEventListener('click', () => {
+      banner.style.display = 'none';
+      localStorage.setItem('god4xe_pwa_dismissed', '1');
     });
   }
 }

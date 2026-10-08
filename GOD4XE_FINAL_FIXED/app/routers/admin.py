@@ -1769,3 +1769,93 @@ async def admin_toggle_tournament_visibility(
     new_state = tournament_service.toggle_tournament_visibility(tournament_id)
     state_str = "Live+(Published)" if new_state == 1 else "Hidden+(Unpublished)"
     return RedirectResponse(url=f"/admin/tournaments?msg=Tournament+is+now+{state_str}", status_code=status.HTTP_303_SEE_OTHER)
+
+# --------------------------------------------------------------------------
+# DAILY FREE FIRE REDEEM CODES HUB ADMIN
+# --------------------------------------------------------------------------
+@router.get("/redeem-codes-hub", response_class=HTMLResponse)
+async def admin_redeem_codes_hub_view(request: Request, msg: str = None, error: str = None):
+    admin = check_admin(request)
+    if not admin:
+        return RedirectResponse(url="/admin/login", status_code=302)
+    
+    from app.services import ff_redeem_codes as ff_redeem_service
+    codes = ff_redeem_service.get_all_codes_admin(limit=100)
+    
+    return templates.TemplateResponse(
+        request=request,
+        name="admin/redeem_codes_hub.html",
+        context={
+            "request": request,
+            "admin": admin,
+            "active_nav": "redeem_codes_hub",
+            "codes": codes,
+            "msg": msg,
+            "error": error
+        }
+    )
+
+@router.post("/redeem-codes-hub/bulk-import")
+async def admin_bulk_import_redeem_codes(
+    request: Request,
+    raw_text: str = Form(...),
+    default_server: str = Form("India & Global"),
+    default_reward: str = Form("Exclusive In-Game Weapon / Voucher"),
+    csrf_token: str = Form(...)
+):
+    admin = check_admin(request)
+    if not admin:
+        return RedirectResponse(url="/admin/login", status_code=302)
+    check_csrf(request, csrf_token, admin)
+
+    from app.services import ff_redeem_codes as ff_redeem_service
+    imported_count = ff_redeem_service.bulk_import_codes(raw_text, default_server, default_reward)
+    return RedirectResponse(
+        url=f"/admin/redeem-codes-hub?msg=Successfully+imported+and+published+{imported_count}+codes+for+today!",
+        status_code=status.HTTP_303_SEE_OTHER
+    )
+
+@router.post("/redeem-codes-hub/new")
+async def admin_new_redeem_code(
+    request: Request,
+    code: str = Form(...),
+    reward_desc: str = Form("Exclusive In-Game Weapon / Voucher"),
+    server_region: str = Form("India & Global"),
+    csrf_token: str = Form(...)
+):
+    admin = check_admin(request)
+    if not admin:
+        return RedirectResponse(url="/admin/login", status_code=302)
+    check_csrf(request, csrf_token, admin)
+
+    from app.services import ff_redeem_codes as ff_redeem_service
+    ok, err = ff_redeem_service.add_code(code, reward_desc, server_region)
+    if not ok:
+        return RedirectResponse(url=f"/admin/redeem-codes-hub?error={err}", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse(url="/admin/redeem-codes-hub?msg=Code+added+successfully!", status_code=status.HTTP_303_SEE_OTHER)
+
+@router.post("/redeem-codes-hub/delete/{code_id}")
+async def admin_delete_redeem_code(
+    code_id: int, request: Request, csrf_token: str = Form(...)
+):
+    admin = check_admin(request)
+    if not admin:
+        return RedirectResponse(url="/admin/login", status_code=302)
+    check_csrf(request, csrf_token, admin)
+
+    from app.services import ff_redeem_codes as ff_redeem_service
+    ff_redeem_service.delete_code(code_id)
+    return RedirectResponse(url="/admin/redeem-codes-hub?msg=Code+deleted+successfully", status_code=status.HTTP_303_SEE_OTHER)
+
+@router.post("/redeem-codes-hub/toggle/{code_id}")
+async def admin_toggle_redeem_code(
+    code_id: int, request: Request, csrf_token: str = Form(...)
+):
+    admin = check_admin(request)
+    if not admin:
+        return RedirectResponse(url="/admin/login", status_code=302)
+    check_csrf(request, csrf_token, admin)
+
+    from app.services import ff_redeem_codes as ff_redeem_service
+    ff_redeem_service.toggle_code_active(code_id)
+    return RedirectResponse(url="/admin/redeem-codes-hub?msg=Status+updated", status_code=status.HTTP_303_SEE_OTHER)

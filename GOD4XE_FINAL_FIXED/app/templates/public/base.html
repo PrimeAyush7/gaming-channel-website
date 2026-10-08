@@ -82,6 +82,15 @@
         <a href="/esports" class="nav-link nav-link-esports {% if request.url.path == '/esports' or request.url.path.startswith('/tournaments') %}active{% endif %}">
           <span>🏆 ESPORTS ARENA</span>
         </a>
+        <a href="/sensitivity-calculator" class="nav-link {% if request.url.path == '/sensitivity-calculator' %}active{% endif %}" title="Headshot Sensitivity Calculator">
+          <span>🎯 SENSITIVITY</span>
+        </a>
+        <a href="/redeem-codes" class="nav-link {% if request.url.path == '/redeem-codes' %}active{% endif %}" title="Daily Free Fire Redeem Codes">
+          <span>🎁 REDEEM CODES</span>
+        </a>
+        <a href="/leaderboard" class="nav-link {% if request.url.path == '/leaderboard' %}active{% endif %}" title="Esports Hall of Fame">
+          <span>👑 LEADERBOARD</span>
+        </a>
         <a href="/announcements" class="nav-link {% if request.url.path == '/announcements' %}active{% endif %}">
           <span>📢 NOTICES</span>
         </a>
@@ -248,6 +257,21 @@
         <span class="mobile-nav-text">ESPORTS ARENA</span>
         <span class="mobile-nav-arrow">&rarr;</span>
       </a>
+      <a href="/sensitivity-calculator" class="mobile-nav-item {% if request.url.path == '/sensitivity-calculator' %}active{% endif %}">
+        <span class="mobile-nav-icon">🎯</span>
+        <span class="mobile-nav-text">SENSITIVITY TOOL</span>
+        <span class="mobile-nav-arrow">&rarr;</span>
+      </a>
+      <a href="/redeem-codes" class="mobile-nav-item {% if request.url.path == '/redeem-codes' %}active{% endif %}">
+        <span class="mobile-nav-icon">🎁</span>
+        <span class="mobile-nav-text">REDEEM CODES</span>
+        <span class="mobile-nav-arrow">&rarr;</span>
+      </a>
+      <a href="/leaderboard" class="mobile-nav-item {% if request.url.path == '/leaderboard' %}active{% endif %}">
+        <span class="mobile-nav-icon">👑</span>
+        <span class="mobile-nav-text">LEADERBOARD</span>
+        <span class="mobile-nav-arrow">&rarr;</span>
+      </a>
       <a href="/announcements" class="mobile-nav-item {% if request.url.path == '/announcements' %}active{% endif %}">
         <span class="mobile-nav-icon">📢</span>
         <span class="mobile-nav-text">ANNOUNCEMENTS</span>
@@ -405,5 +429,75 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+
+  <!-- ========================================================================= -->
+  <!-- ⏳ SMART MONETIZATION DOWNLOAD COUNTDOWN MODAL -->
+  <!-- ========================================================================= -->
+  <div id="download-timer-modal" class="download-modal-backdrop" style="display: none;" role="dialog" aria-modal="true">
+    <div class="download-modal-card cyber-card">
+      <button type="button" id="download-modal-close" class="modal-close-btn" aria-label="Close modal">&times;</button>
+      
+      <div class="modal-badge-row">
+        <span class="badge badge-cyan"><span class="pulse-dot"></span> SECURE CLOUD GATEWAY</span>
+        <span style="font-size: 0.72rem; color: #10b981; font-family: monospace;">OB-55 VERIFIED</span>
+      </div>
+
+      <h3 id="modal-download-filename" class="modal-title">Generating Ban-Safe VIP Mirror...</h3>
+      <p class="modal-sub">Fast cloud mirror delivery. Please wait while your security verification token is generated.</p>
+
+      <!-- Animated Countdown Ring / Progress -->
+      <div class="timer-progress-wrap">
+        <div class="timer-number-display">
+          <span id="timer-seconds-count">10</span><span class="timer-sec-label">s</span>
+        </div>
+        <div class="timer-bar-track">
+          <div id="timer-bar-fill" class="timer-bar-fill"></div>
+        </div>
+      </div>
+
+      <!-- High-CTR AdSense Slot Inside Modal -->
+      {% if ads and ads.is_enabled and ads.client_id and (ads.slot_post_bottom or ads.slot_home_bottom) %}
+      <div class="modal-adsense-box">
+        <span class="ad-label">Sponsored Advertisement</span>
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="{{ ads.client_id }}"
+             data-ad-slot="{{ ads.slot_post_bottom or ads.slot_home_bottom }}"
+             data-ad-format="rectangle"
+             data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+      </div>
+      {% endif %}
+
+      <!-- Unlocked Action Button (Replaces timer when complete) -->
+      <div class="modal-action-row">
+        <a id="modal-proceed-download-btn" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-proceed-download disabled">
+          <span id="modal-btn-label">⏳ Generating Link (10s)...</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 📲 PWA NATIVE MOBILE INSTALL BANNER -->
+  <!-- ========================================================================= -->
+  <div id="pwa-install-banner" class="pwa-install-banner" style="display: none;">
+    <div class="pwa-banner-inner">
+      <div class="pwa-banner-left">
+        <img src="/static/images/favicon.png" alt="GOD4XE App" class="pwa-app-icon">
+        <div class="pwa-app-info">
+          <div class="pwa-app-title">GOD4XE Official App</div>
+          <div class="pwa-app-sub">Add to Home Screen for 1-Tap Access</div>
+        </div>
+      </div>
+      <div class="pwa-banner-actions">
+        <button type="button" id="pwa-install-btn" class="btn btn-primary btn-sm">
+          <span>⚡ Install App</span>
+        </button>
+        <button type="button" id="pwa-dismiss-btn" class="pwa-close-btn" aria-label="Close">✕</button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
