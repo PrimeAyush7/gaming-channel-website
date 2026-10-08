@@ -188,6 +188,120 @@
     </div>
   </section>
 
+  <!-- ========================================================================= -->
+  <!-- ⚡ GOD4XE 3D FACTORY ENGINE & ECOSYSTEM GATEWAY (Interactive 3D Machine) -->
+  <!-- ========================================================================= -->
+  <section class="god4xe-factory-section" id="god4xe-factory-section">
+    <div class="factory-header-wrap">
+      <span class="factory-badge">⚡ PROCEDURAL ESPORTS ENGINE</span>
+      <h2 class="factory-title">
+        THE CORE BEHIND <span class="gradient-text">GOD4XE DOMINATION</span>
+      </h2>
+      <p class="factory-subtitle">
+        Interactive 3D ecosystem gateway: Drag to rotate, zoom to inspect, and click any station to explore our automated pipeline from DPI headshot sensitivity to ban-safe kernel verification, VIP glitch tools, cloud mirrors, and diamond tournament rewards.
+      </p>
+    </div>
+
+    <!-- The 3D Machine Interactive Container -->
+    <div class="god4xe-factory-container agentic-factory-3d" id="god4xe-factory-root">
+      
+      <!-- WebGL Canvas Mount -->
+      <div id="factory-scene-canvas" class="factory-scene-canvas" role="img" aria-label="Interactive 3D GOD4XE Machine with five stations: Sensitivity Calibrator, Antiban Kernel, VIP Glitch Forge, Cloud Vault Mirror, and Diamond Arena. Drag to rotate, scroll to zoom, hover or click stations."></div>
+      
+      <div class="vignette"></div>
+
+      <!-- Station Labels Holographic Overlay -->
+      <div id="factory-labels" class="factory-labels"></div>
+
+      <!-- Interactive Hover Tooltip -->
+      <div id="factory-tooltip" class="factory-tooltip" role="tooltip">
+        <strong></strong>
+        <p></p>
+      </div>
+
+      <!-- Mode & Camera Switcher Bar -->
+      <div class="factory-controls-bar">
+        <nav class="mode-bar" aria-label="Machine Mode">
+          <button type="button" data-factory-mode="assembled" class="active">
+            <svg viewBox="0 0 16 16" fill="none" width="14" height="14">
+              <path d="M8 1.5l6 3.3v6.4l-6 3.3-6-3.3V4.8L8 1.5zM2 4.8l6 3.4 6-3.4M8 8.2v6.3" stroke="currentColor" stroke-linejoin="round"/>
+            </svg>
+            <span>Assembled</span>
+          </button>
+          <button type="button" data-factory-mode="cutaway">
+            <svg viewBox="0 0 16 16" fill="none" width="14" height="14">
+              <path d="M3 2h10v12H3zM8 2v12M10.5 4l2.5 2.5m-2.5 0L13 9m-2.5 0 2.5 2.5" stroke="currentColor" stroke-linejoin="round"/>
+            </svg>
+            <span>Cutaway Deck</span>
+          </button>
+          <button type="button" data-factory-mode="stations">
+            <svg viewBox="0 0 16 16" fill="none" width="14" height="14">
+              <path d="M8 1.5l6 3-6 3-6-3 6-3zM2 8l6 3 6-3M2 11.5l6 3 6-3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>5 Stations</span>
+          </button>
+          <button type="button" data-factory-mode="order">
+            <svg viewBox="0 0 16 16" fill="none" width="14" height="14">
+              <path d="M5 2.5l8 5.5-8 5.5v-11z" stroke="currentColor" stroke-linejoin="round"/>
+            </svg>
+            <span>Live Pipeline</span>
+          </button>
+        </nav>
+
+        <nav class="camera-row" aria-label="Camera Views">
+          <span class="caption">CAM:</span>
+          <button type="button" data-factory-camera="overview" class="active">Overview</button>
+          <button type="button" data-factory-camera="side">Side</button>
+          <button type="button" data-factory-camera="top">Top</button>
+          <button type="button" data-factory-camera="station">Station</button>
+          <span class="divider"></span>
+          <button type="button" id="factory-play" aria-label="Pause/Resume animation" title="Pause Animation">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+              <rect x="2" y="1" width="2.5" height="10" rx=".5"/>
+              <rect x="7.5" y="1" width="2.5" height="10" rx=".5"/>
+            </svg>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Factory Loading Spinner -->
+      <div id="factory-loading" class="factory-loading">
+        <i></i>
+        <span>Assembling GOD4XE Factory Engine...</span>
+      </div>
+
+      <!-- Fallback Error Alert -->
+      <div id="factory-error" class="factory-error" role="alert">
+        <strong>WebGL Hardware Acceleration Required</strong>
+        <p>Could not initialize 3D canvas. Turn on hardware acceleration in browser settings.</p>
+      </div>
+    </div>
+
+    <!-- Interactive 5-Station Direct Action Pills -->
+    <div class="factory-stations-pills-row">
+      <a href="#articles-wrapper" class="station-chip chip-cyan" title="Jump to Sensitivity Guides">
+        <span class="chip-num">01</span>
+        <span class="chip-title">🎯 Sensitivity Calibrator</span>
+      </a>
+      <a href="#articles-wrapper" class="station-chip chip-emerald" title="Antiban Bypass System">
+        <span class="chip-num">02</span>
+        <span class="chip-title">🛡️ Antiban Kernel</span>
+      </a>
+      <a href="#articles-wrapper" class="station-chip chip-purple" title="VIP Skin Tools & Configs">
+        <span class="chip-num">03</span>
+        <span class="chip-title">⚡ VIP Glitch Forge</span>
+      </a>
+      <a href="#articles-wrapper" class="station-chip chip-cyan" title="Direct Cloud Mirrors">
+        <span class="chip-num">04</span>
+        <span class="chip-title">📥 Cloud Vault</span>
+      </a>
+      <a href="/esports" class="station-chip chip-amber" title="Join Tournaments & Earn Diamonds">
+        <span class="chip-num">05</span>
+        <span class="chip-title">🏆 Diamond Arena</span>
+      </a>
+    </div>
+  </section>
+
   <!-- 3D APPLE HARDWARE SHOWCASE: MACBOOK PRO 16" (TOP) + IPHONE 16 PRO (BELOW) -->
   <section class="device-showcase-section" id="device-showcase-section">
     <div class="device-showcase-header">
@@ -749,4 +863,20 @@
 <!-- Drawer Mobile Backdrop -->
 <div class="drawer-backdrop" id="drawer-backdrop" aria-hidden="true"></div>
 
+{% endblock %}
+
+
+{% block extra_scripts %}
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/examples/jsm/controls/OrbitControls.js": "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js",
+    "three/examples/jsm/geometries/RoundedBoxGeometry.js": "https://unpkg.com/three@0.160.0/examples/jsm/geometries/RoundedBoxGeometry.js",
+    "three/examples/jsm/utils/BufferGeometryUtils.js": "https://unpkg.com/three@0.160.0/examples/jsm/utils/BufferGeometryUtils.js",
+    "three/examples/jsm/environments/RoomEnvironment.js": "https://unpkg.com/three@0.160.0/examples/jsm/environments/RoomEnvironment.js"
+  }
+}
+</script>
+<script type="module" src="/static/js/god4xe-factory-3d.js?v=4.5.0"></script>
 {% endblock %}
