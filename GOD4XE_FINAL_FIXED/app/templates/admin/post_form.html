@@ -95,9 +95,11 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="youtube_video_id">YouTube Video URL or 11-char ID</label>
-        <input type="text" id="youtube_video_id" name="youtube_video_id" value="{{ post.youtube_video_id if post else '' }}" class="form-control" placeholder="https://www.youtube.com/watch?v=... or ID">
-        <small class="text-muted" style="display: block; margin-top: 0.35rem;">Optional: Embeds a YouTube video player inside the article.</small>
+        <label class="form-label" for="youtube_video_id">📺 YouTube Video URL or ID</label>
+        <input type="text" id="youtube_video_id" name="youtube_video_id" value="{{ post.youtube_video_id if post else '' }}" class="form-control" placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/...">
+        <small style="display: block; margin-top: 0.35rem; color: #a78bfa; font-size: 0.75rem;">
+          ⚡ <strong>Automatic Hero Video:</strong> Video will be embedded inside the article and automatically featured in the Homepage Hero section!
+        </small>
       </div>
     </div>
 
@@ -142,7 +144,7 @@
 
       <label class="toggle-label">
         <input type="checkbox" name="is_featured" value="1" {% if post and post.is_featured %}checked{% endif %}>
-        <span>⭐ <strong>Featured Post</strong> (Highlighted on homepage)</span>
+        <span>⭐ <strong>Featured Post & Video</strong> (Sets as Homepage Hero video & unfeatures previous)</span>
       </label>
 
       <label class="toggle-label">

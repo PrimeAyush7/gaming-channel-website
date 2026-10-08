@@ -217,6 +217,9 @@ def create_post(data: dict) -> tuple[int, str]:
                     break
                 count += 1
 
+        if data.get("is_featured"):
+            cursor.execute("UPDATE posts SET is_featured = 0;")
+
         cursor.execute("""
             INSERT INTO posts (
                 title, slug, summary, content, thumbnail_url,
@@ -267,6 +270,9 @@ def update_post(post_id: int, data: dict) -> tuple[bool, str]:
         cursor.execute("SELECT id FROM posts WHERE slug = %s AND id != %s;", (slug, post_id))
         if cursor.fetchone():
             slug = f"{slug}-{post_id}"
+
+        if data.get("is_featured"):
+            cursor.execute("UPDATE posts SET is_featured = 0 WHERE id != %s;", (post_id,))
 
         cursor.execute("""
             UPDATE posts SET
@@ -320,3 +326,66 @@ def increment_post_download(post_id: int):
     with get_db() as conn:
         cursor = conn.cursor()
         cursor.execute("UPDATE posts SET download_count = download_count + 1 WHERE id = %s;", (post_id,))
+
+
+def get_hero_featured_media() -> dict | None:
+    """
+    Returns the post that should be featured in the homepage hero section.
+    Priority order:
+    1) Latest published post marked is_featured=1 with a youtube_video_id
+    2) Latest published post marked is_featured=1
+    3) Latest published post with a youtube_video_id
+    4) Latest published post overall
+    """
+    with get_db() as conn:
+        cursor = conn.cursor()
+        # 1. Featured post with youtube video
+        cursor.execute("""
+            SELECT p.*, s.name as section_name
+            FROM posts p
+            LEFT JOIN sections s ON p.section_id = s.id
+            WHERE p.is_published = 1 AND p.is_featured = 1 AND p.youtube_video_id IS NOT NULL AND TRIM(p.youtube_video_id) != ''
+            ORDER BY p.published_at DESC, p.id DESC
+            LIMIT 1;
+        """)
+        row = cursor.fetchone()
+        if row:
+            return dict_from_row(row)
+
+        # 2. Any latest published post with youtube video
+        cursor.execute("""
+            SELECT p.*, s.name as section_name
+            FROM posts p
+            LEFT JOIN sections s ON p.section_id = s.id
+            WHERE p.is_published = 1 AND p.youtube_video_id IS NOT NULL AND TRIM(p.youtube_video_id) != ''
+            ORDER BY p.published_at DESC, p.id DESC
+            LIMIT 1;
+        """)
+        row = cursor.fetchone()
+        if row:
+            return dict_from_row(row)
+
+        # 3. Any featured post
+        cursor.execute("""
+            SELECT p.*, s.name as section_name
+            FROM posts p
+            LEFT JOIN sections s ON p.section_id = s.id
+            WHERE p.is_published = 1 AND p.is_featured = 1
+            ORDER BY p.published_at DESC, p.id DESC
+            LIMIT 1;
+        """)
+        row = cursor.fetchone()
+        if row:
+            return dict_from_row(row)
+
+        # 4. Fallback: Latest published post
+        cursor.execute("""
+            SELECT p.*, s.name as section_name
+            FROM posts p
+            LEFT JOIN sections s ON p.section_id = s.id
+            WHERE p.is_published = 1
+            ORDER BY p.published_at DESC, p.id DESC
+            LIMIT 1;
+        """)
+        row = cursor.fetchone()
+        return dict_from_row(row) if row else None

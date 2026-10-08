@@ -49,26 +49,17 @@
           <a href="/post/{{ post.slug }}">{{ post.title }}</a>
         </h3>
         <p class="post-excerpt">{{ post.summary or (post.content[:130] ~ '...') }}</p>
-        {% if custom_desc_links %}
-        <div class="post-card-ext-links">
-          {% for title, url in custom_desc_links %}
-            {% if title and url %}
-            <a href="{{ url }}" target="_blank" rel="noopener noreferrer" class="post-ext-chip">
-              <span class="ext-chip-dot"></span>
-              <span class="ext-chip-text">{{ title }}</span>
-              <svg class="ext-chip-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-            </a>
-            {% endif %}
-          {% endfor %}
-        </div>
-        {% endif %}
+        
         <div class="post-card-footer">
           <a href="/post/{{ post.slug }}" class="read-more-link">
             <span>Read Guide</span>
             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
           </a>
           {% if post.download_url %}
-          <span class="badge badge-success" style="font-size: 0.72rem;">Download</span>
+          <a href="{{ post.download_url }}" target="_blank" rel="noopener noreferrer" class="btn-card-direct-download" data-track-download="1" data-post-id="{{ post.id }}" title="Direct Download Config">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            <span>Download</span>
+          </a>
           {% endif %}
         </div>
       </div>

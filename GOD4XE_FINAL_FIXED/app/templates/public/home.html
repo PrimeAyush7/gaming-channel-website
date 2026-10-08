@@ -59,16 +59,7 @@
           {{ settings.get('site_description') or 'We build boundary-pushing, physics-enabled digital topologies that merge advanced WebGL with sleek brutalism, crafting the next frontier of immersive esports computing.' }}
         </p>
 
-        <!-- Custom Description Links (Configured in Admin Settings) -->
-        <div class="hero-custom-links gsap-reveal-text">
-          {% for title, url in custom_desc_links %}
-            {% if title and url %}
-            <a href="{{ url }}" target="_blank" rel="noopener noreferrer" class="hero-custom-link-pill">
-              <span>🔗</span> {{ title }}
-            </a>
-            {% endif %}
-          {% endfor %}
-        </div>
+
 
         <!-- Vanguard Action Buttons: Primary White Pill + Glass Secondary + Quick Links -->
         <div class="hero-action-buttons gsap-reveal-text">
@@ -118,13 +109,38 @@
         </div>
       </div>
 
-      <!-- Hero Media Col: Featured Video or Featured Post Highlight -->
+      <!-- Hero Media Col: Automatic YouTube Video from Post / Featured Highlight -->
       <div class="hero-media-col gsap-reveal">
-        {% if featured_video %}
+        {% if hero_media_post and hero_media_post.youtube_video_id %}
         <div class="featured-video-card cyber-card" data-track-youtube="1">
           <div class="video-responsive-wrapper">
             <iframe 
-              src="https://www.youtube-nocookie.com/embed/{{ featured_video.youtube_id }}" 
+              src="https://www.youtube-nocookie.com/embed/{{ hero_media_post.youtube_video_id }}?rel=0&modestbranding=1" 
+              title="{{ hero_media_post.title }}" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+              allowfullscreen>
+            </iframe>
+          </div>
+          <div class="video-card-footer">
+            <div class="video-card-title">{{ hero_media_post.title }}</div>
+            <a href="/post/{{ hero_media_post.slug }}" class="btn btn-primary btn-sm">Read Guide &rarr;</a>
+          </div>
+        </div>
+        {% elif hero_media_post and hero_media_post.thumbnail_url %}
+        <div class="featured-video-card cyber-card">
+          <a href="/post/{{ hero_media_post.slug }}" class="video-responsive-wrapper" style="display: block;">
+            <img src="{{ hero_media_post.thumbnail_url }}" alt="{{ hero_media_post.title }}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null; this.src='/static/images/god4xe-logo.jpg';">
+          </a>
+          <div class="video-card-footer">
+            <div class="video-card-title">{{ hero_media_post.title }}</div>
+            <a href="/post/{{ hero_media_post.slug }}" class="btn btn-primary btn-sm">Read Guide &rarr;</a>
+          </div>
+        </div>
+        {% elif featured_video and featured_video.youtube_id %}
+        <div class="featured-video-card cyber-card" data-track-youtube="1">
+          <div class="video-responsive-wrapper">
+            <iframe 
+              src="https://www.youtube-nocookie.com/embed/{{ featured_video.youtube_id }}?rel=0" 
               title="{{ featured_video.title }}" 
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
               allowfullscreen>
@@ -132,26 +148,14 @@
           </div>
           <div class="video-card-footer">
             <div class="video-card-title">{{ featured_video.title }}</div>
-            {% if settings.youtube_channel_url %}
-            <a href="{{ settings.youtube_channel_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" data-track-youtube="1">Watch Channel</a>
-            {% endif %}
-          </div>
-        </div>
-        {% elif featured_post and featured_post.thumbnail_url %}
-        <div class="featured-video-card cyber-card">
-          <a href="/post/{{ featured_post.slug }}" class="video-responsive-wrapper" style="display: block;">
-            <img src="{{ featured_post.thumbnail_url }}" alt="{{ featured_post.title }}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null; this.src='/static/images/god4xe-logo.jpg';">
-          </a>
-          <div class="video-card-footer">
-            <div class="video-card-title">{{ featured_post.title }}</div>
-            <a href="/post/{{ featured_post.slug }}" class="btn btn-primary btn-sm">Read Now</a>
+            <a href="/esports" class="btn btn-primary btn-sm">Enter Arena &rarr;</a>
           </div>
         </div>
         {% else %}
         <div class="featured-video-card cyber-card" style="padding: 2.5rem; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 280px;">
           <div style="font-size: 3.5rem; margin-bottom: 1rem; filter: drop-shadow(0 0 20px var(--neon-cyan));">🎮</div>
-          <h3 style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 800; color: #fff; margin-bottom: 0.5rem;">GOD4XE ARENA</h3>
-          <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 320px; margin-bottom: 1.25rem;">Daily verified custom rooms, Free Fire tournaments, and direct diamond payouts.</p>
+          <h3 style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 800; color: #fff; margin-bottom: 0.5rem;">GOD4XE GAMING</h3>
+          <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 320px; margin-bottom: 1.25rem;">Daily verified Free Fire configs, headshot sensitivities, and custom room tournaments.</p>
           <a href="/esports" class="btn btn-primary btn-sm">Enter Arena &rarr;</a>
         </div>
         {% endif %}
@@ -638,28 +642,16 @@
                 {{ post.summary or (post.content[:130] ~ '...') }}
               </p>
 
-              <!-- External Links Strip Under Every Post (Requested in Point 3) -->
-              {% if custom_desc_links %}
-              <div class="post-card-ext-links">
-                {% for title, url in custom_desc_links %}
-                  {% if title and url %}
-                  <a href="{{ url }}" target="_blank" rel="noopener noreferrer" class="post-ext-chip">
-                    <span class="ext-chip-dot"></span>
-                    <span class="ext-chip-text">{{ title }}</span>
-                    <svg class="ext-chip-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-                  </a>
-                  {% endif %}
-                {% endfor %}
-              </div>
-              {% endif %}
-
               <div class="post-card-footer">
                 <a href="/post/{{ post.slug }}" class="read-more-link btn-read-guide">
                   <span>Read Guide</span>
                   <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                 </a>
                 {% if post.download_url %}
-                <span class="badge badge-success" style="font-size: 0.72rem;">Download Available</span>
+                <a href="{{ post.download_url }}" target="_blank" rel="noopener noreferrer" class="btn-card-direct-download" data-track-download="1" data-post-id="{{ post.id }}" title="Direct Download Config">
+                  <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                  <span>Download</span>
+                </a>
                 {% endif %}
               </div>
             </div>
@@ -717,26 +709,17 @@
             {{ post.summary or (post.content[:120] ~ '...') }}
           </p>
 
-          <!-- External Links Strip Under Popular Post (Point 3) -->
-          {% if custom_desc_links %}
-          <div class="post-card-ext-links">
-            {% for title, url in custom_desc_links %}
-              {% if title and url %}
-              <a href="{{ url }}" target="_blank" rel="noopener noreferrer" class="post-ext-chip">
-                <span class="ext-chip-dot"></span>
-                <span class="ext-chip-text">{{ title }}</span>
-                <svg class="ext-chip-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-              </a>
-              {% endif %}
-            {% endfor %}
-          </div>
-          {% endif %}
-
           <div class="post-card-footer">
             <a href="/post/{{ post.slug }}" class="read-more-link link-accent btn-read-guide">
               <span>Get Details</span>
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
             </a>
+            {% if post.download_url %}
+            <a href="{{ post.download_url }}" target="_blank" rel="noopener noreferrer" class="btn-card-direct-download" data-track-download="1" data-post-id="{{ post.id }}" title="Direct Download Config">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+              <span>Download</span>
+            </a>
+            {% endif %}
           </div>
         </div>
       </article>

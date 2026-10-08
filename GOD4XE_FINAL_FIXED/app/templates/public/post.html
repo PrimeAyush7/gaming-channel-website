@@ -123,26 +123,7 @@
       </div>
       {% endif %}
 
-      <!-- EXTERNAL LINKS STRIP UNDER POST (Requested in Point 3) -->
-      {% if custom_desc_links %}
-      <div class="post-detail-ext-links-box">
-        <div class="ext-links-box-header">
-          <span class="pulse-dot"></span>
-          <span class="ext-links-box-title">RECOMMENDED OFFICIAL CHANNELS &amp; SERVERS</span>
-        </div>
-        <div class="post-card-ext-links post-detail-links-grid">
-          {% for title, url in custom_desc_links %}
-            {% if title and url %}
-            <a href="{{ url }}" target="_blank" rel="noopener noreferrer" class="post-ext-chip post-ext-chip-large">
-              <span class="ext-chip-dot"></span>
-              <span class="ext-chip-text">{{ title }}</span>
-              <svg class="ext-chip-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-            </a>
-            {% endif %}
-          {% endfor %}
-        </div>
-      </div>
-      {% endif %}
+
 
       <!-- PROMINENT EPIC ANIMATED CYBER DOWNLOAD SECTION (Requested in Point 2) -->
       {% if post.download_url %}
@@ -198,6 +179,27 @@
           <div class="trust-item"><span class="trust-icon">🛡️</span> Safe Link Protection Active</div>
           <div class="trust-item"><span class="trust-icon">⚡</span> High Speed Cloud Mirror</div>
           <div class="trust-item"><span class="trust-icon">✅</span> Anti-Cheat Passed</div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- OTHER USEFUL LINKS STRIP (Placed below download file as requested) -->
+      {% if custom_desc_links %}
+      <div class="post-detail-ext-links-box" style="margin-top: 1.5rem; margin-bottom: 2rem;">
+        <div class="ext-links-box-header">
+          <span class="pulse-dot"></span>
+          <span class="ext-links-box-title">⚡ OTHER USEFUL LINKS</span>
+        </div>
+        <div class="post-card-ext-links post-detail-links-grid">
+          {% for title, url in custom_desc_links %}
+            {% if title and url %}
+            <a href="{{ url }}" target="_blank" rel="noopener noreferrer" class="post-ext-chip post-ext-chip-large">
+              <span class="ext-chip-dot"></span>
+              <span class="ext-chip-text">{{ title }}</span>
+              <svg class="ext-chip-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+            </a>
+            {% endif %}
+          {% endfor %}
         </div>
       </div>
       {% endif %}

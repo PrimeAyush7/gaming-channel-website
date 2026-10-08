@@ -56,11 +56,9 @@ async def home_view(request: Request):
     ctx = get_common_context(request)
     posts_data = post_service.get_posts(page=1, per_page=9, only_published=True)
     popular_posts = post_service.get_popular_posts(limit=6)
+    hero_media_post = post_service.get_hero_featured_media()
     featured_video = youtube_service.get_featured_video()
-    
-    # Check if there is a featured post
-    featured_post_data = post_service.get_posts(page=1, per_page=1, is_featured=True, only_published=True)
-    featured_post = featured_post_data["posts"][0] if featured_post_data["posts"] else None
+    featured_post = hero_media_post
 
     # Esports tournaments for homepage arena section
     esports_tournaments = tournament_service.list_tournaments(status_filter="UPCOMING", limit=4, is_published_only=True)
@@ -79,6 +77,7 @@ async def home_view(request: Request):
         "popular_posts": popular_posts,
         "featured_video": featured_video,
         "featured_post": featured_post,
+        "hero_media_post": hero_media_post,
         "esports_tournaments": esports_tournaments,
         "announcements": announcements,
         "arena_notice": arena_notice,

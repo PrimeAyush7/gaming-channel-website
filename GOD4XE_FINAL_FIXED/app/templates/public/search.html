@@ -59,19 +59,7 @@
           <a href="/post/{{ post.slug }}">{{ post.title }}</a>
         </h3>
         <p class="post-excerpt">{{ post.summary or (post.content[:130] ~ '...') }}</p>
-        {% if custom_desc_links %}
-        <div class="post-card-ext-links">
-          {% for title, url in custom_desc_links %}
-            {% if title and url %}
-            <a href="{{ url }}" target="_blank" rel="noopener noreferrer" class="post-ext-chip">
-              <span class="ext-chip-dot"></span>
-              <span class="ext-chip-text">{{ title }}</span>
-              <svg class="ext-chip-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-            </a>
-            {% endif %}
-          {% endfor %}
-        </div>
-        {% endif %}
+        
         <div class="post-card-footer">
           <a href="/post/{{ post.slug }}" class="read-more-link">
             <span>Read Guide</span>
