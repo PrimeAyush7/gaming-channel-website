@@ -68,12 +68,16 @@ export function initGod4xeFactory(rootId = 'god4xe-factory-root') {
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.15;
-    renderer.shadowMap.enabled = true;
+    const isMobile = window.innerWidth <= 768 || window.matchMedia('(pointer: coarse)').matches;
+    renderer.shadowMap.enabled = !isMobile;
     renderer.shadowMap.type = THREE.PCFShadowMap;
     renderer.localClippingEnabled = true;
 
     sceneContainer.innerHTML = '';
     sceneContainer.appendChild(renderer.domElement);
+    
+    // Critical for Mobile Scroll: Allow vertical touch swipe to scroll the webpage naturally!
+    renderer.domElement.style.touchAction = 'pan-y';
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
@@ -83,8 +87,11 @@ export function initGod4xeFactory(rootId = 'god4xe-factory-root') {
     controls.maxDistance = 55;
     controls.minPolarAngle = 0.09;
     controls.maxPolarAngle = Math.PI * 0.475;
-    controls.rotateSpeed = 0.48;
+    controls.rotateSpeed = isMobile ? 0.35 : 0.48;
     controls.zoomSpeed = 0.7;
+    if (isMobile) {
+      controls.enableZoom = false; // Disable zoom on mobile so pinching/touching scrolls the page
+    }
 
     const pmrem = new THREE.PMREMGenerator(renderer);
     const room = new RoomEnvironment();
@@ -346,21 +353,11 @@ export function initGod4xeFactory(rootId = 'god4xe-factory-root') {
       });
       screen(group, 1.54, 0.345, 0, 0.27, 0.891, plaque);
 
-      let labelEl = null;
-      if (labelsContainer) {
-        labelEl = document.createElement('div');
-        labelEl.className = 'station-label';
-        labelEl.innerHTML = `<div class="stem"></div><div class="label-card"><div class="label-title"><span>${String(i + 1).padStart(2, '0')}</span>${d.name}</div><div class="label-meta">Step ${d.step} · ${d.output}</div></div>`;
-        labelsContainer.appendChild(labelEl);
-        cleanups.push(() => labelEl.remove());
-      }
-
       stations.push({
         ...d,
         group,
         base: new THREE.Vector3(...d.pos),
         glowMat,
-        label: labelEl,
         index: i,
         anchor: new THREE.Vector3(0, 2.5, 0)
       });
@@ -765,9 +762,17 @@ export function initGod4xeFactory(rootId = 'god4xe-factory-root') {
       }
     });
 
+    let isCanvasVisible = true;
+    const visibilityObserver = new IntersectionObserver((entries) => {
+      isCanvasVisible = entries[0].isIntersecting && !document.hidden;
+    }, { threshold: 0.05 });
+    visibilityObserver.observe(renderer.domElement);
+    cleanups.push(() => visibilityObserver.disconnect());
+
     let lastFrame = performance.now();
     function animate(now) {
       requestAnimationFrame(animate);
+      if (!isCanvasVisible) return; // 0% GPU when scrolled past -> Silky-smooth mobile scrolling!
       const dt = Math.max(0, Math.min((now - lastFrame) / 1000, 0.045));
       lastFrame = now;
 

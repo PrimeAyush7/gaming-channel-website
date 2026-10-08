@@ -1,13 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
   <defs>
-    <linearGradient id="favGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#d8b4fe"/>
-      <stop offset="50%" stop-color="#a855f7"/>
-      <stop offset="100%" stop-color="#6b21a8"/>
+    <linearGradient id="g4xGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f2fe"/>
+      <stop offset="100%" stop-color="#a855f7"/>
     </linearGradient>
   </defs>
-  <rect width="64" height="64" rx="14" fill="#0d0722"/>
-  <polygon points="32,8 52,19 52,45 32,56 12,45 12,19" fill="#180b3d" stroke="#a855f7" stroke-width="2.5"/>
-  <polygon points="32,18 44,25 44,39 32,46 20,39 20,25" fill="#0d0722" stroke="#c084fc" stroke-width="1.5"/>
-  <circle cx="32" cy="32" r="5" fill="url(#favGrad)"/>
+  <rect width="64" height="64" rx="16" fill="#060a12"/>
+  <rect x="2" y="2" width="60" height="60" rx="14" stroke="url(#g4xGrad)" stroke-width="2.5"/>
+  <path d="M42 19H22C19.79 19 18 20.79 18 23V41C18 43.21 19.79 45 22 45H42C44.21 45 46 43.21 46 41V33H33V27.5H46V23C46 20.79 44.21 19 42 19Z" fill="url(#g4xGrad)"/>
+  <circle cx="34" cy="30" r="3.2" fill="#ffffff"/>
 </svg>
