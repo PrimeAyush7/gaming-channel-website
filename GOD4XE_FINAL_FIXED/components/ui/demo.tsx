@@ -1,9 +1,5 @@
-import DimensionalField from "@/components/ui/dimensional-field";
+import AgenticFactory3D from '@/components/ui/agentic-factory-3d'
 
-export default function DimensionalFieldDemo() {
-  return (
-    <div className="relative h-[600px] w-full overflow-hidden rounded-xl border border-border bg-background">
-      <DimensionalField className="h-full w-full" />
-    </div>
-  );
+export default function AgenticFactory3DDemo() {
+  return <AgenticFactory3D height="100vh" />
 }
