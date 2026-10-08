@@ -33,7 +33,7 @@
     <article class="post-card cyber-card">
       <a href="/post/{{ post.slug }}" class="post-thumb-link">
         {% if post.thumbnail_url %}
-        <img src="{{ post.thumbnail_url }}" alt="{{ post.title }}" class="post-thumb-img" loading="lazy">
+        <img src="{{ post.thumbnail_url }}" alt="{{ post.title }}" class="post-thumb-img" loading="lazy" onerror="this.onerror=null; this.src='/static/images/god4xe-logo.jpg';">
         {% else %}
         <div style="width: 100%; height: 100%; background: #0c1424; display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">{{ section.icon }}</div>
         {% endif %}

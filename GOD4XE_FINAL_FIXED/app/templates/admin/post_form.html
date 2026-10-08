@@ -65,7 +65,7 @@
 
         <!-- Current / Live Preview Container -->
         <div id="thumb-preview-box" style="{% if not (post and post.thumbnail_url) %}display: none;{% endif %} margin-bottom: 0.85rem; display: flex; align-items: center; gap: 1rem; background: rgba(0,0,0,0.4); padding: 0.65rem; border-radius: 8px; border: 1px solid var(--admin-border);">
-          <img id="thumb-preview-img" src="{{ post.thumbnail_url if post and post.thumbnail_url else '' }}" alt="Thumbnail Preview" style="width: 120px; height: 70px; object-fit: cover; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: #000;">
+          <img id="thumb-preview-img" src="{{ post.thumbnail_url if post and post.thumbnail_url else '' }}" alt="Thumbnail Preview" onerror="this.onerror=null; this.src='/static/images/god4xe-logo.jpg';" style="width: 120px; height: 70px; object-fit: cover; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: #000;">
           <div style="min-width: 0;">
             <div style="font-size: 0.8rem; color: #10b981; font-weight: 700;">✓ Image Attached</div>
             <div id="thumb-status-text" style="font-size: 0.7rem; color: var(--admin-dim); word-break: break-all;">
