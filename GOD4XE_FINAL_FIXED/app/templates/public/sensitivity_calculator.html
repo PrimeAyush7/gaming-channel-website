@@ -4,37 +4,37 @@
 {% block meta_description %}Interactive Free Fire & FF MAX Sensitivity & DPI Generator. Calculate perfect one-tap headshot settings, DPI, and Fire Button size for your phone.{% endblock %}
 
 {% block content %}
-<div class="container" style="padding-top: 2rem; padding-bottom: 5rem; max-width: 1100px;">
+<div class="container" style="padding-top: 2rem; padding-bottom: 5rem; max-width: 980px; box-sizing: border-box;">
 
-  <!-- Header Banner -->
-  <div class="section-header" style="text-align: center; margin-bottom: 2.5rem;">
-    <span class="badge badge-cyan" style="margin-bottom: 0.75rem; font-size: 0.8rem; letter-spacing: 1.5px;">
+  <!-- Centered Hero Banner (Responsive Column on All Screens) -->
+  <div class="page-hero-banner">
+    <span class="badge badge-cyan page-hero-badge">
       🎯 PRO GAMING TOOLS // OB-55 ENGINE
     </span>
-    <h1 style="font-family: var(--font-heading); font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; line-height: 1.2; margin-bottom: 0.75rem; color: #fff;">
+    <h1 class="page-hero-title">
       AUTO HEADSHOT <span class="gradient-text">SENSITIVITY CALCULATOR</span>
     </h1>
-    <p style="color: var(--text-muted); font-size: 1.05rem; max-width: 680px; margin: 0 auto; line-height: 1.6;">
+    <p class="page-hero-desc">
       Select your smartphone brand, RAM tier, and playstyle. Our algorithm calculates the exact in-game sensitivity sliders, optimal DPI, and fire button size for 98.4% drag headshot accuracy.
     </p>
   </div>
 
-  <div class="calculator-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start;">
+  <div class="calculator-grid">
     
-    <!-- Left Column: Input Form -->
-    <div class="cyber-card" style="padding: 2rem; border: 1px solid rgba(0, 242, 254, 0.3); background: rgba(10, 16, 28, 0.85); backdrop-filter: blur(12px); border-radius: 16px;">
-      <h3 style="font-family: var(--font-heading); font-size: 1.3rem; font-weight: 800; color: #fff; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.6rem;">
+    <!-- Left Column: Input Form (Full Width on Mobile) -->
+    <div class="cyber-card" style="padding: 1.75rem 1.5rem; border: 1px solid rgba(0, 242, 254, 0.3); background: rgba(10, 16, 28, 0.85); backdrop-filter: blur(12px); border-radius: 16px; box-sizing: border-box; width: 100%;">
+      <h3 style="font-family: var(--font-heading); font-size: 1.2rem; font-weight: 800; color: #fff; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.6rem;">
         <span>⚙️</span> Device &amp; Playstyle Configuration
       </h3>
 
       <form id="sens-form" onsubmit="event.preventDefault(); calculateSensitivity();">
         
         <!-- Phone Brand -->
-        <div class="form-group" style="margin-bottom: 1.25rem;">
-          <label class="form-label" style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 0.4rem;">
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label" style="display: block; font-size: 0.82rem; font-weight: 700; color: #cbd5e1; margin-bottom: 0.35rem;">
             📱 Select Device Brand
           </label>
-          <select id="dev-brand" class="form-control" style="width: 100%; padding: 0.75rem 1rem; background: rgba(3, 7, 18, 0.8); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 8px;">
+          <select id="dev-brand" class="form-control" style="width: 100%; padding: 0.75rem 1rem; background: rgba(3, 7, 18, 0.8); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 8px; box-sizing: border-box;">
             <option value="redmi" selected>Redmi / Xiaomi / POCO</option>
             <option value="realme">Realme / Narzo</option>
             <option value="vivo">Vivo / iQOO</option>
@@ -47,11 +47,11 @@
         </div>
 
         <!-- RAM Tier -->
-        <div class="form-group" style="margin-bottom: 1.25rem;">
-          <label class="form-label" style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 0.4rem;">
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label" style="display: block; font-size: 0.82rem; font-weight: 700; color: #cbd5e1; margin-bottom: 0.35rem;">
             ⚡ Device RAM Capacity
           </label>
-          <select id="dev-ram" class="form-control" style="width: 100%; padding: 0.75rem 1rem; background: rgba(3, 7, 18, 0.8); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 8px;">
+          <select id="dev-ram" class="form-control" style="width: 100%; padding: 0.75rem 1rem; background: rgba(3, 7, 18, 0.8); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 8px; box-sizing: border-box;">
             <option value="3">2GB - 3GB RAM (Budget Low-End)</option>
             <option value="4" selected>4GB RAM (Standard Mid-Tier)</option>
             <option value="6">6GB RAM (Smooth Gaming Tier)</option>
@@ -61,11 +61,11 @@
         </div>
 
         <!-- Playstyle -->
-        <div class="form-group" style="margin-bottom: 1.25rem;">
-          <label class="form-label" style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 0.4rem;">
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label" style="display: block; font-size: 0.82rem; font-weight: 700; color: #cbd5e1; margin-bottom: 0.35rem;">
             🎮 Main Playstyle
           </label>
-          <select id="dev-style" class="form-control" style="width: 100%; padding: 0.75rem 1rem; background: rgba(3, 7, 18, 0.8); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 8px;">
+          <select id="dev-style" class="form-control" style="width: 100%; padding: 0.75rem 1rem; background: rgba(3, 7, 18, 0.8); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 8px; box-sizing: border-box;">
             <option value="onetap" selected>🔥 One-Tap Drag Headshot (M1887 / Desert Eagle)</option>
             <option value="rusher">⚡ Fast Rusher / Close-Range SMG (MP40 / UMP)</option>
             <option value="sniper">🎯 Quick Scope &amp; Long Range (AWM / Woodpecker)</option>
@@ -74,46 +74,46 @@
         </div>
 
         <!-- Game Version -->
-        <div class="form-group" style="margin-bottom: 1.75rem;">
-          <label class="form-label" style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 0.4rem;">
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label class="form-label" style="display: block; font-size: 0.82rem; font-weight: 700; color: #cbd5e1; margin-bottom: 0.35rem;">
             🏆 Free Fire Edition
           </label>
-          <div style="display: flex; gap: 1rem;">
-            <label style="display: flex; align-items: center; gap: 0.5rem; color: #fff; font-size: 0.9rem; cursor: pointer;">
+          <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <label style="display: flex; align-items: center; gap: 0.5rem; color: #fff; font-size: 0.88rem; cursor: pointer;">
               <input type="radio" name="ff_edition" value="max" checked style="accent-color: var(--neon-cyan);"> Free Fire MAX
             </label>
-            <label style="display: flex; align-items: center; gap: 0.5rem; color: #fff; font-size: 0.9rem; cursor: pointer;">
+            <label style="display: flex; align-items: center; gap: 0.5rem; color: #fff; font-size: 0.88rem; cursor: pointer;">
               <input type="radio" name="ff_edition" value="normal" style="accent-color: var(--neon-cyan);"> Free Fire Standard
             </label>
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem; font-size: 1rem; font-weight: 800; letter-spacing: 1px; justify-content: center; box-shadow: 0 0 20px rgba(0,242,254,0.35);">
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem; font-size: 0.95rem; font-weight: 800; letter-spacing: 0.5px; justify-content: center; box-shadow: 0 0 20px rgba(0,242,254,0.35);">
           <span>GENERATE PERFECT SENSITIVITY 🚀</span>
         </button>
       </form>
     </div>
 
-    <!-- Right Column: Calculated Results -->
-    <div class="cyber-card" id="results-card" style="padding: 2rem; border: 1px solid rgba(168, 85, 247, 0.4); background: rgba(10, 16, 28, 0.85); backdrop-filter: blur(12px); border-radius: 16px; position: relative;">
+    <!-- Right Column: Calculated Results (Full Width on Mobile) -->
+    <div class="cyber-card" id="results-card" style="padding: 1.75rem 1.5rem; border: 1px solid rgba(168, 85, 247, 0.4); background: rgba(10, 16, 28, 0.85); backdrop-filter: blur(12px); border-radius: 16px; position: relative; box-sizing: border-box; width: 100%;">
       
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
         <div>
-          <span style="font-size: 0.72rem; color: var(--neon-cyan); font-family: monospace; letter-spacing: 1px;">CALIBRATION MATRIX</span>
-          <h3 id="res-target-title" style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 800; color: #fff; margin: 0;">
+          <span style="font-size: 0.7rem; color: var(--neon-cyan); font-family: monospace; letter-spacing: 1px;">CALIBRATION MATRIX</span>
+          <h3 id="res-target-title" style="font-family: var(--font-heading); font-size: 1.15rem; font-weight: 800; color: #fff; margin: 0;">
             Redmi / POCO (4GB RAM)
           </h3>
         </div>
-        <span class="badge badge-success" style="font-size: 0.75rem;">100% ONE-TAP VERIFIED</span>
+        <span class="badge badge-success" style="font-size: 0.72rem;">100% ONE-TAP VERIFIED</span>
       </div>
 
       <!-- Sliders List -->
-      <div class="sens-sliders-list" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.75rem;">
+      <div class="sens-sliders-list" style="display: flex; flex-direction: column; gap: 0.9rem; margin-bottom: 1.5rem;">
         
         <div class="slider-row">
-          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.35rem;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 0.25rem;">
             <span style="color: #cbd5e1;">General Sensitivity</span>
-            <span id="val-general" style="color: var(--neon-cyan); font-family: monospace; font-size: 1rem;">98</span>
+            <span id="val-general" style="color: var(--neon-cyan); font-family: monospace; font-size: 0.95rem;">98</span>
           </div>
           <div style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
             <div id="bar-general" style="height: 100%; width: 98%; background: linear-gradient(90deg, #00f2fe, #4facfe); border-radius: 4px; transition: width 0.4s ease;"></div>
@@ -121,9 +121,9 @@
         </div>
 
         <div class="slider-row">
-          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.35rem;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 0.25rem;">
             <span style="color: #cbd5e1;">Red Dot Sight</span>
-            <span id="val-reddot" style="color: var(--neon-cyan); font-family: monospace; font-size: 1rem;">100</span>
+            <span id="val-reddot" style="color: var(--neon-cyan); font-family: monospace; font-size: 0.95rem;">100</span>
           </div>
           <div style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
             <div id="bar-reddot" style="height: 100%; width: 100%; background: linear-gradient(90deg, #a855f7, #ec4899); border-radius: 4px; transition: width 0.4s ease;"></div>
@@ -131,9 +131,9 @@
         </div>
 
         <div class="slider-row">
-          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.35rem;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 0.25rem;">
             <span style="color: #cbd5e1;">2X Scope</span>
-            <span id="val-2x" style="color: var(--neon-cyan); font-family: monospace; font-size: 1rem;">95</span>
+            <span id="val-2x" style="color: var(--neon-cyan); font-family: monospace; font-size: 0.95rem;">95</span>
           </div>
           <div style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
             <div id="bar-2x" style="height: 100%; width: 95%; background: linear-gradient(90deg, #00f2fe, #38bdf8); border-radius: 4px; transition: width 0.4s ease;"></div>
@@ -141,9 +141,9 @@
         </div>
 
         <div class="slider-row">
-          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.35rem;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 0.25rem;">
             <span style="color: #cbd5e1;">4X Scope</span>
-            <span id="val-4x" style="color: var(--neon-cyan); font-family: monospace; font-size: 1rem;">92</span>
+            <span id="val-4x" style="color: var(--neon-cyan); font-family: monospace; font-size: 0.95rem;">92</span>
           </div>
           <div style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
             <div id="bar-4x" style="height: 100%; width: 92%; background: linear-gradient(90deg, #00f2fe, #38bdf8); border-radius: 4px; transition: width 0.4s ease;"></div>
@@ -151,9 +151,9 @@
         </div>
 
         <div class="slider-row">
-          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.35rem;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 0.25rem;">
             <span style="color: #cbd5e1;">Sniper Scope</span>
-            <span id="val-sniper" style="color: var(--neon-cyan); font-family: monospace; font-size: 1rem;">84</span>
+            <span id="val-sniper" style="color: var(--neon-cyan); font-family: monospace; font-size: 0.95rem;">84</span>
           </div>
           <div style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
             <div id="bar-sniper" style="height: 100%; width: 84%; background: linear-gradient(90deg, #10b981, #34d399); border-radius: 4px; transition: width 0.4s ease;"></div>
@@ -161,9 +161,9 @@
         </div>
 
         <div class="slider-row">
-          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.35rem;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 0.25rem;">
             <span style="color: #cbd5e1;">Free Look (360°)</span>
-            <span id="val-freelook" style="color: var(--neon-cyan); font-family: monospace; font-size: 1rem;">78</span>
+            <span id="val-freelook" style="color: var(--neon-cyan); font-family: monospace; font-size: 0.95rem;">78</span>
           </div>
           <div style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
             <div id="bar-freelook" style="height: 100%; width: 78%; background: linear-gradient(90deg, #f59e0b, #fbbf24); border-radius: 4px; transition: width 0.4s ease;"></div>
@@ -173,23 +173,23 @@
       </div>
 
       <!-- Quick Badges: DPI & Fire Button -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
-        <div style="background: rgba(0, 242, 254, 0.08); border: 1px solid rgba(0, 242, 254, 0.3); padding: 0.85rem; border-radius: 10px; text-align: center;">
-          <div style="font-size: 0.72rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">RECOMMENDED DPI</div>
-          <div id="badge-dpi" style="font-size: 1.4rem; font-weight: 900; color: var(--neon-cyan); font-family: monospace; margin-top: 0.2rem;">450 DPI</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.25rem;">
+        <div style="background: rgba(0, 242, 254, 0.08); border: 1px solid rgba(0, 242, 254, 0.3); padding: 0.75rem; border-radius: 10px; text-align: center;">
+          <div style="font-size: 0.68rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">RECOMMENDED DPI</div>
+          <div id="badge-dpi" style="font-size: 1.3rem; font-weight: 900; color: var(--neon-cyan); font-family: monospace; margin-top: 0.15rem;">450 DPI</div>
         </div>
-        <div style="background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.3); padding: 0.85rem; border-radius: 10px; text-align: center;">
-          <div style="font-size: 0.72rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">FIRE BUTTON SIZE</div>
-          <div id="badge-btn-size" style="font-size: 1.4rem; font-weight: 900; color: #c084fc; font-family: monospace; margin-top: 0.2rem;">48%</div>
+        <div style="background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.3); padding: 0.75rem; border-radius: 10px; text-align: center;">
+          <div style="font-size: 0.68rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">FIRE BUTTON SIZE</div>
+          <div id="badge-btn-size" style="font-size: 1.3rem; font-weight: 900; color: #c084fc; font-family: monospace; margin-top: 0.15rem;">48%</div>
         </div>
       </div>
 
       <!-- Action Buttons -->
-      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-        <button type="button" onclick="copySettings()" class="btn btn-secondary" style="flex: 1; min-width: 140px; justify-content: center; font-size: 0.85rem;">
+      <div style="display: flex; gap: 0.65rem; flex-wrap: wrap;">
+        <button type="button" onclick="copySettings()" class="btn btn-secondary" style="flex: 1; min-width: 130px; justify-content: center; font-size: 0.82rem;">
           <span id="copy-btn-text">📋 Copy Sliders</span>
         </button>
-        <button type="button" onclick="shareSquad()" class="btn btn-secondary" style="flex: 1; min-width: 140px; justify-content: center; font-size: 0.85rem; color: #25D366; border-color: rgba(37,211,102,0.4);">
+        <button type="button" onclick="shareSquad()" class="btn btn-secondary" style="flex: 1; min-width: 130px; justify-content: center; font-size: 0.82rem; color: #25D366; border-color: rgba(37,211,102,0.4);">
           <span>📲 Share on WhatsApp</span>
         </button>
       </div>
@@ -215,7 +215,6 @@ function calculateSensitivity() {
   let dpi = 420;
   let btnSize = "48%";
 
-  // RAM adjustments
   if (ram <= 3) {
     general = 100;
     reddot = 100;
@@ -232,7 +231,6 @@ function calculateSensitivity() {
     btnSize = "52%";
   }
 
-  // Playstyle adjustments
   if (style === 'onetap') {
     reddot = 100;
     btnSize = "46%";
@@ -245,7 +243,6 @@ function calculateSensitivity() {
     btnSize = "54%";
   }
 
-  // Brand tuning
   if (brand === 'iphone') {
     general = 90;
     reddot = 92;
@@ -255,7 +252,6 @@ function calculateSensitivity() {
     dpi = ram >= 6 ? 480 : 420;
   }
 
-  // Update DOM
   document.getElementById('val-general').textContent = general;
   document.getElementById('bar-general').style.width = general + '%';
 
@@ -303,7 +299,7 @@ function copySettings() {
   
   navigator.clipboard.writeText(text).then(() => {
     const btnEl = document.getElementById('copy-btn-text');
-    btnEl.textContent = '✓ Copied to Clipboard!';
+    btnEl.textContent = '✓ Copied!';
     setTimeout(() => { btnEl.textContent = '📋 Copy Sliders'; }, 2000);
   });
 }

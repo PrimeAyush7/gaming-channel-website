@@ -499,5 +499,32 @@ if ('serviceWorker' in navigator) {
     </div>
   </div>
 
+
+  <!-- ========================================================================= -->
+  <!-- 📱 MOBILE GAMING APP DOCK (1-Tap Thumb Navigation for Mobile Gamers) -->
+  <!-- ========================================================================= -->
+  <nav class="mobile-app-dock" aria-label="Mobile Dock Navigation">
+    <a href="/" class="dock-item {% if request.url.path == '/' %}active{% endif %}">
+      <span class="dock-icon">🏠</span>
+      <span>Home</span>
+    </a>
+    <a href="/sensitivity-calculator" class="dock-item {% if request.url.path == '/sensitivity-calculator' %}active{% endif %}">
+      <span class="dock-icon">🎯</span>
+      <span>Sens</span>
+    </a>
+    <a href="/redeem-codes" class="dock-item {% if request.url.path == '/redeem-codes' %}active{% endif %}">
+      <span class="dock-icon">🎁</span>
+      <span>Codes</span>
+    </a>
+    <a href="/leaderboard" class="dock-item {% if request.url.path == '/leaderboard' %}active{% endif %}">
+      <span class="dock-icon">👑</span>
+      <span>Ranks</span>
+    </a>
+    <a href="/esports" class="dock-item {% if request.url.path == '/esports' or request.url.path.startswith('/tournaments') %}active{% endif %}">
+      <span class="dock-icon">🏆</span>
+      <span>Arena</span>
+    </a>
+  </nav>
+
 </body>
 </html>

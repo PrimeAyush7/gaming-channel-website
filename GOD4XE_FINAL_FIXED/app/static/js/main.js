@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initDimensionalUI();
   initDownloadTimerModal();
   initPwaInstallBanner();
+  initDesktopNavScroll();
 });
 
 /* --------------------------------------------------------------------------
@@ -925,4 +926,20 @@ function initPwaInstallBanner() {
       localStorage.setItem('god4xe_pwa_dismissed', '1');
     });
   }
+}
+
+
+/* --------------------------------------------------------------------------
+   DESKTOP NAV MOUSE WHEEL HORIZONTAL SCROLL
+   -------------------------------------------------------------------------- */
+function initDesktopNavScroll() {
+  const desktopNav = document.querySelector('.desktop-nav');
+  if (!desktopNav) return;
+
+  desktopNav.addEventListener('wheel', (e) => {
+    if (e.deltaY !== 0) {
+      e.preventDefault();
+      desktopNav.scrollLeft += e.deltaY * 1.5;
+    }
+  }, { passive: false });
 }

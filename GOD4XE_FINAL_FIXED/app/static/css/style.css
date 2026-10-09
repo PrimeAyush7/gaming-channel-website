@@ -5558,3 +5558,295 @@ body.preview-hud-open {
 .pwa-close-btn:hover {
   color: #fff;
 }
+
+/* ==========================================================================
+   PAGE HERO BANNER (FIX FOR CENTERING & ELIMINATING HORIZONTAL OVERFLOW)
+   ========================================================================== */
+.page-hero-banner {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  margin: 0 auto 2.5rem !important;
+  width: 100% !important;
+  max-width: 820px !important;
+  box-sizing: border-box !important;
+  padding: 0 0.5rem !important;
+}
+
+.page-hero-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.4rem !important;
+  padding: 0.35rem 0.85rem !important;
+  font-family: var(--font-heading) !important;
+  font-size: 0.75rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 1.25px !important;
+  margin-bottom: 0.75rem !important;
+  border-radius: var(--radius-full) !important;
+  text-transform: uppercase !important;
+  white-space: normal !important;
+  text-align: center !important;
+}
+
+.page-hero-title {
+  font-family: var(--font-heading) !important;
+  font-size: clamp(1.65rem, 5.5vw, 2.75rem) !important;
+  font-weight: 900 !important;
+  line-height: 1.2 !important;
+  color: #fff !important;
+  margin: 0 0 0.75rem !important;
+  word-break: break-word !important;
+  text-align: center !important;
+}
+
+.page-hero-desc {
+  color: var(--text-muted) !important;
+  font-size: clamp(0.88rem, 2.5vw, 1.05rem) !important;
+  line-height: 1.6 !important;
+  max-width: 680px !important;
+  margin: 0 auto 1.5rem !important;
+  text-align: center !important;
+}
+
+/* ==========================================================================
+   SENSITIVITY CALCULATOR RESPONSIVE GRID
+   ========================================================================== */
+.calculator-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: start;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .calculator-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
+}
+
+/* ==========================================================================
+   REDEEM CODES HUB RESPONSIVE CARDS
+   ========================================================================== */
+.redeem-code-card {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  border: 1px solid rgba(0, 242, 254, 0.25);
+  background: rgba(10, 16, 28, 0.85);
+  border-radius: 14px;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.redeem-code-card:hover {
+  border-color: rgba(0, 242, 254, 0.5);
+  box-shadow: 0 4px 20px rgba(0, 242, 254, 0.15);
+}
+
+.code-info-group {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.code-text-badge {
+  font-family: monospace;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 1.5px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  border: 1px dashed rgba(0, 242, 254, 0.35);
+  word-break: break-all;
+}
+
+.code-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .redeem-code-card {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 1rem !important;
+    padding: 1.15rem 1rem !important;
+  }
+
+  .code-info-group {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+  }
+
+  .code-text-badge {
+    font-size: 1.15rem !important;
+    width: 100% !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+  }
+
+  .code-actions-group {
+    width: 100% !important;
+    display: flex !important;
+    gap: 0.5rem !important;
+  }
+
+  .code-actions-group button,
+  .code-actions-group a {
+    flex: 1 !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+}
+
+/* ==========================================================================
+   ESPORTS LEADERBOARD RESPONSIVE PODIUM
+   ========================================================================== */
+.podium-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3.5rem;
+  align-items: end;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .podium-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+    margin-bottom: 2rem !important;
+  }
+
+  .podium-grid .rank-1-card {
+    order: 1 !important;
+    transform: none !important;
+  }
+  .podium-grid .rank-2-card {
+    order: 2 !important;
+  }
+  .podium-grid .rank-3-card {
+    order: 3 !important;
+  }
+}
+
+/* ==========================================================================
+   DESKTOP NAVIGATION SCROLLBAR & OVERFLOW REPAIR
+   ========================================================================== */
+.desktop-nav {
+  overflow-x: auto !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(0, 242, 254, 0.4) transparent !important;
+  -webkit-overflow-scrolling: touch !important;
+  scroll-behavior: smooth !important;
+  max-width: 580px !important;
+  flex-shrink: 1 !important;
+}
+
+.desktop-nav::-webkit-scrollbar {
+  height: 4px !important;
+  display: block !important;
+}
+
+.desktop-nav::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-radius: 4px !important;
+}
+
+.desktop-nav::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple)) !important;
+  border-radius: 4px !important;
+}
+
+/* Compact Navigation Link Padding on Medium/Laptop Screens */
+@media (max-width: 1280px) {
+  .desktop-nav {
+    max-width: 440px !important;
+  }
+  .nav-link {
+    font-size: 0.82rem !important;
+    padding: 0.35rem 0.65rem !important;
+    gap: 0.3rem !important;
+  }
+}
+
+/* ==========================================================================
+   MOBILE BOTTOM APP BAR DOCK (NATIVE APP FEEL FOR GAMERS)
+   ========================================================================== */
+.mobile-app-dock {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-app-dock {
+    display: flex !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 62px !important;
+    background: rgba(6, 10, 18, 0.94) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border-top: 1px solid rgba(0, 242, 254, 0.25) !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.8), 0 -1px 10px rgba(0, 242, 254, 0.15) !important;
+    z-index: 999 !important;
+    align-items: center !important;
+    justify-content: space-around !important;
+    padding: 0 0.5rem !important;
+    box-sizing: border-box !important;
+  }
+
+  .dock-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-decoration: none !important;
+    color: #94a3b8 !important;
+    font-family: var(--font-heading) !important;
+    font-size: 0.65rem !important;
+    font-weight: 700 !important;
+    gap: 2px !important;
+    padding: 5px 8px !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease !important;
+    min-width: 52px !important;
+  }
+
+  .dock-icon {
+    font-size: 1.2rem !important;
+    line-height: 1 !important;
+    filter: drop-shadow(0 0 4px rgba(0,0,0,0.5)) !important;
+  }
+
+  .dock-item:hover,
+  .dock-item.active {
+    color: var(--neon-cyan) !important;
+    background: rgba(0, 242, 254, 0.08) !important;
+  }
+
+  .dock-item.active .dock-icon {
+    transform: translateY(-2px) scale(1.1) !important;
+    filter: drop-shadow(0 0 8px var(--neon-cyan)) !important;
+  }
+
+  /* Add padding bottom to body so floating dock doesn't cover content */
+  body {
+    padding-bottom: 70px !important;
+  }
+}

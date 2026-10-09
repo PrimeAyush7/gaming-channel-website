@@ -4,49 +4,49 @@
 {% block meta_description %}Official GOD4XE Free Fire Esports Leaderboard. Check top tournament champions, headshot masters, kill leaders, and diamond winnings.{% endblock %}
 
 {% block content %}
-<div class="container" style="padding-top: 2rem; padding-bottom: 5rem; max-width: 1100px;">
+<div class="container" style="padding-top: 2rem; padding-bottom: 5rem; max-width: 980px; box-sizing: border-box;">
 
-  <!-- Header Banner -->
-  <div class="section-header" style="text-align: center; margin-bottom: 3rem;">
-    <span class="badge badge-cyan" style="margin-bottom: 0.75rem; font-size: 0.8rem; letter-spacing: 1.5px;">
+  <!-- Centered Hero Banner (Responsive Column on All Screens) -->
+  <div class="page-hero-banner">
+    <span class="badge badge-cyan page-hero-badge">
       🏆 ESPORTS ARENA // HALL OF FAME
     </span>
-    <h1 style="font-family: var(--font-heading); font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; line-height: 1.2; margin-bottom: 0.75rem; color: #fff;">
+    <h1 class="page-hero-title">
       TOURNAMENT <span class="gradient-text">CHAMPIONS LEADERBOARD</span>
     </h1>
-    <p style="color: var(--text-muted); font-size: 1.05rem; max-width: 680px; margin: 0 auto; line-height: 1.6;">
+    <p class="page-hero-desc">
       Honoring the most dominant Free Fire and Free Fire MAX competitors in the GOD4XE arena. Compete in daily custom rooms, accumulate kills, and earn direct diamond payouts.
     </p>
 
-    <div style="margin-top: 1.5rem; display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
-      <a href="/esports" class="btn btn-primary" style="padding: 0.75rem 1.5rem; font-size: 0.95rem; font-weight: 800;">
-        <span>🎮 Join Live Tournaments &rarr;</span>
+    <div style="margin-top: 0.5rem; display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap; width: 100%; max-width: 440px;">
+      <a href="/esports" class="btn btn-primary" style="flex: 1; min-width: 160px; padding: 0.75rem 1.25rem; font-size: 0.9rem; font-weight: 800; justify-content: center;">
+        <span>🎮 Join Arena &rarr;</span>
       </a>
-      <a href="/download-app" class="btn btn-secondary" style="padding: 0.75rem 1.5rem; font-size: 0.95rem;">
-        <span>📱 Launch Android App</span>
+      <a href="/download-app" class="btn btn-secondary" style="flex: 1; min-width: 160px; padding: 0.75rem 1.25rem; font-size: 0.9rem; justify-content: center;">
+        <span>📱 Android APK</span>
       </a>
     </div>
   </div>
 
-  <!-- Top 3 Podium Cards -->
+  <!-- Top 3 Podium Cards (Responsive: #1 on top on mobile) -->
   {% if leaderboard and leaderboard|length >= 3 %}
-  <div class="podium-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 3.5rem; align-items: end;">
+  <div class="podium-grid">
     
     <!-- Rank 2: Silver -->
-    <div class="cyber-card" style="padding: 2rem 1.5rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.4); background: rgba(15, 23, 42, 0.85); border-radius: 16px; position: relative;">
-      <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: #94a3b8; color: #000; font-weight: 900; font-size: 0.8rem; padding: 0.2rem 0.8rem; border-radius: 20px;">
+    <div class="cyber-card rank-2-card" style="padding: 1.75rem 1.25rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.4); background: rgba(15, 23, 42, 0.85); border-radius: 16px; position: relative;">
+      <div style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: #94a3b8; color: #000; font-weight: 900; font-size: 0.75rem; padding: 0.2rem 0.8rem; border-radius: 20px;">
         #2 SILVER
       </div>
-      <div style="font-size: 3rem; margin-bottom: 0.5rem;">🥈</div>
-      <h3 style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 800; color: #fff; margin: 0 0 0.25rem;">
+      <div style="font-size: 2.75rem; margin-bottom: 0.35rem;">🥈</div>
+      <h3 style="font-family: var(--font-heading); font-size: 1.2rem; font-weight: 800; color: #fff; margin: 0 0 0.2rem;">
         {{ leaderboard[1].username }}
       </h3>
-      <div style="font-size: 0.75rem; color: #94a3b8; font-family: monospace; margin-bottom: 1rem;">
+      <div style="font-size: 0.72rem; color: #94a3b8; font-family: monospace; margin-bottom: 0.85rem;">
         UID: {{ leaderboard[1].ff_uid }}
       </div>
-      <div style="background: rgba(0, 242, 254, 0.08); border: 1px solid rgba(0, 242, 254, 0.2); padding: 0.75rem; border-radius: 10px; margin-bottom: 1rem;">
-        <div style="font-size: 0.7rem; color: #94a3b8; font-weight: 700;">TOTAL WINNINGS</div>
-        <div style="font-size: 1.4rem; font-weight: 900; color: var(--neon-cyan); font-family: monospace;">💎 {{ leaderboard[1].diamonds_won }}</div>
+      <div style="background: rgba(0, 242, 254, 0.08); border: 1px solid rgba(0, 242, 254, 0.2); padding: 0.65rem; border-radius: 10px; margin-bottom: 0.85rem;">
+        <div style="font-size: 0.68rem; color: #94a3b8; font-weight: 700;">TOTAL WINNINGS</div>
+        <div style="font-size: 1.35rem; font-weight: 900; color: var(--neon-cyan); font-family: monospace;">💎 {{ leaderboard[1].diamonds_won }}</div>
       </div>
       <div style="display: flex; justify-content: space-around; font-size: 0.8rem; color: #cbd5e1;">
         <div>Kills: <strong>{{ leaderboard[1].total_kills }}</strong></div>
@@ -54,43 +54,43 @@
       </div>
     </div>
 
-    <!-- Rank 1: Gold (Center & Elevated) -->
-    <div class="cyber-card" style="padding: 2.5rem 1.75rem; text-align: center; border: 2px solid #eab308; background: radial-gradient(circle at 50% 0%, rgba(234, 179, 8, 0.15), rgba(15, 23, 42, 0.95)); border-radius: 18px; position: relative; box-shadow: 0 0 35px rgba(234, 179, 8, 0.25); transform: translateY(-10px);">
-      <div style="position: absolute; top: -16px; left: 50%; transform: translateX(-50%); background: #eab308; color: #000; font-weight: 900; font-size: 0.85rem; padding: 0.25rem 1rem; border-radius: 20px; box-shadow: 0 0 15px rgba(234, 179, 8, 0.6);">
+    <!-- Rank 1: Gold (Center & Highlighted) -->
+    <div class="cyber-card rank-1-card" style="padding: 2.25rem 1.5rem; text-align: center; border: 2px solid #eab308; background: radial-gradient(circle at 50% 0%, rgba(234, 179, 8, 0.15), rgba(15, 23, 42, 0.98)); border-radius: 18px; position: relative; box-shadow: 0 0 35px rgba(234, 179, 8, 0.25);">
+      <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: #eab308; color: #000; font-weight: 900; font-size: 0.8rem; padding: 0.25rem 1rem; border-radius: 20px; box-shadow: 0 0 15px rgba(234, 179, 8, 0.6);">
         👑 #1 CHAMPION
       </div>
-      <div style="font-size: 3.5rem; margin-bottom: 0.5rem; filter: drop-shadow(0 0 15px #eab308);">🥇</div>
-      <h3 style="font-family: var(--font-heading); font-size: 1.45rem; font-weight: 900; color: #fff; margin: 0 0 0.25rem;">
+      <div style="font-size: 3.25rem; margin-bottom: 0.35rem; filter: drop-shadow(0 0 15px #eab308);">🥇</div>
+      <h3 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 900; color: #fff; margin: 0 0 0.2rem;">
         {{ leaderboard[0].username }}
       </h3>
-      <div style="font-size: 0.75rem; color: #eab308; font-family: monospace; margin-bottom: 1rem; font-weight: 700;">
+      <div style="font-size: 0.72rem; color: #eab308; font-family: monospace; margin-bottom: 0.85rem; font-weight: 700;">
         UID: {{ leaderboard[0].ff_uid }} &bull; {{ leaderboard[0].badge }}
       </div>
-      <div style="background: rgba(234, 179, 8, 0.12); border: 1px solid rgba(234, 179, 8, 0.4); padding: 0.85rem; border-radius: 12px; margin-bottom: 1rem;">
-        <div style="font-size: 0.72rem; color: #fef08a; font-weight: 800;">GRAND CHAMPION REWARDS</div>
-        <div style="font-size: 1.75rem; font-weight: 900; color: #facc15; font-family: monospace;">💎 {{ leaderboard[0].diamonds_won }}</div>
+      <div style="background: rgba(234, 179, 8, 0.12); border: 1px solid rgba(234, 179, 8, 0.4); padding: 0.75rem; border-radius: 12px; margin-bottom: 0.85rem;">
+        <div style="font-size: 0.7rem; color: #fef08a; font-weight: 800;">GRAND CHAMPION REWARDS</div>
+        <div style="font-size: 1.6rem; font-weight: 900; color: #facc15; font-family: monospace;">💎 {{ leaderboard[0].diamonds_won }}</div>
       </div>
-      <div style="display: flex; justify-content: space-around; font-size: 0.85rem; color: #fef08a; font-weight: 700;">
+      <div style="display: flex; justify-content: space-around; font-size: 0.82rem; color: #fef08a; font-weight: 700;">
         <div>Kills: <strong>{{ leaderboard[0].total_kills }}</strong></div>
         <div>Win Rate: <strong>{{ leaderboard[0].win_rate }}</strong></div>
       </div>
     </div>
 
     <!-- Rank 3: Bronze -->
-    <div class="cyber-card" style="padding: 2rem 1.5rem; text-align: center; border: 1px solid rgba(205, 127, 50, 0.4); background: rgba(15, 23, 42, 0.85); border-radius: 16px; position: relative;">
-      <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: #cd7f32; color: #fff; font-weight: 900; font-size: 0.8rem; padding: 0.2rem 0.8rem; border-radius: 20px;">
+    <div class="cyber-card rank-3-card" style="padding: 1.75rem 1.25rem; text-align: center; border: 1px solid rgba(205, 127, 50, 0.4); background: rgba(15, 23, 42, 0.85); border-radius: 16px; position: relative;">
+      <div style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: #cd7f32; color: #fff; font-weight: 900; font-size: 0.75rem; padding: 0.2rem 0.8rem; border-radius: 20px;">
         #3 BRONZE
       </div>
-      <div style="font-size: 3rem; margin-bottom: 0.5rem;">🥉</div>
-      <h3 style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 800; color: #fff; margin: 0 0 0.25rem;">
+      <div style="font-size: 2.75rem; margin-bottom: 0.35rem;">🥉</div>
+      <h3 style="font-family: var(--font-heading); font-size: 1.2rem; font-weight: 800; color: #fff; margin: 0 0 0.2rem;">
         {{ leaderboard[2].username }}
       </h3>
-      <div style="font-size: 0.75rem; color: #94a3b8; font-family: monospace; margin-bottom: 1rem;">
+      <div style="font-size: 0.72rem; color: #94a3b8; font-family: monospace; margin-bottom: 0.85rem;">
         UID: {{ leaderboard[2].ff_uid }}
       </div>
-      <div style="background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.2); padding: 0.75rem; border-radius: 10px; margin-bottom: 1rem;">
-        <div style="font-size: 0.7rem; color: #94a3b8; font-weight: 700;">TOTAL WINNINGS</div>
-        <div style="font-size: 1.4rem; font-weight: 900; color: #c084fc; font-family: monospace;">💎 {{ leaderboard[2].diamonds_won }}</div>
+      <div style="background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.2); padding: 0.65rem; border-radius: 10px; margin-bottom: 0.85rem;">
+        <div style="font-size: 0.68rem; color: #94a3b8; font-weight: 700;">TOTAL WINNINGS</div>
+        <div style="font-size: 1.35rem; font-weight: 900; color: #c084fc; font-family: monospace;">💎 {{ leaderboard[2].diamonds_won }}</div>
       </div>
       <div style="display: flex; justify-content: space-around; font-size: 0.8rem; color: #cbd5e1;">
         <div>Kills: <strong>{{ leaderboard[2].total_kills }}</strong></div>
@@ -102,45 +102,45 @@
   {% endif %}
 
   <!-- Full Standings Table -->
-  <div class="cyber-card" style="padding: 1.5rem; border: 1px solid rgba(0, 242, 254, 0.25); background: rgba(10, 16, 28, 0.85); border-radius: 16px; overflow-x: auto;">
-    <h3 style="font-family: var(--font-heading); font-size: 1.2rem; font-weight: 800; color: #fff; margin-bottom: 1.25rem;">
+  <div class="cyber-card" style="padding: 1.25rem; border: 1px solid rgba(0, 242, 254, 0.25); background: rgba(10, 16, 28, 0.85); border-radius: 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; box-sizing: border-box;">
+    <h3 style="font-family: var(--font-heading); font-size: 1.15rem; font-weight: 800; color: #fff; margin-bottom: 1rem;">
       📋 Full Arena Standings
     </h3>
 
-    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; min-width: 600px;">
       <thead>
-        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #94a3b8; font-size: 0.75rem; text-transform: uppercase;">
-          <th style="padding: 0.75rem 1rem;">Rank</th>
-          <th style="padding: 0.75rem 1rem;">Player</th>
-          <th style="padding: 0.75rem 1rem;">FF UID</th>
-          <th style="padding: 0.75rem 1rem;">Tier</th>
-          <th style="padding: 0.75rem 1rem;">Kills</th>
-          <th style="padding: 0.75rem 1rem;">Win Rate</th>
-          <th style="padding: 0.75rem 1rem; text-align: right;">Diamonds Won</th>
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #94a3b8; font-size: 0.72rem; text-transform: uppercase;">
+          <th style="padding: 0.65rem 0.85rem;">Rank</th>
+          <th style="padding: 0.65rem 0.85rem;">Player</th>
+          <th style="padding: 0.65rem 0.85rem;">FF UID</th>
+          <th style="padding: 0.65rem 0.85rem;">Tier</th>
+          <th style="padding: 0.65rem 0.85rem;">Kills</th>
+          <th style="padding: 0.65rem 0.85rem;">Win Rate</th>
+          <th style="padding: 0.65rem 0.85rem; text-align: right;">Diamonds Won</th>
         </tr>
       </thead>
       <tbody>
         {% for p in leaderboard %}
         <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #fff;">
-          <td style="padding: 0.85rem 1rem; font-weight: 800; font-family: monospace; color: var(--neon-cyan);">
+          <td style="padding: 0.75rem 0.85rem; font-weight: 800; font-family: monospace; color: var(--neon-cyan);">
             #{{ p.rank }}
           </td>
-          <td style="padding: 0.85rem 1rem; font-weight: 700;">
-            {{ p.username }} <span style="font-size: 0.72rem; color: #94a3b8; margin-left: 0.3rem;">{{ p.badge }}</span>
+          <td style="padding: 0.75rem 0.85rem; font-weight: 700;">
+            {{ p.username }} <span style="font-size: 0.7rem; color: #94a3b8; margin-left: 0.25rem;">{{ p.badge }}</span>
           </td>
-          <td style="padding: 0.85rem 1rem; font-family: monospace; color: #94a3b8;">
+          <td style="padding: 0.75rem 0.85rem; font-family: monospace; color: #94a3b8;">
             {{ p.ff_uid }}
           </td>
-          <td style="padding: 0.85rem 1rem;">
-            <span class="badge badge-accent" style="font-size: 0.7rem;">{{ p.tier }}</span>
+          <td style="padding: 0.75rem 0.85rem;">
+            <span class="badge badge-accent" style="font-size: 0.68rem;">{{ p.tier }}</span>
           </td>
-          <td style="padding: 0.85rem 1rem; font-weight: 700; color: #34d399;">
+          <td style="padding: 0.75rem 0.85rem; font-weight: 700; color: #34d399;">
             {{ p.total_kills }}
           </td>
-          <td style="padding: 0.85rem 1rem; color: #cbd5e1;">
+          <td style="padding: 0.75rem 0.85rem; color: #cbd5e1;">
             {{ p.win_rate }}
           </td>
-          <td style="padding: 0.85rem 1rem; text-align: right; font-weight: 900; font-family: monospace; color: var(--neon-cyan);">
+          <td style="padding: 0.75rem 0.85rem; text-align: right; font-weight: 900; font-family: monospace; color: var(--neon-cyan);">
             💎 {{ p.diamonds_won }}
           </td>
         </tr>

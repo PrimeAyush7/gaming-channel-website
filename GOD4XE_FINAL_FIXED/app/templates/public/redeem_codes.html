@@ -4,31 +4,31 @@
 {% block meta_description %}Get today's verified Free Fire & FF MAX redeem codes. Claim free diamonds, gun skins, emotes, and bundles. 1-click copy with direct official redemption link.{% endblock %}
 
 {% block content %}
-<div class="container" style="padding-top: 2rem; padding-bottom: 5rem; max-width: 1100px;">
+<div class="container" style="padding-top: 2rem; padding-bottom: 5rem; max-width: 980px; box-sizing: border-box;">
 
-  <!-- Header Banner -->
-  <div class="section-header" style="text-align: center; margin-bottom: 2.5rem;">
-    <span class="badge badge-cyan" style="margin-bottom: 0.75rem; font-size: 0.8rem; letter-spacing: 1.5px;">
+  <!-- Centered Hero Banner (Responsive Column on All Screens) -->
+  <div class="page-hero-banner">
+    <span class="badge badge-cyan page-hero-badge">
       <span class="pulse-dot"></span> LIVE DAILY CODES // VERIFIED TODAY
     </span>
-    <h1 style="font-family: var(--font-heading); font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; line-height: 1.2; margin-bottom: 0.75rem; color: #fff;">
+    <h1 class="page-hero-title">
       FREE FIRE <span class="gradient-text">REDEEM CODES TODAY</span>
     </h1>
-    <p style="color: var(--text-muted); font-size: 1.05rem; max-width: 720px; margin: 0 auto; line-height: 1.6;">
+    <p class="page-hero-desc">
       Fresh 100% working Free Fire and Free Fire MAX redeem codes. Tested daily for India and Global servers. Click "Copy" on any code and claim rewards on Garena's official portal.
     </p>
 
     <!-- Quick Action: Official Portal Link -->
-    <div style="margin-top: 1.5rem;">
-      <a href="https://reward.ff.garena.com/en" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="padding: 0.75rem 1.5rem; font-size: 0.95rem; font-weight: 800; box-shadow: 0 0 25px rgba(0, 242, 254, 0.4);">
-        <span>🌐 Open Garena Official Redemption Site ↗</span>
+    <div style="margin-top: 0.5rem; width: 100%; max-width: 380px;">
+      <a href="https://reward.ff.garena.com/en" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="width: 100%; padding: 0.8rem 1.25rem; font-size: 0.95rem; font-weight: 800; justify-content: center; box-shadow: 0 0 25px rgba(0, 242, 254, 0.4);">
+        <span>🌐 Open Garena Official Site ↗</span>
       </a>
     </div>
   </div>
 
   <!-- Top Ad Slot -->
   {% if ads and ads.is_enabled and ads.client_id and ads.slot_home_bottom %}
-  <div class="ad-slot-wrapper" style="margin-bottom: 2.5rem;">
+  <div class="ad-slot-wrapper" style="margin-bottom: 2rem;">
     <span class="ad-label">Sponsored Advertisement</span>
     <div class="ad-container-responsive">
       <ins class="adsbygoogle"
@@ -42,40 +42,40 @@
   </div>
   {% endif %}
 
-  <!-- Active Codes Grid / Table -->
-  <div class="codes-grid" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 3.5rem;">
+  <!-- Active Codes List (Responsive Vertical Stack on Mobile) -->
+  <div class="codes-list" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 3rem; width: 100%; box-sizing: border-box;">
     
     {% for item in codes %}
-    <div class="cyber-card" style="padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; border: 1px solid rgba(0, 242, 254, 0.25); background: rgba(10, 16, 28, 0.85); border-radius: 12px; transition: transform 0.2s ease, border-color 0.2s ease;">
+    <div class="redeem-code-card cyber-card">
       
-      <div style="display: flex; align-items: center; gap: 1.25rem;">
-        <div style="font-size: 2rem; background: rgba(0, 242, 254, 0.08); width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 10px; border: 1px solid rgba(0, 242, 254, 0.3);">
+      <div class="code-info-group">
+        <div style="font-size: 1.8rem; background: rgba(0, 242, 254, 0.08); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 10px; border: 1px solid rgba(0, 242, 254, 0.3); flex-shrink: 0;">
           🎁
         </div>
         <div>
-          <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.25rem;">
-            <span style="font-family: monospace; font-size: 1.35rem; font-weight: 800; color: #fff; letter-spacing: 1.5px; background: rgba(0,0,0,0.4); padding: 0.2rem 0.6rem; border-radius: 6px; border: 1px dashed rgba(255,255,255,0.2);">
+          <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.35rem;">
+            <span class="code-text-badge">
               {{ item.code }}
             </span>
             <span class="badge badge-success" style="font-size: 0.7rem;">Active Today</span>
           </div>
-          <div style="color: #cbd5e1; font-size: 0.85rem; font-weight: 600;">
+          <div style="color: #f1f5f9; font-size: 0.88rem; font-weight: 600; line-height: 1.4;">
             {{ item.reward_desc }}
           </div>
-          <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 0.25rem;">
+          <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.25rem;">
             🌍 {{ item.server_region }} &bull; 👥 {{ item.copy_count }} players claimed today
           </div>
         </div>
       </div>
 
-      <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <div class="code-actions-group">
         <button type="button" 
                 onclick="copyRedeemCode('{{ item.code }}', this, {{ item.id }})" 
                 class="btn btn-secondary" 
-                style="padding: 0.6rem 1.2rem; font-size: 0.85rem; font-weight: 700; min-width: 130px; justify-content: center;">
+                style="padding: 0.65rem 1.25rem; font-size: 0.85rem; font-weight: 700; min-width: 130px; justify-content: center;">
           <span>📋 Copy Code</span>
         </button>
-        <a href="https://reward.ff.garena.com/en" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm" style="padding: 0.6rem 1rem;">
+        <a href="https://reward.ff.garena.com/en" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm" style="padding: 0.65rem 1rem; justify-content: center;">
           <span>Claim ↗</span>
         </a>
       </div>
@@ -92,28 +92,28 @@
   </div>
 
   <!-- How to Redeem Guide -->
-  <div class="cyber-card" style="padding: 2.25rem; border: 1px solid rgba(168, 85, 247, 0.35); background: rgba(10, 16, 28, 0.9); border-radius: 16px;">
-    <h3 style="font-family: var(--font-heading); font-size: 1.4rem; font-weight: 800; color: #fff; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.6rem;">
-      <span>📖</span> How to Redeem Free Fire Codes (Official Step-by-Step)
+  <div class="cyber-card" style="padding: 1.75rem 1.5rem; border: 1px solid rgba(168, 85, 247, 0.35); background: rgba(10, 16, 28, 0.9); border-radius: 16px; box-sizing: border-box;">
+    <h3 style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 800; color: #fff; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.6rem;">
+      <span>📖</span> How to Redeem Free Fire Codes (Official Guide)
     </h3>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
-      <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 1.25rem; border-radius: 10px;">
-        <div style="font-size: 1.5rem; font-weight: 900; color: var(--neon-cyan); margin-bottom: 0.5rem;">01</div>
-        <h4 style="font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 0.35rem;">Copy Working Code</h4>
-        <p style="font-size: 0.8rem; color: #94a3b8; line-height: 1.5; margin: 0;">Click the "Copy Code" button next to any active reward in the list above.</p>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 1rem; border-radius: 10px;">
+        <div style="font-size: 1.4rem; font-weight: 900; color: var(--neon-cyan); margin-bottom: 0.35rem;">01</div>
+        <h4 style="font-size: 0.9rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem;">Copy Code</h4>
+        <p style="font-size: 0.78rem; color: #94a3b8; line-height: 1.4; margin: 0;">Click "Copy Code" next to any active reward in the list above.</p>
       </div>
 
-      <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 1.25rem; border-radius: 10px;">
-        <div style="font-size: 1.5rem; font-weight: 900; color: var(--neon-purple); margin-bottom: 0.5rem;">02</div>
-        <h4 style="font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 0.35rem;">Visit Official Site</h4>
-        <p style="font-size: 0.8rem; color: #94a3b8; line-height: 1.5; margin: 0;">Open <a href="https://reward.ff.garena.com/en" target="_blank" rel="noopener noreferrer" style="color: var(--neon-cyan);">reward.ff.garena.com</a> and sign in with your Free Fire account (Google/Facebook/VK).</p>
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 1rem; border-radius: 10px;">
+        <div style="font-size: 1.4rem; font-weight: 900; color: var(--neon-purple); margin-bottom: 0.35rem;">02</div>
+        <h4 style="font-size: 0.9rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem;">Open Official Site</h4>
+        <p style="font-size: 0.78rem; color: #94a3b8; line-height: 1.4; margin: 0;">Visit <a href="https://reward.ff.garena.com/en" target="_blank" rel="noopener noreferrer" style="color: var(--neon-cyan);">reward.ff.garena.com</a> and sign in with your Free Fire account.</p>
       </div>
 
-      <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 1.25rem; border-radius: 10px;">
-        <div style="font-size: 1.5rem; font-weight: 900; color: #10b981; margin-bottom: 0.5rem;">03</div>
-        <h4 style="font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 0.35rem;">Paste &amp; Confirm</h4>
-        <p style="font-size: 0.8rem; color: #94a3b8; line-height: 1.5; margin: 0;">Paste the code in the text boxes and press "Confirm". Rewards appear in your in-game vault within 24 hours!</p>
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 1rem; border-radius: 10px;">
+        <div style="font-size: 1.4rem; font-weight: 900; color: #10b981; margin-bottom: 0.35rem;">03</div>
+        <h4 style="font-size: 0.9rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem;">Paste &amp; Confirm</h4>
+        <p style="font-size: 0.78rem; color: #94a3b8; line-height: 1.4; margin: 0;">Paste the code into the text boxes and confirm. Rewards arrive in-game within 24 hours!</p>
       </div>
     </div>
   </div>
@@ -127,7 +127,6 @@ function copyRedeemCode(code, btn, codeId) {
     btn.innerHTML = '<span style="color: #34d399;">✓ Copied!</span>';
     btn.style.borderColor = '#10b981';
     
-    // Track count via lightweight beacon
     if (codeId) {
       try {
         navigator.sendBeacon(`/api/track/code-copy/${codeId}`, new FormData());
